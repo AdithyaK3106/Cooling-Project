@@ -1,247 +1,246 @@
 """
-data_processing.py
-------------------
-Feature engineering, normalization, and label generation
-for the sensor-free predictive cooling system.
+training/data_processing.py
+────────────────────────────
+DATASET BUILDER — training pipeline only.
 
-Input schema: timestamp, rack_id, cpu, gpu, memory, disk_io, network
+Responsibility
+──────────────
+Convert raw telemetry CSV into (X, y) matrices ready for XGBoost training.
+
+This file:
+  ✅ Delegates ALL feature engineering to src.features.FeatureProcessor
+  ✅ Uses src.features.AnalyticGNN for the GNN embedding column
+  ✅ Generates risk labels using the PRD formula (0.6*cpu + 0.4*gpu → [0,1])
+  ✅ Persists preprocessor state to models/preprocessor_state.pkl
+  ✅ Produces X (15 features + gnn_embedding = 16 cols) and y (risk score)
+
+  ❌ Does NOT define any normalization logic
+  ❌ Does NOT use StandardScaler
+  ❌ Does NOT duplicate feature engineering from src/features.py
+  ❌ Does NOT use PyTorch/torch-geometric
+
+Schema compliance (PRD v1.0):
+  Raw CSV columns: timestamp, cpu, gpu, memory, disk_io, network_io
+  (Any additional columns like gpu_temp, cpu_temp are passed through for labels only)
 """
 
+import sys
+import os
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
-from typing import Tuple, Dict, List
-import joblib
-import os
+from typing import Tuple
+
+# ── Import from src (single source of truth) ──────────────────────────────────
+# Resolve src/ relative to this file's location
+_SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
+if _SRC_PATH not in sys.path:
+    sys.path.insert(0, _SRC_PATH)
+
+from features import FeatureProcessor, AnalyticGNN
 
 
-# ─────────────────────────────────────────────
-# CONSTANTS
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# CONSTANTS  (must match PRD schema)
+# ─────────────────────────────────────────────────────────────────────────────
 
-TELEMETRY_COLS = ["cpu", "gpu", "memory", "disk_io", "network"]
+REQUIRED_COLS = ['cpu', 'gpu', 'memory', 'disk_io', 'network_io']
 
-# Overheating proxy thresholds (used when no real temp sensor exists)
-THERMAL_THRESHOLDS = {
-    "cpu":     85.0,   # % utilisation → maps to high thermal output
-    "gpu":     90.0,
-    "memory":  90.0,
-    "disk_io": 80.0,
-    "network": 75.0,
-}
-
-# Weights for composite thermal risk label (domain-derived)
-THERMAL_WEIGHTS = {
-    "cpu":     0.35,
-    "gpu":     0.30,
-    "memory":  0.15,
-    "disk_io": 0.10,
-    "network": 0.10,
-}
-
-ROLLING_WINDOWS = [3, 5, 10]   # time-steps (e.g. 3 s, 5 s, 10 s)
+# Risk label formula (PRD §4.2): identical to inference-time risk derivation
+_RISK_LABEL_CPU_W = 0.6
+_RISK_LABEL_GPU_W = 0.4
 
 
-# ─────────────────────────────────────────────
-# FEATURE ENGINEERING
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# SCHEMA VALIDATION
+# ─────────────────────────────────────────────────────────────────────────────
 
-def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
+def validate_schema(df: pd.DataFrame) -> None:
     """
-    Given raw telemetry, produce an enriched feature matrix per rack.
-
-    Features added
-    ──────────────
-    • Rolling mean / std   → captures sustained load vs. spikes
-    • Rate-of-change (diff)→ captures acceleration of thermal build-up
-    • Composite load score → single signal combining all resources
-    • Cross-feature interaction: cpu×gpu (high both = thermal danger)
+    Raise a ValueError if the DataFrame is missing required columns.
+    Catches the most common mistake: 'network' instead of 'network_io'.
     """
-    df = df.copy().sort_values(["rack_id", "timestamp"])
-
-    for col in TELEMETRY_COLS:
-        grp = df.groupby("rack_id")[col]
-
-        # Rolling statistics (per rack)
-        for w in ROLLING_WINDOWS:
-            df[f"{col}_roll_mean_{w}"] = grp.transform(
-                lambda s, w=w: s.rolling(w, min_periods=1).mean()
-            )
-            df[f"{col}_roll_std_{w}"] = grp.transform(
-                lambda s, w=w: s.rolling(w, min_periods=1).std().fillna(0)
-            )
-
-        # Rate of change (first-order finite difference per rack)
-        df[f"{col}_delta"] = grp.transform(lambda s: s.diff().fillna(0))
-
-    # Composite thermal load score  (0–100 scale)
-    df["composite_load"] = sum(
-        THERMAL_WEIGHTS[c] * df[c] for c in TELEMETRY_COLS
-    )
-
-    # Cross-feature interaction: CPU × GPU (both hot = hotspot risk ↑)
-    df["cpu_gpu_interaction"] = (df["cpu"] / 100.0) * (df["gpu"] / 100.0) * 100.0
-
-    # Peak-pressure flag: any single metric above its threshold
-    df["any_threshold_breach"] = (
-        (df["cpu"]     >= THERMAL_THRESHOLDS["cpu"])     |
-        (df["gpu"]     >= THERMAL_THRESHOLDS["gpu"])     |
-        (df["memory"]  >= THERMAL_THRESHOLDS["memory"])  |
-        (df["disk_io"] >= THERMAL_THRESHOLDS["disk_io"]) |
-        (df["network"] >= THERMAL_THRESHOLDS["network"])
-    ).astype(int)
-
-    return df
+    missing = [c for c in REQUIRED_COLS if c not in df.columns]
+    if missing:
+        hint = ""
+        if 'network_io' in missing and 'network' in df.columns:
+            hint = " Hint: rename column 'network' → 'network_io' (PRD §2.1)."
+        raise ValueError(
+            f"[data_processing] Schema violation — missing columns: {missing}.{hint}"
+        )
 
 
-# ─────────────────────────────────────────────
-# LABEL GENERATION (THERMAL RISK PROXY)
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# LABEL GENERATION
+# ─────────────────────────────────────────────────────────────────────────────
 
-def generate_thermal_risk_label(df: pd.DataFrame) -> pd.DataFrame:
+def generate_risk_labels(df: pd.DataFrame) -> np.ndarray:
     """
-    Builds a synthetic thermal risk score (0–100) from workload telemetry.
+    Compute continuous risk label in [0, 1] from raw telemetry.
 
-    Formula
-    ───────
-    base_risk   = weighted sum of utilisation values
-    breach_bonus= +15 per column that is above its threshold
-    risk_score  = clip(base_risk + breach_bonus, 0, 100)
+    Formula (PRD §4.2, identical to inference fusion target):
+        risk = clip(0.6 * (cpu/100) + 0.4 * (gpu/100), 0, 1)
 
-    This acts as the ground truth label when stress-test data is available.
-    In production, labels can be refined with actual thermal measurements
-    from a one-time calibration run.
+    This is the ground-truth proxy when no physical temperature sensors exist.
+    In a calibrated deployment, replace with actual sensor readings.
     """
-    df = df.copy()
-
-    base_risk = sum(THERMAL_WEIGHTS[c] * df[c] for c in TELEMETRY_COLS)
-
-    breach_bonus = sum(
-        15.0 * (df[c] >= THERMAL_THRESHOLDS[c]).astype(float)
-        for c in TELEMETRY_COLS
-    )
-
-    df["thermal_risk_score"] = np.clip(base_risk + breach_bonus, 0, 100)
-
-    # Binary hotspot label for classification evaluation
-    df["hotspot"] = (df["thermal_risk_score"] >= 70).astype(int)
-
-    return df
+    cpu_n = df['cpu'].clip(0, 100) / 100.0
+    gpu_n = df['gpu'].clip(0, 100) / 100.0
+    y     = (_RISK_LABEL_CPU_W * cpu_n + _RISK_LABEL_GPU_W * gpu_n).clip(0, 1)
+    return y.values.astype(np.float64)
 
 
-# ─────────────────────────────────────────────
-# NORMALISATION
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# GNN EMBEDDING COLUMN (analytic, no PyTorch)
+# ─────────────────────────────────────────────────────────────────────────────
 
-class TelemetryScaler:
+def compute_gnn_embeddings(df: pd.DataFrame, processor: FeatureProcessor) -> np.ndarray:
     """
-    Wraps sklearn StandardScaler with save/load helpers.
-    Fit only on training data; transform train + inference data.
-    """
+    Compute the analytic GNN embedding column for each training row.
 
-    def __init__(self):
-        self.scaler = StandardScaler()
-        self._feature_cols: List[str] = []
-
-    def fit_transform(self, df: pd.DataFrame, exclude_cols: List[str]) -> pd.DataFrame:
-        self._feature_cols = [c for c in df.columns if c not in exclude_cols]
-        df = df.copy()
-        df[self._feature_cols] = self.scaler.fit_transform(df[self._feature_cols])
-        return df
-
-    def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        df = df.copy()
-        df[self._feature_cols] = self.scaler.transform(df[self._feature_cols])
-        return df
-
-    def save(self, path: str):
-        joblib.dump((self.scaler, self._feature_cols), path)
-
-    def load(self, path: str):
-        self.scaler, self._feature_cols = joblib.load(path)
-
-
-# ─────────────────────────────────────────────
-# TRAINING DATASET BUILDER
-# ─────────────────────────────────────────────
-
-def build_training_dataset(
-    raw_df: pd.DataFrame,
-    scaler_save_path: str = "scaler.pkl",
-) -> Tuple[pd.DataFrame, pd.DataFrame, TelemetryScaler]:
-    """
-    End-to-end: raw telemetry → normalised feature matrix + labels.
+    Uses AnalyticGNN from src/features.py with isolated-node mode
+    (single-machine training data has no rack topology).
 
     Returns
     ───────
-    X_train : feature matrix (all engineered features, normalised)
-    y_train : thermal_risk_score column
-    scaler  : fitted TelemetryScaler for inference-time use
+    gnn_col : np.ndarray of shape (n_rows,), values in [0, 1].
     """
-    df = engineer_features(raw_df)
-    df = generate_thermal_risk_label(df)
+    gnn = AnalyticGNN(adjacency=None, n_nodes=1)
+    embeddings = []
 
-    EXCLUDE = ["timestamp", "rack_id", "thermal_risk_score", "hotspot"]
+    for _, row in df.iterrows():
+        cpu_n  = float(row.get('cpu',  0.0)) / 100.0
+        gpu_n  = float(row.get('gpu',  0.0)) / 100.0
+        heat_n = float(np.clip(0.6 * cpu_n + 0.4 * gpu_n, 0.0, 1.0))
+        emb    = gnn.compute_single(heat_norm=heat_n, neighbor_heats=None)
+        embeddings.append(emb)
 
-    scaler = TelemetryScaler()
-    df_scaled = scaler.fit_transform(df, exclude_cols=EXCLUDE)
-    scaler.save(scaler_save_path)
-
-    feature_cols = [c for c in df_scaled.columns if c not in EXCLUDE]
-    X = df_scaled[feature_cols]
-    y = df_scaled["thermal_risk_score"]   # label kept in original scale
-
-    # Re-attach unscaled label
-    y = df["thermal_risk_score"]
-
-    return X, y, scaler
+    return np.array(embeddings, dtype=np.float64)
 
 
-# ─────────────────────────────────────────────
-# SYNTHETIC DATA GENERATOR  (for testing)
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# SYNTHETIC DATA GENERATOR  (testing / demo)
+# ─────────────────────────────────────────────────────────────────────────────
 
 def generate_synthetic_telemetry(
-    n_racks: int = 4,
-    n_timesteps: int = 200,
-    seed: int = 42,
+    n_rows: int = 500,
+    seed:   int = 42,
 ) -> pd.DataFrame:
     """
-    Generates realistic-ish telemetry for a small rack cluster.
-    Useful for unit tests and demonstration without real hardware.
+    Generate synthetic telemetry compliant with PRD schema.
+
+    Columns: timestamp, cpu, gpu, memory, disk_io, network_io
+    I/O values are in bytes/sec (realistic range for a workstation).
     """
     rng = np.random.default_rng(seed)
-    records = []
 
-    for rack_id in range(n_racks):
-        # Each rack has a random baseline load profile
-        base_cpu = rng.uniform(20, 60)
-        base_gpu = rng.uniform(10, 50)
+    # Simulate bursts: 10% of rows have high CPU/GPU
+    n = n_rows
+    burst = rng.random(n) < 0.10
 
-        for t in range(n_timesteps):
-            # Simulate occasional stress spikes
-            spike = 1.0 + (0.4 if rng.random() < 0.08 else 0.0)
-            records.append({
-                "timestamp": pd.Timestamp("2024-01-01") + pd.Timedelta(seconds=t),
-                "rack_id":   rack_id,
-                "cpu":       float(np.clip(base_cpu * spike + rng.normal(0, 5), 0, 100)),
-                "gpu":       float(np.clip(base_gpu * spike + rng.normal(0, 5), 0, 100)),
-                "memory":    float(np.clip(rng.uniform(40, 85) + rng.normal(0, 3), 0, 100)),
-                "disk_io":   float(np.clip(rng.uniform(10, 70) + rng.normal(0, 4), 0, 100)),
-                "network":   float(np.clip(rng.uniform(5,  60) + rng.normal(0, 4), 0, 100)),
-            })
+    cpu    = np.where(burst, rng.uniform(75, 98, n), rng.uniform(10, 65, n))
+    gpu    = np.where(burst, rng.uniform(70, 95, n), rng.uniform( 5, 55, n))
+    memory = rng.uniform(40, 85, n)
 
-    return pd.DataFrame(records)
+    # I/O in bytes/sec: baseline ~10 MB/s, spikes up to ~200 MB/s
+    disk_io    = rng.exponential(scale=5_000_000, size=n).clip(0, 200_000_000)
+    network_io = rng.exponential(scale=1_000_000, size=n).clip(0,  50_000_000)
+
+    timestamps = pd.date_range("2024-01-01", periods=n, freq="1s")
+
+    return pd.DataFrame({
+        'timestamp':  timestamps,
+        'cpu':        cpu.clip(0, 100).round(2),
+        'gpu':        gpu.clip(0, 100).round(2),
+        'memory':     memory.clip(0, 100).round(2),
+        'disk_io':    disk_io.round(2),
+        'network_io': network_io.round(2),
+    })
 
 
-# ─────────────────────────────────────────────
-# QUICK SMOKE TEST
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────
+# MAIN DATASET BUILDER
+# ─────────────────────────────────────────────────────────────────────────────
+
+def build_training_dataset(
+    raw_df:          pd.DataFrame,
+    state_save_path: str = os.path.join('..', 'models', 'preprocessor_state.pkl'),
+) -> Tuple[np.ndarray, np.ndarray, FeatureProcessor]:
+    """
+    End-to-end builder: raw telemetry DataFrame → (X, y, processor).
+
+    Steps
+    ─────
+    1. Validate schema (crash-fast on wrong column names).
+    2. Clean/coerce numeric types, forward-fill missing values.
+    3. Fit FeatureProcessor on full dataset → save state.
+    4. Process each row via processor.process_single() → 15 telemetry features.
+    5. Compute analytic GNN embedding per row → 1 extra column.
+    6. Concatenate → X of shape (n_rows, 16).
+    7. Generate risk labels y in [0,1].
+
+    Returns
+    ───────
+    X         : np.ndarray (n_rows, 16)  — 15 telemetry features + gnn_embedding
+    y         : np.ndarray (n_rows,)     — risk score in [0,1]
+    processor : fitted FeatureProcessor  — use to save/load state
+    """
+    print("─" * 60)
+    print("[data_processing] Building training dataset …")
+
+    # ── 1. Schema validation ──────────────────────────────────────────────────
+    validate_schema(raw_df)
+
+    # ── 2. Data cleaning ──────────────────────────────────────────────────────
+    df = raw_df.copy()
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df = df.sort_values('timestamp').reset_index(drop=True)
+
+    for col in REQUIRED_COLS:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    df[REQUIRED_COLS] = df[REQUIRED_COLS].ffill().fillna(df[REQUIRED_COLS].median())
+
+    print(f"[data_processing] Rows after cleaning: {len(df)}")
+
+    # ── 3. Fit FeatureProcessor ───────────────────────────────────────────────
+    processor = FeatureProcessor()
+    processor.fit(df)
+    processor.save(state_save_path)
+
+    # ── 4. Feature engineering (row-by-row, simulating inference loop) ────────
+    print("[data_processing] Engineering 15 telemetry features …")
+    tel_features = processor.process_dataframe(df)  # shape: (n_rows, 15)
+
+    # ── 5. Analytic GNN embedding ─────────────────────────────────────────────
+    print("[data_processing] Computing analytic GNN embeddings …")
+    gnn_col = compute_gnn_embeddings(df, processor)  # shape: (n_rows,)
+
+    # ── 6. Assemble X ─────────────────────────────────────────────────────────
+    X = np.hstack([tel_features, gnn_col.reshape(-1, 1)])  # (n_rows, 16)
+
+    # ── 7. Labels ─────────────────────────────────────────────────────────────
+    y = generate_risk_labels(df)  # (n_rows,), in [0,1]
+
+    print(f"[data_processing] X shape: {X.shape} | y range: [{y.min():.4f}, {y.max():.4f}]")
+    print("[data_processing] Dataset build complete.")
+    print("─" * 60)
+
+    return X, y, processor
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SMOKE TEST
+# ─────────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    raw = generate_synthetic_telemetry(n_racks=4, n_timesteps=50)
-    X, y, scaler = build_training_dataset(raw, scaler_save_path="/tmp/scaler.pkl")
-    print(f"Feature matrix : {X.shape}")
-    print(f"Label range    : {y.min():.1f} – {y.max():.1f}")
-    print(f"Feature columns:\n  {list(X.columns[:8])} …")
-    print("data_processing.py  ✓")
+    print("\n[SMOKE TEST] data_processing.py")
+    raw = generate_synthetic_telemetry(n_rows=200, seed=0)
+    X, y, proc = build_training_dataset(raw, state_save_path="/tmp/preprocessor_state_test.pkl")
+    print(f"\n  X shape        : {X.shape}   (expected: (200, 16))")
+    print(f"  y range        : [{y.min():.4f}, {y.max():.4f}]   (expected: subset of [0,1])")
+    print(f"  Feature names  : {proc.feature_names} + ['gnn_embedding']")
+    assert X.shape == (200, 16), "X shape mismatch!"
+    assert 0.0 <= y.min() and y.max() <= 1.0, "y out of [0,1]!"
+    assert not np.any(np.isnan(X)), "NaN in X!"
+    print("\ntraining/data_processing.py  ✓")
