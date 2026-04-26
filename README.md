@@ -38,6 +38,13 @@ cd scripts
 python generate_test_data.py
 ```
 
+### 4. Testing (Live Load)
+To generate real system load for the telemetry logger to capture:
+```bash
+cd scripts
+python workload_generator.py
+```
+
 ## Requirements
 - Python 3.8+
 - `psutil`
