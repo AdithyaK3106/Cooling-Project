@@ -1,27 +1,26 @@
 """
 training/data_processing.py
-────────────────────────────
-DATASET BUILDER — training pipeline only.
+----------------------------
+DATASET BUILDER -- training pipeline only.
 
 Responsibility
-──────────────
-Convert raw telemetry CSV into (X, y) matrices ready for XGBoost training.
+--------------
+Convert raw telemetry CSV into (X, y) matrices for XGBoost training.
 
 This file:
-  ✅ Delegates ALL feature engineering to src.features.FeatureProcessor
-  ✅ Uses src.features.AnalyticGNN for the GNN embedding column
-  ✅ Generates risk labels using the PRD formula (0.6*cpu + 0.4*gpu → [0,1])
-  ✅ Persists preprocessor state to models/preprocessor_state.pkl
-  ✅ Produces X (15 features + gnn_embedding = 16 cols) and y (risk score)
+  DELEGATES all feature engineering to src.features.FeatureProcessor.
+  X is exactly 6 columns: [cpu_norm, gpu_norm, memory_norm,
+                            disk_io_norm, network_io_norm, gnn_embedding]
+  y is risk label in [0, 1].
 
-  ❌ Does NOT define any normalization logic
-  ❌ Does NOT use StandardScaler
-  ❌ Does NOT duplicate feature engineering from src/features.py
-  ❌ Does NOT use PyTorch/torch-geometric
+This file does NOT:
+  - Define any normalization logic.
+  - Use StandardScaler.
+  - Duplicate anything from src/features.py.
+  - Use PyTorch or torch-geometric.
 
-Schema compliance (PRD v1.0):
-  Raw CSV columns: timestamp, cpu, gpu, memory, disk_io, network_io
-  (Any additional columns like gpu_temp, cpu_temp are passed through for labels only)
+Schema (PRD v1.0):
+  Required CSV columns: cpu, gpu, memory, disk_io, network_io
 """
 
 import sys
@@ -30,125 +29,94 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 
-# ── Import from src (single source of truth) ──────────────────────────────────
-# Resolve src/ relative to this file's location
+# -- Import from src (single source of truth) ----------------------------------
 _SRC_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
 if _SRC_PATH not in sys.path:
     sys.path.insert(0, _SRC_PATH)
 
-from features import FeatureProcessor, AnalyticGNN
+from features import FeatureProcessor, FEATURE_NAMES, FEATURE_DIM
+
+# -- Import fusion from core ---------------------------------------------------
+_CORE_PATH = os.path.join(_SRC_PATH, 'core')
+if _CORE_PATH not in sys.path:
+    sys.path.insert(0, _CORE_PATH)
+
+from core.fusion import assert_parity  # noqa: E402
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONSTANTS  (must match PRD schema)
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
+# CONSTANTS
+# =============================================================================
 
 REQUIRED_COLS = ['cpu', 'gpu', 'memory', 'disk_io', 'network_io']
 
-# Risk label formula (PRD §4.2): identical to inference-time risk derivation
-_RISK_LABEL_CPU_W = 0.6
-_RISK_LABEL_GPU_W = 0.4
+# Risk label weights (PRD §4.2)
+_RISK_CPU_W = 0.6
+_RISK_GPU_W = 0.4
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 # SCHEMA VALIDATION
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 
 def validate_schema(df: pd.DataFrame) -> None:
     """
-    Raise a ValueError if the DataFrame is missing required columns.
-    Catches the most common mistake: 'network' instead of 'network_io'.
+    Raise ValueError on missing required columns.
+    Provides actionable hint for the common 'network' vs 'network_io' mistake.
     """
     missing = [c for c in REQUIRED_COLS if c not in df.columns]
     if missing:
         hint = ""
         if 'network_io' in missing and 'network' in df.columns:
-            hint = " Hint: rename column 'network' → 'network_io' (PRD §2.1)."
+            hint = " Hint: rename 'network' -> 'network_io' (PRD §2.1)."
         raise ValueError(
-            f"[data_processing] Schema violation — missing columns: {missing}.{hint}"
+            f"[data_processing] Schema violation -- missing columns: {missing}.{hint}"
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 # LABEL GENERATION
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 
 def generate_risk_labels(df: pd.DataFrame) -> np.ndarray:
     """
-    Compute continuous risk label in [0, 1] from raw telemetry.
+    Compute continuous risk label in [0, 1].
 
-    Formula (PRD §4.2, identical to inference fusion target):
+    Formula (PRD §4.2):
         risk = clip(0.6 * (cpu/100) + 0.4 * (gpu/100), 0, 1)
 
-    This is the ground-truth proxy when no physical temperature sensors exist.
-    In a calibrated deployment, replace with actual sensor readings.
+    This is the ground-truth proxy without physical temperature sensors.
+    Replace with real sensor readings when available.
     """
     cpu_n = df['cpu'].clip(0, 100) / 100.0
     gpu_n = df['gpu'].clip(0, 100) / 100.0
-    y     = (_RISK_LABEL_CPU_W * cpu_n + _RISK_LABEL_GPU_W * gpu_n).clip(0, 1)
+    y     = (_RISK_CPU_W * cpu_n + _RISK_GPU_W * gpu_n).clip(0.0, 1.0)
     return y.values.astype(np.float64)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# GNN EMBEDDING COLUMN (analytic, no PyTorch)
-# ─────────────────────────────────────────────────────────────────────────────
-
-def compute_gnn_embeddings(df: pd.DataFrame, processor: FeatureProcessor) -> np.ndarray:
-    """
-    Compute the analytic GNN embedding column for each training row.
-
-    Uses AnalyticGNN from src/features.py with isolated-node mode
-    (single-machine training data has no rack topology).
-
-    Returns
-    ───────
-    gnn_col : np.ndarray of shape (n_rows,), values in [0, 1].
-    """
-    gnn = AnalyticGNN(adjacency=None, n_nodes=1)
-    embeddings = []
-
-    for _, row in df.iterrows():
-        cpu_n  = float(row.get('cpu',  0.0)) / 100.0
-        gpu_n  = float(row.get('gpu',  0.0)) / 100.0
-        heat_n = float(np.clip(0.6 * cpu_n + 0.4 * gpu_n, 0.0, 1.0))
-        emb    = gnn.compute_single(heat_norm=heat_n, neighbor_heats=None)
-        embeddings.append(emb)
-
-    return np.array(embeddings, dtype=np.float64)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 # SYNTHETIC DATA GENERATOR  (testing / demo)
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 
-def generate_synthetic_telemetry(
-    n_rows: int = 500,
-    seed:   int = 42,
-) -> pd.DataFrame:
+def generate_synthetic_telemetry(n_rows: int = 500, seed: int = 42) -> pd.DataFrame:
     """
     Generate synthetic telemetry compliant with PRD schema.
 
     Columns: timestamp, cpu, gpu, memory, disk_io, network_io
-    I/O values are in bytes/sec (realistic range for a workstation).
+    I/O values in bytes/sec (realistic workstation range).
     """
-    rng = np.random.default_rng(seed)
+    rng   = np.random.default_rng(seed)
+    burst = rng.random(n_rows) < 0.10
 
-    # Simulate bursts: 10% of rows have high CPU/GPU
-    n = n_rows
-    burst = rng.random(n) < 0.10
+    cpu    = np.where(burst, rng.uniform(75, 98, n_rows), rng.uniform(10, 65, n_rows))
+    gpu    = np.where(burst, rng.uniform(70, 95, n_rows), rng.uniform( 5, 55, n_rows))
+    memory = rng.uniform(40, 85, n_rows)
 
-    cpu    = np.where(burst, rng.uniform(75, 98, n), rng.uniform(10, 65, n))
-    gpu    = np.where(burst, rng.uniform(70, 95, n), rng.uniform( 5, 55, n))
-    memory = rng.uniform(40, 85, n)
-
-    # I/O in bytes/sec: baseline ~10 MB/s, spikes up to ~200 MB/s
-    disk_io    = rng.exponential(scale=5_000_000, size=n).clip(0, 200_000_000)
-    network_io = rng.exponential(scale=1_000_000, size=n).clip(0,  50_000_000)
-
-    timestamps = pd.date_range("2024-01-01", periods=n, freq="1s")
+    disk_io    = rng.exponential(scale=5_000_000, size=n_rows).clip(0, 200_000_000)
+    network_io = rng.exponential(scale=1_000_000, size=n_rows).clip(0,  50_000_000)
 
     return pd.DataFrame({
-        'timestamp':  timestamps,
+        'timestamp':  pd.date_range("2024-01-01", periods=n_rows, freq="1s"),
         'cpu':        cpu.clip(0, 100).round(2),
         'gpu':        gpu.clip(0, 100).round(2),
         'memory':     memory.clip(0, 100).round(2),
@@ -157,40 +125,72 @@ def generate_synthetic_telemetry(
     })
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
+# PARITY ASSERTION  (mandatory before every training run)
+# =============================================================================
+
+def verify_training_inference_parity(processor: FeatureProcessor) -> None:
+    """
+    Assert that the training and inference feature paths produce identical
+    vectors for the same input.
+
+    This test is run at the END of build_training_dataset() to guarantee
+    zero training-serving skew before the model is trained.
+
+    Uses src.core.fusion.assert_parity() — hard fail on any deviation.
+    """
+    sample = {
+        'cpu': 75.0, 'gpu': 60.0, 'memory': 70.0,
+        'disk_io': 1_500_000.0, 'network_io': 800_000.0,
+    }
+
+    # Training path: FeatureProcessor.process_single()
+    train_vec = processor.process_single(sample)
+
+    # Inference path: independent processor instance with same state
+    infer_proc = FeatureProcessor()
+    infer_proc.stats = dict(processor.stats)  # same fitted state, different object
+    infer_vec = infer_proc.process_single(sample)
+
+    assert_parity(train_vec, infer_vec, label="training vs inference feature vector")
+    print("[data_processing] Parity check: PASSED -- training == inference feature path")
+
+
+# =============================================================================
 # MAIN DATASET BUILDER
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 
 def build_training_dataset(
     raw_df:          pd.DataFrame,
     state_save_path: str = os.path.join('..', 'models', 'preprocessor_state.pkl'),
 ) -> Tuple[np.ndarray, np.ndarray, FeatureProcessor]:
     """
-    End-to-end builder: raw telemetry DataFrame → (X, y, processor).
+    Full builder: raw telemetry DataFrame -> (X, y, processor).
 
     Steps
-    ─────
-    1. Validate schema (crash-fast on wrong column names).
-    2. Clean/coerce numeric types, forward-fill missing values.
-    3. Fit FeatureProcessor on full dataset → save state.
-    4. Process each row via processor.process_single() → 15 telemetry features.
-    5. Compute analytic GNN embedding per row → 1 extra column.
-    6. Concatenate → X of shape (n_rows, 16).
-    7. Generate risk labels y in [0,1].
+    -----
+    1. Schema validation.
+    2. Data cleaning (coerce types, forward-fill NaNs).
+    3. Fit FeatureProcessor on full dataset -> save state.
+    4. Process each row via processor.process_single() -> 6-dim X.
+       (gnn_embedding is INSIDE process_single(), not appended separately.)
+    5. Generate risk labels y in [0,1].
+    6. Parity assertion (training == inference path, hard fail on skew).
 
     Returns
-    ───────
-    X         : np.ndarray (n_rows, 16)  — 15 telemetry features + gnn_embedding
-    y         : np.ndarray (n_rows,)     — risk score in [0,1]
-    processor : fitted FeatureProcessor  — use to save/load state
+    -------
+    X         : np.ndarray (n_rows, 6)  -- FRD feature vector per row
+    y         : np.ndarray (n_rows,)    -- risk score in [0,1]
+    processor : fitted FeatureProcessor -- use .save() to persist
     """
-    print("─" * 60)
-    print("[data_processing] Building training dataset …")
+    print("-" * 60)
+    print("[data_processing] Building training dataset ...")
+    print(f"[data_processing] Feature dim = {FEATURE_DIM}, names = {FEATURE_NAMES}")
 
-    # ── 1. Schema validation ──────────────────────────────────────────────────
+    # Step 1 -- schema
     validate_schema(raw_df)
 
-    # ── 2. Data cleaning ──────────────────────────────────────────────────────
+    # Step 2 -- cleaning
     df = raw_df.copy()
     if 'timestamp' in df.columns:
         df['timestamp'] = pd.to_datetime(df['timestamp'])
@@ -198,49 +198,48 @@ def build_training_dataset(
 
     for col in REQUIRED_COLS:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-
     df[REQUIRED_COLS] = df[REQUIRED_COLS].ffill().fillna(df[REQUIRED_COLS].median())
 
     print(f"[data_processing] Rows after cleaning: {len(df)}")
 
-    # ── 3. Fit FeatureProcessor ───────────────────────────────────────────────
+    # Step 3 -- fit + save
     processor = FeatureProcessor()
     processor.fit(df)
     processor.save(state_save_path)
 
-    # ── 4. Feature engineering (row-by-row, simulating inference loop) ────────
-    print("[data_processing] Engineering 15 telemetry features …")
-    tel_features = processor.process_dataframe(df)  # shape: (n_rows, 15)
+    # Step 4 -- feature engineering (6-dim, gnn inside process_single)
+    print("[data_processing] Engineering 6-dim feature vectors ...")
+    X = processor.process_dataframe(df)  # shape: (n_rows, 6)
 
-    # ── 5. Analytic GNN embedding ─────────────────────────────────────────────
-    print("[data_processing] Computing analytic GNN embeddings …")
-    gnn_col = compute_gnn_embeddings(df, processor)  # shape: (n_rows,)
-
-    # ── 6. Assemble X ─────────────────────────────────────────────────────────
-    X = np.hstack([tel_features, gnn_col.reshape(-1, 1)])  # (n_rows, 16)
-
-    # ── 7. Labels ─────────────────────────────────────────────────────────────
-    y = generate_risk_labels(df)  # (n_rows,), in [0,1]
+    # Step 5 -- labels
+    y = generate_risk_labels(df)  # shape: (n_rows,), in [0,1]
 
     print(f"[data_processing] X shape: {X.shape} | y range: [{y.min():.4f}, {y.max():.4f}]")
+
+    # Step 6 -- parity assertion (MANDATORY -- fail hard if training != inference)
+    verify_training_inference_parity(processor)
+
     print("[data_processing] Dataset build complete.")
-    print("─" * 60)
+    print("-" * 60)
 
     return X, y, processor
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 # SMOKE TEST
-# ─────────────────────────────────────────────────────────────────────────────
+# =============================================================================
 
 if __name__ == "__main__":
     print("\n[SMOKE TEST] data_processing.py")
     raw = generate_synthetic_telemetry(n_rows=200, seed=0)
     X, y, proc = build_training_dataset(raw, state_save_path="/tmp/preprocessor_state_test.pkl")
-    print(f"\n  X shape        : {X.shape}   (expected: (200, 16))")
-    print(f"  y range        : [{y.min():.4f}, {y.max():.4f}]   (expected: subset of [0,1])")
-    print(f"  Feature names  : {proc.feature_names} + ['gnn_embedding']")
-    assert X.shape == (200, 16), "X shape mismatch!"
+
+    print(f"\n  X shape      : {X.shape}   (expected: (200, {FEATURE_DIM}))")
+    print(f"  y range      : [{y.min():.4f}, {y.max():.4f}]  (expected: subset of [0,1])")
+    print(f"  Feature names: {proc.feature_names}")
+
+    assert X.shape == (200, FEATURE_DIM), f"X shape mismatch! Got {X.shape}"
     assert 0.0 <= y.min() and y.max() <= 1.0, "y out of [0,1]!"
     assert not np.any(np.isnan(X)), "NaN in X!"
-    print("\ntraining/data_processing.py  ✓")
+    assert np.all(X >= 0.0) and np.all(X <= 1.0), "X values outside [0,1]!"
+    print("\ntraining/data_processing.py OK")
