@@ -38,7 +38,11 @@ except ImportError:
 #  CONFIGURATION DEFAULTS
 # ─────────────────────────────────────────────
 DEFAULT_INTERVAL_SEC = 1.0
+# Default CSV location (kept in data/raw for historical reasons). Parent
+# directories are auto-created at runtime so users don't need to mkdir.
 DEFAULT_CSV_PATH     = os.path.join("..", "data", "raw", "telemetry_data.csv")
+# Log file location (placed under ../logs). The logs directory is created
+# automatically when the script starts so logs and CSVs have their folders.
 LOG_FILE             = os.path.join("..", "logs", "telemetry_logger.log")
 
 CSV_COLUMNS = [
@@ -81,6 +85,21 @@ def setup_logging() -> logging.Logger:
     return logger
 
 
+def ensure_directories(csv_path: str, log_path: str) -> None:
+    """Create parent directories for CSV and log files if they don't exist."""
+    try:
+        csv_dir = Path(csv_path).parent
+        log_dir = Path(log_path).parent
+        csv_dir.mkdir(parents=True, exist_ok=True)
+        log_dir.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        # If we cannot create directories, that's fatal for running the logger
+        print(f"[FATAL] Cannot create required directories: {exc}")
+        sys.exit(1)
+
+
+# Ensure folders exist before configuring logging and CSV
+ensure_directories(DEFAULT_CSV_PATH, LOG_FILE)
 logger = setup_logging()
 
 
@@ -294,8 +313,15 @@ def init_csv(csv_path: str) -> None:
     """
     Create the CSV and write the header row ONLY if the file
     does not already exist (so we append without duplicating headers).
+    Ensures parent directory exists for user-specified paths.
     """
     path = Path(csv_path)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        logger.error("Cannot create directory for CSV file: %s", exc)
+        sys.exit(1)
+
     if not path.exists():
         try:
             with path.open("w", newline="", encoding="utf-8") as f:
