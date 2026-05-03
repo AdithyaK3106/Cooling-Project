@@ -38,12 +38,12 @@ except ImportError:
 #  CONFIGURATION DEFAULTS
 # ─────────────────────────────────────────────
 DEFAULT_INTERVAL_SEC = 1.0
-# Default CSV location (kept in data/raw for historical reasons). Parent
-# directories are auto-created at runtime so users don't need to mkdir.
-DEFAULT_CSV_PATH     = os.path.join("..", "data", "raw", "telemetry_data.csv")
-# Log file location (placed under ../logs). The logs directory is created
-# automatically when the script starts so logs and CSVs have their folders.
-LOG_FILE             = os.path.join("..", "logs", "telemetry_logger.log")
+# Base path is the script directory so defaults work regardless of current
+# working directory when the script is invoked.
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+DEFAULT_CSV_PATH = PROJECT_ROOT / "data" / "raw" / "telemetry_data.csv"
+LOG_FILE = PROJECT_ROOT / "logs" / "telemetry_logger.log"
 
 CSV_COLUMNS = [
     "timestamp",

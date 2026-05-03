@@ -25,5 +25,5 @@ scikit-learn
 
 # ── Research / GNN pre-training only (NOT loaded by runtime) ──────
 # Uncomment to enable training/research/gnn_model.py:
-# torch
+torch
 # torch-geometric
