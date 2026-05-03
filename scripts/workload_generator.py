@@ -1,189 +1,152 @@
 import time
+import subprocess
 import threading
-import random
 import os
-import requests
-import sys
 
-# -----------------------------
-# CONFIG
-# -----------------------------
-PHASE_DURATION = 60
-BURST_CHANCE = 0.2
+# ========== CONFIG ==========
+CPU_CORES = 6
+PHASES = [
+    ("WARMUP", 300),
+    ("IDLE", 600),
+    ("CPU", 600),
+    ("IDLE", 300),
+    ("MEMORY", 600),
+    ("IDLE", 300),
+    ("DISK", 600),
+    ("NETWORK", 600),
+    ("MIXED", 600),
+    ("BURST", 300),
+]
 
-# Path for temporary disk stress (aligned with project structure)
-TEMP_STRESS_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "raw", "workload_temp.txt")
+LOG_FILE = "phase_log.txt"
 
-# -----------------------------
-# CPU LOAD
-# -----------------------------
+# ========== HELPERS ==========
+def log(msg):
+    ts = time.strftime("%H:%M:%S")
+    line = f"[{ts}] {msg}"
+    print(line)
+    with open(LOG_FILE, "a") as f:
+        f.write(line + "\n")
+
+# ---------- CPU ----------
 def cpu_stress(duration):
-    """Generates CPU load by performing continuous calculations."""
-    end = time.time() + duration
-    while time.time() < end:
-        _ = sum(i*i for i in range(10000))
-
-
-# -----------------------------
-# MEMORY LOAD
-# -----------------------------
-def memory_stress(duration):
-    """Generates Memory load by allocating and deallocating large strings."""
-    end = time.time() + duration
-    data = []
-    while time.time() < end:
-        data.append("X" * 5_000_000)
-        if len(data) > 10:
-            data.pop(0)
-
-
-# -----------------------------
-# DISK LOAD
-# -----------------------------
-def disk_stress(duration):
-    """Generates Disk I/O by writing and deleting a temporary file."""
-    end = time.time() + duration
-    os.makedirs(os.path.dirname(TEMP_STRESS_FILE), exist_ok=True)
-    while time.time() < end:
-        try:
-            with open(TEMP_STRESS_FILE, "w") as f:
-                f.write("A" * 5_000_000)
-            os.remove(TEMP_STRESS_FILE)
-        except OSError:
-            pass
-
-
-# -----------------------------
-# NETWORK LOAD
-# -----------------------------
-def network_stress(duration):
-    """Generates Network I/O by downloading a large test file."""
-    end = time.time() + duration
-    url = "https://speed.hetzner.de/100MB.bin"
-    while time.time() < end:
-        try:
-            # stream=True and iterating ensures actual network traffic is generated
-            response = requests.get(url, timeout=5, stream=True)
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                if time.time() >= end:
-                    break
-        except Exception:
-            pass
-
-
-# -----------------------------
-# GPU LOAD (ADAPTIVE)
-# -----------------------------
-def gpu_stress(duration):
-    """Generates GPU load using PyTorch if available."""
     try:
-        import torch
-        if not torch.cuda.is_available():
-            raise RuntimeError("CUDA not available")
-            
-        device = "cuda"
-        x = None
+        return subprocess.Popen(
+            ["stress-ng", "--cpu", str(CPU_CORES), "--timeout", str(duration)]
+        )
+    except:
+        # fallback python loop
+        def burn():
+            end = time.time() + duration
+            while time.time() < end:
+                [x**2 for x in range(10_000)]
+        t = threading.Thread(target=burn)
+        t.start()
+        return t
 
-        # Try progressively safer sizes
-        for size in [2048, 1536, 1024]:
-            try:
-                x = torch.randn(size, size, device=device)
-                print(f"[GPU] Stress active with tensor size: {size}x{size}")
-                break
-            except Exception:
-                continue
+# ---------- MEMORY ----------
+def memory_stress(duration):
+    def mem():
+        try:
+            a = []
+            for _ in range(10):
+                a.append(bytearray(100 * 1024 * 1024))  # ~100MB chunks
+                time.sleep(1)
+            time.sleep(duration)
+        except:
+            pass
+    t = threading.Thread(target=mem)
+    t.start()
+    return t
 
-        if x is None:
-            raise RuntimeError("GPU allocation failed")
-
+# ---------- DISK ----------
+def disk_stress(duration):
+    def disk():
         end = time.time() + duration
         while time.time() < end:
-            x = torch.matmul(x, x)
+            with open("temp_stress.bin", "wb") as f:
+                f.write(os.urandom(100 * 1024 * 1024))  # 100MB write
+            os.remove("temp_stress.bin")
+    t = threading.Thread(target=disk)
+    t.start()
+    return t
 
-    except Exception as e:
-        print(f"[GPU] Skipping stress: {e}")
-        time.sleep(duration)
+# ---------- NETWORK ----------
+def network_stress(duration):
+    def net():
+        end = time.time() + duration
+        while time.time() < end:
+            try:
+                subprocess.run(
+                    ["curl", "-L", "-o", "temp_net.bin", "http://speedtest.tele2.net/100MB.zip"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                os.remove("temp_net.bin")
+            except:
+                pass
+    t = threading.Thread(target=net)
+    t.start()
+    return t
 
+# ---------- MIXED ----------
+def mixed_stress(duration):
+    threads = []
+    threads.append(cpu_stress(duration))
+    threads.append(memory_stress(duration))
+    threads.append(disk_stress(duration))
+    threads.append(network_stress(duration))
+    return threads
 
-# -----------------------------
-# BURST WRAPPER
-# -----------------------------
-def burst_wrapper(func, duration):
+# ---------- BURST ----------
+def burst_stress(duration):
     end = time.time() + duration
     while time.time() < end:
-        if random.random() < BURST_CHANCE:
-            func(2)
-        else:
-            time.sleep(0.5)
+        log("BURST → CPU spike")
+        p = cpu_stress(10)
+        time.sleep(5)
+        log("BURST → stop")
+        time.sleep(5)
+
+# ========== MAIN ==========
+def run_phase(name, duration):
+    log(f"START {name}")
+
+    processes = []
+
+    if name == "CPU":
+        processes.append(cpu_stress(duration))
+
+    elif name == "MEMORY":
+        processes.append(memory_stress(duration))
+
+    elif name == "DISK":
+        processes.append(disk_stress(duration))
+
+    elif name == "NETWORK":
+        processes.append(network_stress(duration))
+
+    elif name == "MIXED":
+        processes.extend(mixed_stress(duration))
+
+    elif name == "BURST":
+        burst_stress(duration)
+        return
+
+    # idle / warmup just sleep
+    time.sleep(duration)
+
+    log(f"END {name}")
 
 
-# -----------------------------
-# PHASE RUNNER
-# -----------------------------
-def run_phase(name, funcs):
-    print(f"\n>>> STARTING PHASE: {name} ({PHASE_DURATION}s)")
+def main():
+    log("=== WORKLOAD SCRIPT STARTED ===")
 
-    threads = []
-    for func in funcs:
-        t = threading.Thread(target=func, args=(PHASE_DURATION,))
-        t.daemon = True
-        t.start()
-        threads.append(t)
+    for phase, duration in PHASES:
+        run_phase(phase, duration)
 
-    for t in threads:
-        t.join()
-
-
-# -----------------------------
-# MAIN SCENARIO
-# -----------------------------
-def run_scenario():
-    print("=" * 60)
-    print("  SYSTEM WORKLOAD GENERATOR — AI PREDICTIVE COOLING")
-    print("=" * 60)
-    print("  [IMPORTANT] Ensure src/telemetry_logger.py is running!")
-    print(f"  Targeting features: cpu, gpu, memory, disk_io, network_io")
-    print("=" * 60)
-
-    print("\n=== IDLE PHASE (Baselines) ===")
-    time.sleep(PHASE_DURATION)
-
-    run_phase("CPU STRESS", [cpu_stress])
-    time.sleep(20)
-
-    run_phase("GPU STRESS", [gpu_stress])
-    time.sleep(20)
-
-    run_phase("MEMORY STRESS", [memory_stress])
-    time.sleep(20)
-
-    run_phase("DISK I/O STRESS", [disk_stress])
-    run_phase("NETWORK I/O STRESS", [network_stress])
-
-    run_phase("MIXED LOAD (CPU/GPU/MEM)", [
-        cpu_stress,
-        gpu_stress,
-        memory_stress
-    ])
-
-    run_phase("BURST CHAOS", [
-        lambda d: burst_wrapper(cpu_stress, d),
-        lambda d: burst_wrapper(gpu_stress, d),
-        lambda d: burst_wrapper(disk_stress, d),
-        lambda d: burst_wrapper(network_stress, d)
-    ])
-
-    print("\n" + "=" * 60)
-    print("✅ Workload Scenario Complete")
-    print("=" * 60)
+    log("=== WORKLOAD SCRIPT COMPLETED ===")
 
 
 if __name__ == "__main__":
-    try:
-        run_scenario()
-    except KeyboardInterrupt:
-        print("\n\n[INFO] Workload generator stopped by user.")
-        # Cleanup temp file if it exists
-        if os.path.exists(TEMP_STRESS_FILE):
-            os.remove(TEMP_STRESS_FILE)
-        sys.exit(0)
+    main()
