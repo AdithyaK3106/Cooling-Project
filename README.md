@@ -11,8 +11,19 @@ Cooling-Project/
 │   └── processed/          # Cleaned dataset, X (features), and y (labels)
 ├── docs/                   # Documentation, PRDs, and READMEs
 ├── logs/                   # System and logger runtime logs
-├── scripts/                # Helper scripts (data generation, etc.)
-└── src/                    # Core source code (logger, preprocessor)
+├── models/                 # Saved models and preprocessor states
+├── scripts/                # Helper scripts (data generation, workload, etc.)
+├── src/                    # Core source code (production runtime)
+│   ├── core/               # Core logic
+│   ├── features.py         # Feature definitions and processing
+│   ├── inference.py        # Inference pipeline
+│   ├── preprocess.py       # Preprocessing logic
+│   └── telemetry_logger.py # Real-time telemetry logger
+└── training/               # Model training pipelines (non-production)
+    ├── data_processing.py  # Data processing for training
+    ├── gnn_model.py        # GNN model definition
+    ├── inference_pipeline.py # Training validation pipeline
+    └── xgboost_model.py    # XGBoost model training
 ```
 
 ## Getting Started
@@ -31,14 +42,21 @@ cd src
 python preprocess.py
 ```
 
-### 3. Testing (Synthetic Data)
+### 3. Model Training
+To train the XGBoost model on processed data:
+```bash
+cd training
+python xgboost_model.py
+```
+
+### 4. Testing (Synthetic Data)
 To generate a sample dataset for testing the pipeline:
 ```bash
 cd scripts
 python generate_test_data.py
 ```
 
-### 4. Testing (Live Load)
+### 5. Testing (Live Load)
 To generate real system load for the telemetry logger to capture:
 ```bash
 cd scripts
@@ -46,8 +64,7 @@ python workload_generator.py
 ```
 
 ## Requirements
+See [requirements.txt](requirements.txt) for the full list of dependencies.
 - Python 3.8+
-- `psutil`
-- `pandas`
-- `scikit-learn`
-- `numpy`
+- Core: `psutil`, `pandas`, `numpy`, `scikit-learn`, `xgboost`
+- Research (Optional): `torch`

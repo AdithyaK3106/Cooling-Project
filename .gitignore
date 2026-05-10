@@ -147,13 +147,15 @@ cython_debug/
 .idea/
 
 # Custom for this project
-data/raw/*.csv
-data/processed/*.csv
-logs/*.log
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+logs/*
+!logs/.gitkeep
 models/*.pkl
 models/*.pt
 models/*.joblib
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!logs/.gitkeep
 !models/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
