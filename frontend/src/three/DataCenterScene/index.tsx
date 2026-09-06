@@ -1,10 +1,44 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, useGLTF } from '@react-three/drei';
+import { CameraController } from '../Camera';
+
+import { useUiStore } from '../../stores/uiStore';
 
 function Model() {
-  const { scene } = useGLTF('/room_server.gltf'); // We will adjust the path if it exports as .glb
-  return <primitive object={scene} />;
+  const { scene } = useGLTF('/models/room_server.glb');
+  const setSelectedRackId = useUiStore((state) => state.setSelectedRackId);
+
+  // Traverse the scene once to assign IDs and attach event handlers
+  React.useEffect(() => {
+    let rackCounter = 1;
+    scene.traverse((child) => {
+      if (child.name === 'rack') {
+        const rackId = `A0${rackCounter++}`;
+        child.userData = { rackId };
+      }
+    });
+  }, [scene]);
+
+  return (
+    <primitive 
+      object={scene} 
+      onClick={(e: any) => {
+        e.stopPropagation();
+        // Traverse up to find the rack node
+        let node = e.object;
+        while (node && node.name !== 'rack' && node.parent) {
+          node = node.parent;
+        }
+        if (node && node.name === 'rack') {
+          setSelectedRackId(node.userData.rackId);
+        } else {
+          setSelectedRackId(null);
+        }
+      }}
+      onPointerMissed={() => setSelectedRackId(null)}
+    />
+  );
 }
 
 export function DataCenterScene() {
@@ -22,6 +56,7 @@ export function DataCenterScene() {
         </Suspense>
 
         <OrbitControls makeDefault />
+        <CameraController />
       </Canvas>
     </div>
   );
