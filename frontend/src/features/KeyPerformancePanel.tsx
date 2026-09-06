@@ -20,7 +20,7 @@ export function KeyPerformancePanel() {
   const animatedGreen = useAnimatedNumber(greenScore, 800, (v: number) => Math.round(v).toString());
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       
       {/* PUE Card */}
       <div className="rounded-xl border border-white/10 bg-[#0B0E14]/80 p-5 backdrop-blur-xl shadow-2xl">
@@ -79,6 +79,6 @@ export function KeyPerformancePanel() {
         </div>
       </div>
 
-    </div>
+    </>
   );
 }

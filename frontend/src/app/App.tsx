@@ -1,78 +1,32 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { DataCenterScene } from '../three/DataCenterScene';
-
-import { AnalyticsDashboard } from '../features/AnalyticsDashboard';
-import { TelemetryRecorder } from '../services/TelemetryRecorder';
-
-import { KeyPerformancePanel } from '../features/KeyPerformancePanel';
-import { ContextualDetailsPanel } from '../features/ContextualDetailsPanel';
-import { CompactBottomBar } from '../features/CompactBottomBar';
-import { SceneControlBar } from '../features/SceneControlBar';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { TopNav } from '../features/TopNav';
+import { StatusStrip } from '../features/StatusStrip';
+import { OverviewTab } from '../pages/OverviewTab';
+import { ThermalMapTab } from '../pages/ThermalMapTab';
 
 const queryClient = new QueryClient();
-
-function CommandCenter() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* 3D Background */}
-      <div className="absolute inset-0">
-        <DataCenterScene />
-      </div>
-
-      {/* Floating UI Layer */}
-      <div className="absolute inset-0 pointer-events-none p-6 flex flex-col justify-between">
-        
-        {/* Main 3-Column Layout */}
-        <div className="flex-1 flex justify-between mt-12 pointer-events-none">
-          {/* Left: Key Performance */}
-          <div className="w-[320px] flex flex-col gap-4 pointer-events-auto">
-            <KeyPerformancePanel />
-          </div>
-
-          {/* Center: 3D controls floating at top of center */}
-          <div className="flex-1 flex justify-center items-start pointer-events-none">
-             <SceneControlBar />
-          </div>
-
-          {/* Right: Contextual Details */}
-          <div className="w-[320px] flex flex-col gap-4 pointer-events-auto items-end">
-            <ContextualDetailsPanel />
-          </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="h-20 mt-4 pointer-events-auto">
-          <CompactBottomBar />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <TelemetryRecorder />
-        <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-[#05070a] text-gray-200">
-          <div className="absolute left-6 top-6 z-20 flex gap-8 items-baseline pointer-events-auto">
-            <div>
-              <h1 className="text-2xl font-bold tracking-widest text-white">THERVO</h1>
-              <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-cyan-400">Command Center Online</p>
-            </div>
-            <nav className="flex gap-6 font-mono text-xs font-bold tracking-widest">
-              <Link to="/" className="text-white">3D TWIN</Link>
-              <Link to="/analytics" className="text-gray-500 hover:text-white transition-colors">ANALYTICS</Link>
-            </nav>
-          </div>
+      <Router>
+        <div className="flex h-screen flex-col bg-[#0B0E14] text-white overflow-hidden font-sans">
+          <TopNav />
+          <StatusStrip />
           
-          <Routes>
-            <Route path="/" element={<CommandCenter />} />
-            <Route path="/analytics" element={<AnalyticsDashboard />} />
-          </Routes>
+          <main className="flex-1 overflow-auto relative">
+            <Routes>
+              <Route path="/" element={<Navigate to="/overview" replace />} />
+              <Route path="/overview" element={<OverviewTab />} />
+              <Route path="/thermal-map" element={<ThermalMapTab />} />
+              <Route path="/racks" element={<div className="p-8">Racks Tab (Under Construction)</div>} />
+              <Route path="/predictions" element={<div className="p-8">Predictions Tab (Under Construction)</div>} />
+              <Route path="/events" element={<div className="p-8">Events Tab (Under Construction)</div>} />
+            </Routes>
+          </main>
         </div>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   );
 }
