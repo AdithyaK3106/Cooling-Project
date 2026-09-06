@@ -26,12 +26,25 @@ function Model() {
     const nodesToRemove: THREE.Object3D[] = [];
 
     scene.traverse((child: any) => {
-      // Remove all non-rack objects (building walls, floors, roofs, etc)
-      if (!child.name.match(/Rack/i)) {
-        if (child.isMesh) {
-          nodesToRemove.push(child);
+      // Hide roof/ceiling so we can see inside and click
+      if (child.name.toLowerCase().includes('roof') || child.name.toLowerCase().includes('ceiling') || child.name.toLowerCase().includes('top plane')) {
+        child.visible = false;
+      }
+
+      // Check if this object or any ancestor is a Rack
+      let isPartOfRack = false;
+      let node = child;
+      while (node) {
+        if (node.name.match(/Rack/i)) {
+          isPartOfRack = true;
+          break;
         }
-        return;
+        node = node.parent;
+      }
+
+      // Disable raycasting on non-rack objects (walls, floors) so hover works!
+      if (!isPartOfRack) {
+        child.raycast = () => null;
       }
 
       const match = child.name.match(/^Rack\s*(\d+)$/i) || child.name.match(/^Rack_(\d+)$/i);
