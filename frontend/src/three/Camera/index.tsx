@@ -7,6 +7,7 @@ import { useUiStore } from '../../stores/uiStore';
 export function CameraController() {
   const { camera, controls, scene } = useThree();
   const selectedRackId = useUiStore((state) => state.selectedRackId);
+  const perspective = useUiStore((state) => state.perspective);
 
   useEffect(() => {
     if (selectedRackId) {
@@ -42,14 +43,32 @@ export function CameraController() {
         }
       }
     } else {
-      // Reset to isometric overview
-      gsap.to(camera.position, {
-        x: 50,
-        y: 50,
-        z: 50,
-        duration: 1.5,
-        ease: 'power3.inOut',
-      });
+      // Handle perspective modes when no rack is selected
+      if (perspective === '3D') {
+        gsap.to(camera.position, {
+          x: 50,
+          y: 50,
+          z: 50,
+          duration: 1.5,
+          ease: 'power3.inOut',
+        });
+      } else if (perspective === 'TOP') {
+        gsap.to(camera.position, {
+          x: 0,
+          y: 70,
+          z: 0.1, // Slight offset to prevent gimbal lock
+          duration: 1.5,
+          ease: 'power3.inOut',
+        });
+      } else if (perspective === 'SIDE') {
+        gsap.to(camera.position, {
+          x: 60,
+          y: 5,
+          z: 0,
+          duration: 1.5,
+          ease: 'power3.inOut',
+        });
+      }
 
       if (controls && (controls as any).target) {
         gsap.to((controls as any).target, {
@@ -61,7 +80,7 @@ export function CameraController() {
         });
       }
     }
-  }, [selectedRackId, camera, controls]);
+  }, [selectedRackId, perspective, camera, controls, scene]);
 
   return null;
 }

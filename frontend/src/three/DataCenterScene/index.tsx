@@ -14,8 +14,7 @@ import * as THREE from 'three';
 
 function Model() {
   const { scene } = useGLTF('/models/room_server.glb');
-  const setSelectedRackId = useUiStore((state) => state.setSelectedRackId);
-  const setHoveredRackId = useUiStore((state) => state.setHoveredRackId);
+  const { setSelectedRackId, setHoveredRackId, activeLayer } = useUiStore();
   const hoveredRackId = useUiStore((state) => state.hoveredRackId);
   const { data: telemetry } = useTelemetry();
 
@@ -161,9 +160,9 @@ function Model() {
 
       {isReady && (
         <>
-          <ThermalLayer scene={scene} />
-          <GNNLayer scene={scene} />
-          <AirflowLayer />
+          {activeLayer === 'THERMAL' && <ThermalLayer scene={scene} />}
+          {activeLayer === 'RISK' && <GNNLayer scene={scene} />}
+          {activeLayer === 'AIRFLOW' && <AirflowLayer />}
         </>
       )}
     </group>

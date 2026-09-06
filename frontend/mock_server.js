@@ -38,6 +38,28 @@ app.get('/telemetry', (req, res) => {
     ? [generateRack('A07', 7)]
     : Array.from({ length: 25 }, (_, i) => generateRack(`A0${i + 1}`, i));
 
+  // Generate thermal spread topology for 5x5 grid
+  const topology = [];
+  if (currentMode !== 'LOCAL_LAPTOP') {
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 5; col++) {
+        const id1 = row * 5 + col + 1;
+        const rack1 = `A0${id1}`;
+        
+        // Right neighbor
+        if (col < 4) {
+          const id2 = row * 5 + col + 2;
+          topology.push({ source: rack1, target: `A0${id2}`, weight: Math.random() * 0.8 + 0.2 });
+        }
+        // Bottom neighbor
+        if (row < 4) {
+          const id3 = (row + 1) * 5 + col + 1;
+          topology.push({ source: rack1, target: `A0${id3}`, weight: Math.random() * 0.8 + 0.2 });
+        }
+      }
+    }
+  }
+
   res.json({
     operating_mode: currentMode,
     global_health: {
@@ -49,14 +71,7 @@ app.get('/telemetry', (req, res) => {
       ...(spike ? [{ time: new Date().toLocaleTimeString(), message: 'Thermal spike detected!' }] : [])
     ],
     racks,
-    topology: [
-      { source: 'A01', target: 'A02', weight: 0.8 },
-      { source: 'A02', target: 'A03', weight: 0.5 },
-      { source: 'A03', target: 'A04', weight: 0.9 },
-      { source: 'A04', target: 'A05', weight: 0.6 },
-      { source: 'A05', target: 'A06', weight: 0.7 },
-      { source: 'A06', target: 'A07', weight: 0.4 },
-    ]
+    topology
   });
 });
 

@@ -42,18 +42,16 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
       });
   }, [telemetry, positions]);
 
-  if (telemetry?.operating_mode !== 'DATA_CENTER_SIMULATION') return null;
-
   return (
     <>
       {edges.map((edge, i) => (
         <Line 
           key={i} 
           points={edge.points} 
-          color="#C56A38" 
-          lineWidth={edge.weight * 2} 
+          color={edge.weight > 0.6 ? "#ef4444" : "#f97316"} 
+          lineWidth={edge.weight * 3} 
           transparent 
-          opacity={0.6} 
+          opacity={edge.weight * 0.8 + 0.2} 
         />
       ))}
     </>
