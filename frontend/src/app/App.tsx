@@ -5,6 +5,10 @@ import { StatusStrip } from '../features/StatusStrip';
 import { OverviewTab } from '../pages/OverviewTab';
 import { ThermalMapTab } from '../pages/ThermalMapTab';
 
+import { RacksTab } from '../pages/RacksTab';
+import { PredictionsTab } from '../pages/PredictionsTab';
+import { EventsTab } from '../pages/EventsTab';
+
 const queryClient = new QueryClient();
 
 export function App() {
@@ -20,9 +24,9 @@ export function App() {
               <Route path="/" element={<Navigate to="/overview" replace />} />
               <Route path="/overview" element={<OverviewTab />} />
               <Route path="/thermal-map" element={<ThermalMapTab />} />
-              <Route path="/racks" element={<div className="p-8">Racks Tab (Under Construction)</div>} />
-              <Route path="/predictions" element={<div className="p-8">Predictions Tab (Under Construction)</div>} />
-              <Route path="/events" element={<div className="p-8">Events Tab (Under Construction)</div>} />
+              <Route path="/racks" element={<RacksTab />} />
+              <Route path="/predictions" element={<PredictionsTab />} />
+              <Route path="/events" element={<EventsTab />} />
             </Routes>
           </main>
         </div>
