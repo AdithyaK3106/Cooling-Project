@@ -8,42 +8,47 @@ app.use(express.json());
 let load = 50;
 let offset = 0;
 let spike = false;
-let time = 0;
+let currentMode = 'DATA_CENTER_SIMULATION';
 
 app.get('/telemetry', (req, res) => {
-  time += 0.1;
-  const baseTemp = 40 + (load / 100) * 40 + offset + (spike ? 20 : 0);
+  const time = Date.now() / 1000;
+  const baseTemp = 40 + offset;
   
-  const telemetry = {
-    operating_mode: 'DATA_CENTER_SIMULATION',
-    global_health: { status: 'OK', issues: [] },
+  const generateRack = (id, baseIndex) => {
+    const oscillation = Math.sin(time * 0.5 + baseIndex) * 10; 
+    const currentTemp = 40 + (load / 100) * 40 + offset + oscillation + (spike ? 20 : 0);
+    const risk = Math.max(0, Math.min(1, (currentTemp - 40) / 60)); // 0 to 1
+    return {
+      id,
+      telemetry: {
+        cpu_util: Math.max(0, Math.min(100, load + (Math.sin(time + baseIndex) * 10))),
+        gpu_util: Math.max(0, Math.min(100, load + (Math.cos(time + baseIndex) * 10))),
+        cpu_temp: currentTemp
+      },
+      risk_score: risk,
+      cooling: {
+        target_rpm: load * 50,
+        actual_rpm: load * 50 + Math.random() * 100 - 50,
+        status: risk > 0.6 ? 'predictive intervention' : 'normal'
+      }
+    };
+  };
+
+  const racks = currentMode === 'LOCAL_LAPTOP'
+    ? [generateRack('A07', 7)]
+    : Array.from({ length: 360 }, (_, i) => generateRack(`A0${i + 1}`, i));
+
+  res.json({
+    operating_mode: currentMode,
+    global_health: {
+      status: spike ? 'critical' : 'healthy',
+      issues: spike ? ['Thermal runaway predicted in zone A'] : []
+    },
     events: [
       { time: new Date().toLocaleTimeString(), message: 'System running normally' },
       ...(spike ? [{ time: new Date().toLocaleTimeString(), message: 'Thermal spike detected!' }] : [])
     ],
-    racks: Array.from({ length: 360 }, (_, i) => {
-      // Use the simulated load and offset applied by the user!
-      // Add a slight sine wave to make it feel alive, but respect the base load!
-      const oscillation = Math.sin(time * 0.5 + i) * 10; 
-      const currentTemp = 40 + (load / 100) * 40 + offset + oscillation + (spike ? 20 : 0);
-      
-      const risk = Math.max(0, Math.min(1, (currentTemp - 40) / 60)); // 0 to 1
-      
-      return {
-        id: `A0${i + 1}`,
-        telemetry: {
-          cpu_util: Math.max(0, Math.min(100, load + (Math.sin(time + i) * 10))),
-          gpu_util: Math.max(0, Math.min(100, load + (Math.cos(time + i) * 10))),
-          cpu_temp: currentTemp
-        },
-        risk_score: risk,
-        cooling: {
-          target_rpm: load * 50,
-          actual_rpm: load * 50 + Math.random() * 100 - 50,
-          status: risk > 0.6 ? 'predictive intervention' : 'normal'
-        }
-      };
-    }),
+    racks,
     topology: [
       { source: 'A01', target: 'A02', weight: 0.8 },
       { source: 'A02', target: 'A03', weight: 0.5 },
@@ -52,9 +57,7 @@ app.get('/telemetry', (req, res) => {
       { source: 'A05', target: 'A06', weight: 0.7 },
       { source: 'A06', target: 'A07', weight: 0.4 },
     ]
-  };
-  
-  res.json(telemetry);
+  });
 });
 
 app.post('/simulation/controls', (req, res) => {

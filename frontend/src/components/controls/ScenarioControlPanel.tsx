@@ -5,20 +5,32 @@ import { Settings2 } from 'lucide-react';
 export function ScenarioControlPanel() {
   const [load, setLoad] = useState(50);
   const [offset, setOffset] = useState(0);
+  const [mode, setMode] = useState<'LOCAL_LAPTOP' | 'DATA_CENTER_SIMULATION'>('DATA_CENTER_SIMULATION');
   const mutation = useUpdateSimulationControls();
 
   const handleApply = () => {
     mutation.mutate({
       simulated_load: load,
       ambient_temp_offset: offset,
-      trigger_spike: load > 80
+      trigger_spike: load > 80,
+      mode
     });
   };
 
   return (
     <div className="absolute bottom-4 left-4 z-10 w-80 rounded-lg border border-thervo-border bg-thervo-panel/90 p-4 text-thervo-text backdrop-blur-md">
-      <div className="mb-4 flex items-center gap-2 text-sm font-bold text-thervo-orange">
-        <Settings2 size={14} /> SCENARIO CONTROLS
+      <div className="mb-4 flex items-center justify-between text-sm font-bold text-thervo-orange">
+        <div className="flex items-center gap-2">
+          <Settings2 size={14} /> CONTROLS
+        </div>
+        <select 
+          value={mode}
+          onChange={(e) => setMode(e.target.value as any)}
+          className="bg-thervo-background text-thervo-text border border-thervo-border rounded px-2 py-1 text-xs outline-none"
+        >
+          <option value="DATA_CENTER_SIMULATION">SIMULATION MODE</option>
+          <option value="LOCAL_LAPTOP">LOCAL LAPTOP</option>
+        </select>
       </div>
       
       <div className="space-y-4 font-sans text-sm">

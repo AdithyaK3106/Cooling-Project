@@ -6,7 +6,6 @@ import { CameraController } from '../Camera';
 import { useUiStore } from '../../stores/uiStore';
 
 import { ThermalLayer } from '../Layers/ThermalLayer';
-import { CoolingLayer } from '../Layers/CoolingLayer';
 import { GNNLayer } from '../Layers/GNNLayer';
 import { StatsLayer } from '../Layers/StatsLayer';
 import { Html } from '@react-three/drei';

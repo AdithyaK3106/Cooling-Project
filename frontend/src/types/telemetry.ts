@@ -35,4 +35,5 @@ export interface ScenarioParams {
   simulated_load: number;
   ambient_temp_offset: number;
   trigger_spike: boolean;
+  mode?: 'LOCAL_LAPTOP' | 'DATA_CENTER_SIMULATION';
 }

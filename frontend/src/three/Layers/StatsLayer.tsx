@@ -23,9 +23,26 @@ export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
 
   return (
     <>
-      {telemetry.racks.map((rack) => {
-        const pos = rackPositions.get(rack.id);
-        if (!pos) return null;
+      {Array.from(rackPositions.entries()).map(([rackId, pos]) => {
+        const rack = telemetry.racks.find(r => r.id === rackId);
+
+        if (!rack) {
+          return (
+            <Billboard key={rackId} position={[pos.x, pos.y + 1.2, pos.z]} follow={true}>
+              <Text
+                position={[0, 0, 0]}
+                fontSize={0.08}
+                color="#888888"
+                anchorX="center"
+                anchorY="bottom"
+                outlineWidth={0.008}
+                outlineColor="black"
+              >
+                WAITING FOR TELEMETRY
+              </Text>
+            </Billboard>
+          );
+        }
 
         // Color temperature text based on risk
         let tempColor = "#00ffff"; // cool
