@@ -4,10 +4,11 @@ import { useTelemetry } from '../../services/telemetryApi';
 import * as THREE from 'three';
 
 const COLORS = {
-  cool: new THREE.Color('#6F9BA8'),
-  amber: new THREE.Color('#B58A4A'),
-  orange: new THREE.Color('#C56A38'),
-  critical: new THREE.Color('#B84A43'),
+  cool: new THREE.Color('#3b82f6'), // Blue
+  optimal: new THREE.Color('#06b6d4'), // Cyan
+  warning: new THREE.Color('#eab308'), // Yellow
+  elevated: new THREE.Color('#f97316'), // Orange
+  critical: new THREE.Color('#ef4444'), // Red
 };
 
 export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
@@ -65,11 +66,12 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
     rackMap.forEach((meshes, rackId) => {
       const rackData = telemetry.racks?.find((r) => r.id === rackId);
       
-      let targetColor = COLORS.cool;
+      let targetColor = COLORS.optimal;
       if (rackData) {
         if (rackData.risk_score >= 0.8) targetColor = COLORS.critical;
-        else if (rackData.risk_score >= 0.6) targetColor = COLORS.orange;
-        else if (rackData.risk_score >= 0.4) targetColor = COLORS.amber;
+        else if (rackData.risk_score >= 0.6) targetColor = COLORS.elevated;
+        else if (rackData.risk_score >= 0.4) targetColor = COLORS.warning;
+        else if (rackData.risk_score <= 0.2) targetColor = COLORS.cool;
       }
       
       const intensity = rackData ? 0.2 + rackData.risk_score * 1.5 : 0.0;

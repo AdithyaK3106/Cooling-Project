@@ -7,7 +7,7 @@ import { useUiStore } from '../../stores/uiStore';
 
 import { ThermalLayer } from '../Layers/ThermalLayer';
 import { GNNLayer } from '../Layers/GNNLayer';
-import { StatsLayer } from '../Layers/StatsLayer';
+import { AirflowLayer } from '../Layers/AirflowLayer';
 import { Html } from '@react-three/drei';
 import { useTelemetry } from '../../services/telemetryApi';
 import * as THREE from 'three';
@@ -142,21 +142,18 @@ function Model() {
       
       {hoveredRackPos && hoveredRackData && (
         <Html position={hoveredRackPos} center style={{ pointerEvents: 'none', zIndex: 100 }}>
-          <div className="bg-[#1C1F26] border border-[#2D3342] p-3 rounded shadow-lg text-xs w-48 text-gray-200 backdrop-blur-md bg-opacity-90">
-            <div className="font-bold text-white mb-1 border-b border-[#2D3342] pb-1">{hoveredRackId}</div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">CPU</span>
+          <div className="bg-[#0B0E14]/90 border border-white/10 p-3 rounded-lg shadow-2xl text-xs w-48 text-gray-200 backdrop-blur-xl">
+            <div className="font-mono font-bold text-white mb-2 border-b border-white/10 pb-1.5 flex justify-between items-center">
+              <span>{hoveredRackId}</span>
+              <span className={`w-1.5 h-1.5 rounded-full ${hoveredRackData.risk_score > 0.7 ? 'bg-red-500' : 'bg-green-500'}`}></span>
+            </div>
+            <div className="flex justify-between py-0.5">
+              <span className="text-gray-400 font-sans">CPU</span>
               <span className="font-mono text-cyan-400">{hoveredRackData.telemetry.cpu_util.toFixed(1)}%</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Temp</span>
+            <div className="flex justify-between py-0.5">
+              <span className="text-gray-400 font-sans">Temp</span>
               <span className="font-mono text-orange-400">{hoveredRackData.telemetry.cpu_temp.toFixed(1)}°C</span>
-            </div>
-            <div className="flex justify-between mt-1 pt-1 border-t border-[#2D3342]">
-              <span className="text-gray-400">Risk</span>
-              <span className={`font-mono font-bold ${hoveredRackData.risk_score > 0.7 ? 'text-red-400' : 'text-green-400'}`}>
-                {(hoveredRackData.risk_score * 100).toFixed(0)}%
-              </span>
             </div>
           </div>
         </Html>
@@ -166,7 +163,7 @@ function Model() {
         <>
           <ThermalLayer scene={scene} />
           <GNNLayer scene={scene} />
-          <StatsLayer scene={scene} />
+          <AirflowLayer />
         </>
       )}
     </group>

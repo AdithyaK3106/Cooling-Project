@@ -1,32 +1,45 @@
 import { useEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 import gsap from 'gsap';
+import * as THREE from 'three';
 import { useUiStore } from '../../stores/uiStore';
 
 export function CameraController() {
-  const { camera, controls } = useThree();
+  const { camera, controls, scene } = useThree();
   const selectedRackId = useUiStore((state) => state.selectedRackId);
 
   useEffect(() => {
     if (selectedRackId) {
-      // For now, hardcode a focus position or use a dummy position
-      // In Phase 7, we'll map this to the exact rack's world position
-      gsap.to(camera.position, {
-        x: 10,
-        y: 15,
-        z: 10,
-        duration: 1.5,
-        ease: 'power3.inOut',
+      // Find the specific rack node in the scene
+      let targetNode = null;
+      scene.traverse((child) => {
+        if (child.userData && child.userData.rackId === selectedRackId) {
+          targetNode = child;
+        }
       });
 
-      if (controls && (controls as any).target) {
-        gsap.to((controls as any).target, {
-          x: 0,
-          y: 5,
-          z: 0,
+      if (targetNode) {
+        const pos = new THREE.Vector3();
+        (targetNode as THREE.Object3D).getWorldPosition(pos);
+        
+        // Offset the camera to look AT the rack from a good angle
+        gsap.to(camera.position, {
+          x: pos.x + 8,
+          y: pos.y + 10,
+          z: pos.z + 12,
           duration: 1.5,
           ease: 'power3.inOut',
         });
+
+        if (controls && (controls as any).target) {
+          gsap.to((controls as any).target, {
+            x: pos.x,
+            y: pos.y + 3,
+            z: pos.z,
+            duration: 1.5,
+            ease: 'power3.inOut',
+          });
+        }
       }
     } else {
       // Reset to isometric overview
