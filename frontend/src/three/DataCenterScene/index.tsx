@@ -26,21 +26,19 @@ function Model() {
     const nodesToRemove: THREE.Object3D[] = [];
 
     scene.traverse((child: any) => {
-      // Hide roof/ceiling so we can see inside and click
-      if (child.name.toLowerCase().includes('roof') || child.name.toLowerCase().includes('ceiling') || child.name.toLowerCase().includes('top plane')) {
-        child.visible = false;
-      }
-      
-      // Disable raycasting on non-rack objects (walls, floors) so hover works!
+      // Remove all non-rack objects (building walls, floors, roofs, etc)
       if (!child.name.match(/Rack/i)) {
-        child.raycast = () => null;
+        if (child.isMesh) {
+          nodesToRemove.push(child);
+        }
+        return;
       }
 
       const match = child.name.match(/^Rack\s*(\d+)$/i) || child.name.match(/^Rack_(\d+)$/i);
       if (match) {
         const num = parseInt(match[1], 10);
         
-        // Strip out everything except the first 25 racks (5 rows of 5)
+        // Strip out everything except the first 25 racks
         if (num > 25) {
           nodesToRemove.push(child);
           return;
@@ -48,6 +46,23 @@ function Model() {
 
         const rackId = `A0${num}`;
         child.userData = { rackId };
+
+        // Force into a perfect 5x5 grid centered at origin
+        const index = num - 1;
+        const row = Math.floor(index / 5);
+        const col = index % 5;
+        
+        // Adjust spacing based on visual preference
+        const spacingX = 3.5;
+        const spacingZ = 5.0;
+        
+        child.position.set(
+          (col - 2) * spacingX,
+          0,
+          (row - 2) * spacingZ
+        );
+        // Reset rotation so they all face forward neatly
+        child.rotation.set(0, 0, 0);
       }
     });
 
