@@ -17,7 +17,7 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
     if (!telemetry || !scene) return;
 
     scene.traverse((child) => {
-      if (child.name === 'rack' && child.userData.rackId) {
+      if (child.userData && child.userData.rackId) {
         const rackData = telemetry.racks?.find((r) => r.id === child.userData.rackId);
         
         let targetColor = COLORS.cool;
@@ -27,15 +27,32 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
           else if (rackData.risk_score >= 0.4) targetColor = COLORS.amber;
         }
 
+        console.log(`ThermalLayer: Rack ${child.userData.rackId} matched. Data exists: ${!!rackData}, Color:`, targetColor);
+
         child.traverse((mesh: any) => {
           if (mesh.isMesh && mesh.material) {
-            // Clone material once per mesh to allow independent colors
+            // Handle arrays of materials
+            const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            
             if (!mesh.userData.uniqueMaterial) {
-              mesh.material = mesh.material.clone();
+              mesh.material = Array.isArray(mesh.material) 
+                ? materials.map((m: any) => m.clone())
+                : mesh.material.clone();
               mesh.userData.uniqueMaterial = true;
             }
-            mesh.material.emissive = targetColor;
-            mesh.material.emissiveIntensity = rackData ? 0.5 : 0;
+
+            const activeMats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            
+            activeMats.forEach((mat: any) => {
+              if (mat.emissive !== undefined) {
+                mat.emissive.copy(targetColor);
+                mat.emissiveIntensity = rackData ? 1.0 : 0.0;
+                mat.needsUpdate = true;
+              } else if (mat.color !== undefined) {
+                mat.color.copy(targetColor);
+                mat.needsUpdate = true;
+              }
+            });
           }
         });
       }

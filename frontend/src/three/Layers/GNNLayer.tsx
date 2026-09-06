@@ -12,7 +12,7 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
     // Build a map of rackId to world position
     const positions: Record<string, THREE.Vector3> = {};
     scene.traverse((child) => {
-      if (child.name === 'rack' && child.userData.rackId) {
+      if (child.userData && child.userData.rackId) {
         const pos = new THREE.Vector3();
         child.getWorldPosition(pos);
         positions[child.userData.rackId] = pos;
