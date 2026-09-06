@@ -14,6 +14,11 @@ export interface ThervoTelemetry {
       actual_rpm: number;
       status: string;
     };
+    ai_insights?: {
+      gnn_embed: number;
+      xgb_pred: number;
+      zone: string;
+    };
   }>;
   topology?: Array<{
     source: string;

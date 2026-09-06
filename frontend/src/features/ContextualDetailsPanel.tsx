@@ -47,15 +47,29 @@ export function ContextualDetailsPanel() {
         <MetricRow icon={<Activity size={16}/>} label="CPU" value={rack.telemetry.cpu_util} unit="%" />
         <MetricRow icon={<Activity size={16}/>} label="GPU" value={rack.telemetry.gpu_util} unit="%" />
         <MetricRow icon={<Thermometer size={16}/>} label="Temperature" value={rack.telemetry.cpu_temp} unit="°C" highlight={isDanger || isWarning} />
-        <MetricRow icon={<Fan size={16}/>} label="Cooling" value={rack.cooling.actual_rpm} unit=" RPM" format={(v: number) => Math.round(v).toString()} />
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-white/10 space-y-4 font-mono text-sm">
+        <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">AI Insights</div>
+        <MetricRow icon={<Activity size={16}/>} label="XGBoost Pred" value={rack.ai_insights?.xgb_pred ? rack.ai_insights.xgb_pred * 100 : 0} unit="%" />
+        <MetricRow icon={<Activity size={16}/>} label="GNN Embed" value={rack.ai_insights?.gnn_embed ? rack.ai_insights.gnn_embed * 100 : 0} unit="%" format={(v: number) => v.toFixed(2)} />
       </div>
 
       <div className={`mt-6 rounded-lg p-3 border ${isDanger ? 'border-red-500/30 bg-red-500/10' : isWarning ? 'border-yellow-500/30 bg-yellow-500/10' : 'border-green-500/20 bg-green-500/5'}`}>
         <div className="flex justify-between items-baseline mb-1">
           <span className="text-xs text-gray-400">Risk Score</span>
-          <span className={`font-mono text-lg ${statusColor}`}>{rack.risk_score.toFixed(2)}</span>
+          <span className={`font-mono text-lg ${statusColor}`}>{(rack.risk_score * 100).toFixed(1)}%</span>
         </div>
         <div className={`text-xs tracking-widest uppercase ${statusColor}`}>{statusText}</div>
+        
+        {rack.cooling?.status === 'predictive intervention' && (
+          <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-cyan-400 text-xs">
+            <div className="flex items-center gap-2">
+              <Fan size={12} className="animate-spin" />
+              <span>PREDICTIVE COOLING ACTIVE</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <button className="mt-4 w-full flex items-center justify-between rounded bg-white/5 px-4 py-2 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white group">
