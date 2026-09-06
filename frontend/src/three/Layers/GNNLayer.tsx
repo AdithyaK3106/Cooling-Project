@@ -6,24 +6,27 @@ import { Line } from '@react-three/drei';
 export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
   const { data: telemetry } = useTelemetry();
 
-  const edges = useMemo(() => {
-    if (!telemetry || !scene || !telemetry.topology) return [];
-    
-    // Build a map of rackId to world position
-    const positions: Record<string, THREE.Vector3> = {};
+  const positions = useMemo(() => {
+    const map = new Map<string, THREE.Vector3>();
+    if (!scene) return map;
     scene.traverse((child) => {
       if (child.userData && child.userData.rackId) {
         const pos = new THREE.Vector3();
         child.getWorldPosition(pos);
-        positions[child.userData.rackId] = pos;
+        map.set(child.userData.rackId, pos);
       }
     });
+    return map;
+  }, [scene]);
+
+  const edges = useMemo(() => {
+    if (!telemetry || !telemetry.topology) return [];
 
     return telemetry.topology
-      .filter((edge) => positions[edge.source] && positions[edge.target])
+      .filter((edge) => positions.has(edge.source) && positions.has(edge.target))
       .map((edge) => {
-        const start = positions[edge.source];
-        const end = positions[edge.target];
+        const start = positions.get(edge.source)!;
+        const end = positions.get(edge.target)!;
         
         // Create a bezier curve between the nodes
         const mid = start.clone().lerp(end, 0.5);
@@ -37,7 +40,7 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
           weight: edge.weight,
         };
       });
-  }, [telemetry, scene]);
+  }, [telemetry, positions]);
 
   if (telemetry?.operating_mode !== 'DATA_CENTER_SIMULATION') return null;
 

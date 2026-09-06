@@ -36,7 +36,7 @@ app.get('/telemetry', (req, res) => {
 
   const racks = currentMode === 'LOCAL_LAPTOP'
     ? [generateRack('A07', 7)]
-    : Array.from({ length: 360 }, (_, i) => generateRack(`A0${i + 1}`, i));
+    : Array.from({ length: 25 }, (_, i) => generateRack(`A0${i + 1}`, i));
 
   res.json({
     operating_mode: currentMode,

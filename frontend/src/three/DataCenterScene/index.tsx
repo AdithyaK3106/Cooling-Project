@@ -19,8 +19,12 @@ function Model() {
   const hoveredRackId = useUiStore((state) => state.hoveredRackId);
   const { data: telemetry } = useTelemetry();
 
-  // Traverse the scene once to assign IDs and attach event handlers
+  const [isReady, setIsReady] = React.useState(false);
+
+  // Traverse the scene once to assign IDs, attach event handlers, and STRIP excess racks
   React.useEffect(() => {
+    const nodesToRemove: THREE.Object3D[] = [];
+
     scene.traverse((child: any) => {
       // Hide roof/ceiling so we can see inside and click
       if (child.name.toLowerCase().includes('roof') || child.name.toLowerCase().includes('ceiling') || child.name.toLowerCase().includes('top plane')) {
@@ -34,11 +38,23 @@ function Model() {
 
       const match = child.name.match(/^Rack\s*(\d+)$/i) || child.name.match(/^Rack_(\d+)$/i);
       if (match) {
-        const num = match[1];
+        const num = parseInt(match[1], 10);
+        
+        // Strip out everything except the first 25 racks (5 rows of 5)
+        if (num > 25) {
+          nodesToRemove.push(child);
+          return;
+        }
+
         const rackId = `A0${num}`;
         child.userData = { rackId };
       }
     });
+
+    // Remove the excess racks from the scene graph entirely
+    nodesToRemove.forEach(node => node.removeFromParent());
+    
+    setIsReady(true);
   }, [scene]);
 
   // Find the position of the hovered rack for the tooltip
@@ -118,17 +134,33 @@ function Model() {
         </Html>
       )}
 
-      <ThermalLayer scene={scene} />
-      <GNNLayer scene={scene} />
-      <StatsLayer scene={scene} />
+      {isReady && (
+        <>
+          <ThermalLayer scene={scene} />
+          <GNNLayer scene={scene} />
+          <StatsLayer scene={scene} />
+        </>
+      )}
     </group>
   );
+}
+
+import { useThree } from '@react-three/fiber';
+
+function PerfExposer() {
+  const { gl, scene } = useThree();
+  React.useEffect(() => {
+    (window as any).__gl = gl;
+    (window as any).__scene = scene;
+  }, [gl, scene]);
+  return null;
 }
 
 export function DataCenterScene() {
   return (
     <div className="h-full w-full">
       <Canvas camera={{ position: [50, 50, 50], fov: 45 }}>
+        <PerfExposer />
         <color attach="background" args={['#1A1C23']} />
         
         <ambientLight intensity={0.5} />

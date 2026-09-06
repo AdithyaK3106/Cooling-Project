@@ -10,10 +10,21 @@ export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
     const map = new Map<string, THREE.Vector3>();
     if (!scene) return map;
     scene.traverse((child) => {
-      if (child.userData && child.userData.rackId) {
-        const pos = new THREE.Vector3();
-        child.getWorldPosition(pos);
-        map.set(child.userData.rackId, pos);
+      // Ensure the rack hasn't been stripped from the scene
+      if (child.userData && child.userData.rackId && child.parent !== null) {
+        // Double check it's actually in the active scene graph
+        let isActive = true;
+        let node = child;
+        while (node) {
+          if (!node.parent && node !== scene) isActive = false;
+          node = node.parent as any;
+        }
+
+        if (isActive) {
+          const pos = new THREE.Vector3();
+          child.getWorldPosition(pos);
+          map.set(child.userData.rackId, pos);
+        }
       }
     });
     return map;
