@@ -1,14 +1,17 @@
-
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { DataCenterScene } from '../three/DataCenterScene';
 
 const queryClient = new QueryClient();
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-thervo-background text-thervo-text">
-        <h1 className="text-3xl font-mono text-thervo-cool">THERVO</h1>
-        <p className="mt-4 font-sans">Command Center Initializing...</p>
+      <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-thervo-background text-thervo-text">
+        <div className="absolute left-4 top-4 z-10">
+          <h1 className="text-3xl font-mono text-thervo-cool">THERVO</h1>
+          <p className="mt-2 font-sans text-sm text-thervo-text opacity-70">Command Center Online</p>
+        </div>
+        <DataCenterScene />
       </div>
     </QueryClientProvider>
   );
