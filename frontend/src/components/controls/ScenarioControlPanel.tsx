@@ -10,10 +10,8 @@ export function ScenarioControlPanel() {
 
   const handleApply = () => {
     mutation.mutate({
-      simulated_load: load,
-      ambient_temp_offset: offset,
-      trigger_spike: load > 80,
-      mode
+      load: 50,
+      noise: 10
     });
   };
 

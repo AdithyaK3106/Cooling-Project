@@ -1,59 +1,64 @@
 import { useState } from 'react';
 import { Play, Settings2 } from 'lucide-react';
-import { useUpdateSimulationControls } from '../services/controlApi';
+import { useUpdateSimulationControls, useInjectSpike } from '../services/controlApi';
 
 export function CompactBottomBar() {
-  const mutation = useUpdateSimulationControls();
+  const simMutation = useUpdateSimulationControls();
+  const spikeMutation = useInjectSpike();
   
   // Local state for sliders (to avoid constant API spam)
-  const [load, setLoad] = useState(50);
-  const [tempOffset, setTempOffset] = useState(0);
+  const [load, setLoad] = useState(35);
+  const [noise, setNoise] = useState(12);
 
   const handleApply = () => {
-    mutation.mutate({
-      simulated_load: load,
-      ambient_temp_offset: tempOffset,
-      trigger_spike: load > 80,
-      mode: 'DATA_CENTER_SIMULATION'
-    });
+    simMutation.mutate({ load, noise });
   };
 
   return (
     <div className="flex h-full w-full gap-4">
       
       {/* LEFT: Simulation Controls */}
-      <div className="flex w-[400px] items-center justify-between rounded-xl border border-white/10 bg-[#0B0E14]/90 p-4 backdrop-blur-xl shadow-2xl">
+      <div className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-[#0B0E14]/90 p-4 backdrop-blur-xl shadow-2xl">
         
-        <div className="flex gap-4 items-center">
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Sim Load</span>
+        <div className="flex gap-4 items-center flex-1">
+          <div className="flex flex-col gap-1 flex-1">
+            <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Sim Load: {load}%</span>
             <input 
               type="range" 
               min="10" max="100" 
               value={load} 
               onChange={(e) => setLoad(parseInt(e.target.value))}
-              className="w-24 accent-cyan-500" 
+              className="w-full accent-cyan-500" 
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Thermal Off.</span>
+          <div className="flex flex-col gap-1 flex-1">
+            <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Thermal Noise: {noise}%</span>
             <input 
               type="range" 
-              min="-10" max="20" 
-              value={tempOffset} 
-              onChange={(e) => setTempOffset(parseInt(e.target.value))}
-              className="w-24 accent-orange-500" 
+              min="0" max="30" 
+              value={noise} 
+              onChange={(e) => setNoise(parseInt(e.target.value))}
+              className="w-full accent-orange-500" 
             />
           </div>
         </div>
 
-        <button 
-          onClick={handleApply}
-          className="flex h-10 items-center gap-2 rounded-lg bg-cyan-600/20 px-4 text-xs font-bold text-cyan-400 border border-cyan-500/30 hover:bg-cyan-600/40 transition-colors"
-        >
-          <Play size={14} /> APPLY
-        </button>
+        <div className="flex gap-2 ml-6">
+          <button 
+            onClick={handleApply}
+            className="flex h-10 items-center gap-2 rounded-lg bg-cyan-600/20 px-4 text-xs font-bold text-cyan-400 border border-cyan-500/30 hover:bg-cyan-600/40 transition-colors"
+          >
+            <Play size={14} /> APPLY
+          </button>
+          
+          <button 
+            onClick={() => spikeMutation.mutate()}
+            className="flex h-10 items-center gap-2 rounded-lg bg-red-600/20 px-4 text-xs font-bold text-red-400 border border-red-500/30 hover:bg-red-600/40 transition-colors"
+          >
+            ⚡ INJECT SPIKE
+          </button>
+        </div>
 
       </div>
 

@@ -29,6 +29,11 @@ export interface ThervoTelemetry {
     status: string;
     issues: string[];
   };
+  model_stats?: {
+    accuracy: number;
+    total_predictions: number;
+    active_alerts: number;
+  };
   events: Array<{
     time: string;
     message: string;

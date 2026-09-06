@@ -115,9 +115,13 @@ function computeGNNEmbeddings(rackFeatures) {
   return embeddings;
 }
 
+let totalPreds = 0;
+let alertCount = 0;
+
 // Tick loop
 setInterval(() => {
   epoch++;
+  totalPreds += NUM_RACKS;
   const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, epoch, load/100, noise/100));
   const gnnEmbeds = computeGNNEmbeddings(rawFeatures);
 
@@ -134,6 +138,7 @@ setInterval(() => {
     if (!rack.coolingActive) {
       if (rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) {
         rack.coolingActive = true;
+        alertCount++;
         addLog(`⚠ AUTO COOLING DEPLOYED: ${rack.id} risk=${(rawCompositeRisk*100).toFixed(0)}%`);
       }
     } else {
@@ -160,12 +165,19 @@ app.get('/telemetry', (req, res) => {
 
   const responseRacks = currentMode === 'LOCAL_LAPTOP' ? [racks[6]] : racks;
   const hotZones = racks.filter(r => r.riskScore > 0.55).length;
+  
+  const modelAccuracy = Math.min(99.5, 91.0 + Math.sin(epoch * 0.07) * 1.8 + Math.min(epoch * 0.02, 4)).toFixed(1);
 
   res.json({
     operating_mode: currentMode,
     global_health: {
       status: hotZones > 3 ? 'critical' : 'healthy',
       issues: hotZones > 3 ? [`${hotZones} zones critical`] : []
+    },
+    model_stats: {
+      accuracy: parseFloat(modelAccuracy),
+      total_predictions: totalPreds,
+      active_alerts: alertCount
     },
     events,
     topology,
@@ -190,4 +202,42 @@ app.post('/simulation/controls', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(8000, '0.0.0.0', () => console.log('Mock server running on port 8000'));
+app.post('/control/simulation', (req, res) => {
+  const { load: newLoad, noise: newNoise } = req.body;
+  if (newLoad !== undefined) load = newLoad;
+  if (newNoise !== undefined) noise = newNoise;
+  addLog(`⚙ Simulation params updated: load=${load}%, noise=${noise}%`);
+  res.json({ success: true, load, noise });
+});
+
+app.post('/control/scenario', (req, res) => {
+  const { mode } = req.body;
+  currentMode = mode;
+  addLog(`Switched operating mode to ${mode}`);
+  res.json({ success: true, mode });
+});
+
+app.post('/control/cooling', (req, res) => {
+  const { rackId, status } = req.body;
+  const rack = racks.find(r => r.id === rackId);
+  if (rack) {
+    rack.overrideEnabled = (status === 'predictive intervention');
+    rack.coolingActive = (status === 'predictive intervention');
+    addLog(rack.coolingActive ? `❄ MANUAL OVERRIDE: Cooling deployed on ${rack.id}` : `⏏ MANUAL OVERRIDE: Cooling disabled on ${rack.id}`);
+    res.json({ success: true });
+  } else {
+    res.status(404).json({ error: 'Rack not found' });
+  }
+});
+
+app.post('/control/spike', (req, res) => {
+  // Inject massive heat spike into 3 random racks
+  for(let i=0; i<3; i++) {
+    const r = racks[Math.floor(Math.random() * racks.length)];
+    r.riskScore = 0.95;
+    addLog(`⚡ ANOMALY: Sudden thermal spike detected on ${r.id}`);
+  }
+  res.json({ success: true });
+});
+
+app.listen(8000, () => console.log('Mock telemetry server running on port 8000'));
