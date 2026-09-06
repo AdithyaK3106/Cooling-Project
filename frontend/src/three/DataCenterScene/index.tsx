@@ -8,6 +8,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { ThermalLayer } from '../Layers/ThermalLayer';
 import { CoolingLayer } from '../Layers/CoolingLayer';
 import { GNNLayer } from '../Layers/GNNLayer';
+import { StatsLayer } from '../Layers/StatsLayer';
 import { Html } from '@react-three/drei';
 import { useTelemetry } from '../../services/telemetryApi';
 import * as THREE from 'three';
@@ -21,10 +22,21 @@ function Model() {
 
   // Traverse the scene once to assign IDs and attach event handlers
   React.useEffect(() => {
-    let rackCounter = 1;
-    scene.traverse((child) => {
-      if (child.name.match(/^Rack \d+$/)) {
-        const rackId = `A0${rackCounter++}`;
+    scene.traverse((child: any) => {
+      // Hide roof/ceiling so we can see inside and click
+      if (child.name.toLowerCase().includes('roof') || child.name.toLowerCase().includes('ceiling') || child.name.toLowerCase().includes('top plane')) {
+        child.visible = false;
+      }
+      
+      // Disable raycasting on non-rack objects (walls, floors) so hover works!
+      if (!child.name.match(/Rack/i)) {
+        child.raycast = () => null;
+      }
+
+      const match = child.name.match(/^Rack\s*(\d+)$/i) || child.name.match(/^Rack_(\d+)$/i);
+      if (match) {
+        const num = match[1];
+        const rackId = `A0${num}`;
         child.userData = { rackId };
       }
     });
@@ -54,10 +66,10 @@ function Model() {
         onClick={(e: any) => {
           e.stopPropagation();
           let node = e.object;
-          while (node && !node.name.match(/^Rack \d+$/) && node.parent) {
+          while (node && !(node.name.match(/^Rack\s*\d+$/i) || node.name.match(/^Rack_\d+$/i)) && node.parent) {
             node = node.parent;
           }
-          if (node && node.name.match(/^Rack \d+$/)) {
+          if (node && (node.name.match(/^Rack\s*\d+$/i) || node.name.match(/^Rack_\d+$/i))) {
             setSelectedRackId(node.userData.rackId);
           } else {
             setSelectedRackId(null);
@@ -66,10 +78,10 @@ function Model() {
         onPointerOver={(e: any) => {
           e.stopPropagation();
           let node = e.object;
-          while (node && !node.name.match(/^Rack \d+$/) && node.parent) {
+          while (node && !(node.name.match(/^Rack\s*\d+$/i) || node.name.match(/^Rack_\d+$/i)) && node.parent) {
             node = node.parent;
           }
-          if (node && node.name.match(/^Rack \d+$/)) {
+          if (node && (node.name.match(/^Rack\s*\d+$/i) || node.name.match(/^Rack_\d+$/i))) {
             setHoveredRackId(node.userData.rackId);
             document.body.style.cursor = 'pointer';
           }
@@ -86,26 +98,30 @@ function Model() {
       />
       
       {hoveredRackPos && hoveredRackData && (
-        <Html position={hoveredRackPos} center style={{ pointerEvents: 'none' }}>
+        <Html position={hoveredRackPos} center style={{ pointerEvents: 'none', zIndex: 100 }}>
           <div className="bg-[#1C1F26] border border-[#2D3342] p-3 rounded shadow-lg text-xs w-48 text-gray-200 backdrop-blur-md bg-opacity-90">
-            <div className="font-bold text-[#6F9BA8] border-b border-[#2D3342] pb-1 mb-2">
-              Rack {hoveredRackData.id}
-            </div>
-            <div className="grid grid-cols-2 gap-y-1">
+            <div className="font-bold text-white mb-1 border-b border-[#2D3342] pb-1">{hoveredRackId}</div>
+            <div className="flex justify-between">
               <span className="text-gray-400">CPU</span>
-              <span className="text-right">{hoveredRackData.telemetry.cpu_util.toFixed(1)}%</span>
+              <span className="font-mono text-cyan-400">{hoveredRackData.telemetry.cpu_util.toFixed(1)}%</span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-gray-400">Temp</span>
-              <span className="text-right">{hoveredRackData.telemetry.cpu_temp.toFixed(1)}°C</span>
+              <span className="font-mono text-orange-400">{hoveredRackData.telemetry.cpu_temp.toFixed(1)}°C</span>
+            </div>
+            <div className="flex justify-between mt-1 pt-1 border-t border-[#2D3342]">
               <span className="text-gray-400">Risk</span>
-              <span className="text-right">{(hoveredRackData.risk_score * 100).toFixed(0)}%</span>
+              <span className={`font-mono font-bold ${hoveredRackData.risk_score > 0.7 ? 'text-red-400' : 'text-green-400'}`}>
+                {(hoveredRackData.risk_score * 100).toFixed(0)}%
+              </span>
             </div>
           </div>
         </Html>
       )}
 
       <ThermalLayer scene={scene} />
-      <CoolingLayer scene={scene} />
       <GNNLayer scene={scene} />
+      <StatsLayer scene={scene} />
     </group>
   );
 }

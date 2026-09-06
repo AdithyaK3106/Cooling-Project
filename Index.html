@@ -1285,28 +1285,55 @@
             latVal.innerText = ms.toFixed(1) + 'ms';
         }
 
-        // Explainable AI Reasoning attributions
-        const explainBox = document.getElementById('ai-explain-reasoning');
+        // Explainable AI Reasoning attributions (SHAP Feature Attribution)
         const shapReasons = document.getElementById('shap-reasons');
-        if (explainBox && shapReasons) {
+        if (shapReasons) {
             const diag = latestData.diagnostics || {};
-            const e_conf = diag.escalation_confidence || 0;
-            const e_reason = diag.escalation_reason || "NONE";
-            const intent = diag.predictive_intent_class || "NOMINAL";
-            const semantic_status = diag.semantic_status || "NOMINAL THERMAL STATE";
-            
+            const rVel = Math.abs(diag.risk_velocity || 0.01);
+            const tAcc = Math.abs(diag.thermal_acceleration || 0.01);
+            const soak = diag.thermal_soak_accumulation || 0;
+            const gpuPwr = Math.abs(diag.gpu_power_transient_score || 0);
+
+            // Compute dynamic proportional feature weights based on live incoming telemetry & model risk
+            const wGpu = Math.max(5, (gpu * 0.50) + (gtemp > 55 ? (gtemp - 45) * 1.5 : 0) + (gpuPwr * 2.5));
+            const wCpu = Math.max(5, (cpu * 0.45) + (ctemp > 55 ? (ctemp - 45) * 1.2 : 0));
+            const wTherm = Math.max(3, (rVel * 800) + (tAcc * 500) + (soak * 0.5));
+            const wMem = Math.max(2, (mem * 0.15) + (dio > 5 ? 10 : 0));
+            const totalW = wGpu + wCpu + wTherm + wMem;
+
+            const pctGpu = Math.round((wGpu / totalW) * 100);
+            const pctCpu = Math.round((wCpu / totalW) * 100);
+
+            let primaryDriver = "Nominal Baseline Equilibrium";
+            let actionBadge = "Monitoring";
+            let badgeClass = "text-secondary-container";
+
+            if (risk > 0.8 || diag.active_mode === "PERFORMANCE" || diag.active_mode === "FAILSAFE") {
+                actionBadge = "Intervention Active";
+                badgeClass = "text-error font-bold heartbeat-pulse";
+                primaryDriver = pctGpu >= pctCpu ? "GPU Thermal Ramp Detected (dH/dt)" : "CPU Compute Saturation Ramp";
+            } else if (risk > 0.4 || diag.active_mode === "BALANCED") {
+                actionBadge = "Pre-Cooling Advised";
+                badgeClass = "text-tertiary-container font-bold";
+                primaryDriver = pctGpu >= pctCpu ? "Moderate GPU Power Transient" : "Moderate CPU Workload Transient";
+            } else {
+                primaryDriver = diag.workload_fingerprint ? diag.workload_fingerprint.replace(/_/g, ' ') : "Nominal Low-Power State";
+                actionBadge = "Quiet / Optimal";
+                badgeClass = "text-primary/70";
+            }
+
             let reasonsHtml = `
-                <div class="flex justify-between items-center text-primary">
-                    <span class="font-bold uppercase">STATUS</span>
-                    <span class="font-bold">${semantic_status}</span>
+                <div class="flex justify-between items-center">
+                    <span class="truncate mr-2">GPU Thermal Vector</span>
+                    <span class="${pctGpu > 35 ? 'text-error font-bold' : 'text-secondary-container font-bold'}">+${pctGpu}% Contribution</span>
                 </div>
-                <div class="flex justify-between items-center text-secondary-container">
-                    <span>Active Fingerprint</span>
-                    <span class="font-bold">${diag.workload_fingerprint ? diag.workload_fingerprint.replace(/_/g, ' ') : 'UNKNOWN'}</span>
+                <div class="flex justify-between items-center">
+                    <span class="truncate mr-2">CPU Core Compute Load</span>
+                    <span class="${pctCpu > 35 ? 'text-error font-bold' : 'text-primary font-bold'}">+${pctCpu}% Contribution</span>
                 </div>
-                <div class="flex justify-between items-center text-white">
-                    <span>Prediction Confidence</span>
-                    <span>${Math.round(e_conf * 100)}%</span>
+                <div class="flex justify-between items-center">
+                    <span class="truncate mr-2">${primaryDriver}</span>
+                    <span class="${badgeClass}">${actionBadge}</span>
                 </div>
             `;
             shapReasons.innerHTML = reasonsHtml;

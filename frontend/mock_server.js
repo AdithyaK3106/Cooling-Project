@@ -21,20 +21,22 @@ app.get('/telemetry', (req, res) => {
       { time: new Date().toLocaleTimeString(), message: 'System running normally' },
       ...(spike ? [{ time: new Date().toLocaleTimeString(), message: 'Thermal spike detected!' }] : [])
     ],
-    racks: Array.from({ length: 7 }, (_, i) => {
-      // Create some sine wave oscillation based on the rack index
-      const oscillation = Math.sin(time + i) * 10;
-      const currentTemp = baseTemp + oscillation;
-      const risk = (currentTemp - 40) / 60; // 0 to 1
+    racks: Array.from({ length: 360 }, (_, i) => {
+      // Use the simulated load and offset applied by the user!
+      // Add a slight sine wave to make it feel alive, but respect the base load!
+      const oscillation = Math.sin(time * 0.5 + i) * 10; 
+      const currentTemp = 40 + (load / 100) * 40 + offset + oscillation + (spike ? 20 : 0);
+      
+      const risk = Math.max(0, Math.min(1, (currentTemp - 40) / 60)); // 0 to 1
       
       return {
         id: `A0${i + 1}`,
         telemetry: {
-          cpu_util: Math.max(0, Math.min(100, load + Math.sin(time * 2 + i) * 20)),
-          gpu_util: Math.max(0, Math.min(100, load + Math.cos(time * 2 + i) * 20)),
+          cpu_util: Math.max(0, Math.min(100, load + (Math.sin(time + i) * 10))),
+          gpu_util: Math.max(0, Math.min(100, load + (Math.cos(time + i) * 10))),
           cpu_temp: currentTemp
         },
-        risk_score: Math.max(0, Math.min(1, risk)),
+        risk_score: risk,
         cooling: {
           target_rpm: load * 50,
           actual_rpm: load * 50 + Math.random() * 100 - 50,
@@ -64,6 +66,6 @@ app.post('/simulation/controls', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(8000, () => {
+app.listen(8000, '0.0.0.0', () => {
   console.log('Mock server running on port 8000');
 });

@@ -6,7 +6,7 @@ import puppeteer from 'puppeteer';
   
   page.on('console', msg => console.log('PAGE LOG:', msg.text()));
   
-  await page.goto('http://127.0.0.1:5173', { waitUntil: 'networkidle2' });
+  await page.goto('http://localhost:5173', { waitUntil: 'networkidle2' });
   await new Promise(r => setTimeout(r, 5000));
   
   await browser.close();

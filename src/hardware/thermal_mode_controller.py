@@ -26,7 +26,7 @@ class ThermalModeController:
         # llt_backoff_sec instead of every reconcile(). Must be set before the
         # initial hardware query below, which reads these attributes.
         self.llt_unresponsive = False
-        self.llt_backoff_sec = 60.0
+        self.llt_backoff_sec = 5.0
         self.last_llt_failure_time = 0.0
 
         # Query initial hardware mode on startup to avoid boot desync
@@ -62,14 +62,22 @@ class ThermalModeController:
             )
             if result.returncode == 0:
                 output = result.stdout.strip().upper()
+                self.llt_unresponsive = False
+                self.llt_response_status = "OK"
                 if "QUIET" in output:
                     return "QUIET"
                 elif "BALANCE" in output:
                     return "BALANCED"
                 elif "PERFORMANCE" in output:
                     return "PERFORMANCE"
+            else:
+                self.llt_unresponsive = True
+                self.last_llt_failure_time = time.time()
+                self.llt_response_status = f"ERROR: {result.stderr.strip()}"
         except Exception as e:
             logger.debug(f"Hardware verify failed: {e}")
+            self.llt_unresponsive = True
+            self.last_llt_failure_time = time.time()
             
         return self.actual_hardware_mode
 

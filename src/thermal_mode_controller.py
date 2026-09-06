@@ -37,9 +37,9 @@ class ThermalModeController:
     """
     
     MIN_MODE_HOLD_SECONDS = 15.0
-    PERFORMANCE_ENTER_THRESHOLD = 0.85
-    PERFORMANCE_EXIT_THRESHOLD = 0.70
-    FAILSAFE_THRESHOLD = 0.95
+    PERFORMANCE_ENTER_THRESHOLD = 0.45
+    PERFORMANCE_EXIT_THRESHOLD = 0.35
+    FAILSAFE_THRESHOLD = 0.70
     
     COOLDOWN_MAX_SWITCHES = 5
     COOLDOWN_WINDOW_SECONDS = 120.0
@@ -247,7 +247,7 @@ class ThermalModeController:
 
             # 4. Predictive Pre-cooling
             predictive_pre_cooling = False
-            if workload_phase == WorkloadPhase.INITIAL_RAMP and gpu_transient > 15.0 and self.risk_velocity > 0.05:
+            if (workload_phase in (WorkloadPhase.INITIAL_RAMP, WorkloadPhase.SUSTAINED_LOAD)) and (gpu_transient > 10.0 or self.risk_velocity > 0.02):
                 predictive_pre_cooling = True
                 self.semantic_status = "PREDICTIVE PRE-COOLING ACTIVE"
 
@@ -260,27 +260,29 @@ class ThermalModeController:
             if self.active_mode == ThermalMode.FAILSAFE:
                 active_hold_duration = 0.0
             elif self.active_mode == ThermalMode.PERFORMANCE:
-                active_hold_duration = 30.0
+                active_hold_duration = 25.0
             elif self.active_mode in (ThermalMode.QUIET, ThermalMode.SILENT_RECOVERY):
                 active_hold_duration = 10.0
                 
             hold_expired = (current_time - self.last_switch_time) >= active_hold_duration
             
             # Heat soak forces earlier cooling triggers
-            soak_penalty = min(0.15, self.thermal_soak_accumulation * 0.001)
-            enter_thresh = max(0.50, self.PERFORMANCE_ENTER_THRESHOLD - soak_penalty)
-            exit_thresh = max(0.40, self.PERFORMANCE_EXIT_THRESHOLD - soak_penalty)
+            soak_penalty = min(0.10, self.thermal_soak_accumulation * 0.001)
+            enter_thresh = max(0.38, self.PERFORMANCE_ENTER_THRESHOLD - soak_penalty)
+            exit_thresh = max(0.28, self.PERFORMANCE_EXIT_THRESHOLD - soak_penalty)
 
             if self.active_mode in (ThermalMode.QUIET, ThermalMode.SILENT_RECOVERY, ThermalMode.BALANCED):
                 if smoothed_risk >= self.FAILSAFE_THRESHOLD:
                     switch_target = ThermalMode.FAILSAFE
                     reason = "CRITICAL RISK ESCALATION"
-                elif (smoothed_risk > enter_thresh or predictive_pre_cooling) and workload_phase != WorkloadPhase.BACKGROUND_NOISE:
+                elif (smoothed_risk >= enter_thresh or predictive_pre_cooling or workload_phase == WorkloadPhase.SUSTAINED_LOAD) and workload_phase != WorkloadPhase.BACKGROUND_NOISE:
                     switch_target = ThermalMode.PERFORMANCE
                     reason = "SUSTAINED LOAD DETECTED"
                     if predictive_pre_cooling:
                         reason = "PREDICTIVE GPU TRANSIENT"
-                elif smoothed_risk > 0.45 and self.active_mode in (ThermalMode.QUIET, ThermalMode.SILENT_RECOVERY):
+                    elif workload_phase == WorkloadPhase.SUSTAINED_LOAD:
+                        reason = "GAMING / 3D LOAD DETECTED"
+                elif (smoothed_risk > 0.30 or workload_phase == WorkloadPhase.INITIAL_RAMP) and self.active_mode in (ThermalMode.QUIET, ThermalMode.SILENT_RECOVERY):
                     switch_target = ThermalMode.BALANCED
                     reason = "MODERATE LOAD ESCALATION"
                     
@@ -288,25 +290,25 @@ class ThermalModeController:
                 if smoothed_risk >= self.FAILSAFE_THRESHOLD:
                     switch_target = ThermalMode.FAILSAFE
                     reason = "CRITICAL RISK ESCALATION"
-                elif smoothed_risk < exit_thresh and workload_phase in (WorkloadPhase.COOLDOWN, WorkloadPhase.IDLE):
+                elif (smoothed_risk < exit_thresh and workload_phase not in (WorkloadPhase.SUSTAINED_LOAD,)) and (workload_phase in (WorkloadPhase.COOLDOWN, WorkloadPhase.IDLE)):
                     switch_target = ThermalMode.SILENT_RECOVERY
                     reason = "WORKLOAD CONCLUDED - SILENT RECOVERY"
-                elif smoothed_risk < exit_thresh:
+                elif smoothed_risk < exit_thresh and workload_phase not in (WorkloadPhase.SUSTAINED_LOAD,):
                     switch_target = ThermalMode.BALANCED
                     reason = "LOAD RELAXED"
 
             elif self.active_mode == ThermalMode.FAILSAFE:
-                if smoothed_risk < 0.70:
+                if smoothed_risk < 0.60:
                     switch_target = ThermalMode.PERFORMANCE
                     reason = "RECOVERY SUCCESSFUL"
                     
             elif self.active_mode == ThermalMode.BALANCED:
-                 if smoothed_risk < exit_thresh - 0.10:
+                 if smoothed_risk < 0.28 and workload_phase == WorkloadPhase.IDLE:
                      switch_target = ThermalMode.QUIET
                      reason = "EQUILIBRIUM ACHIEVED"
 
             elif self.active_mode == ThermalMode.SILENT_RECOVERY:
-                if smoothed_risk < 0.30 and self.thermal_soak_accumulation < 50:
+                if smoothed_risk < 0.28 and self.thermal_soak_accumulation < 50:
                     switch_target = ThermalMode.QUIET
                     reason = "EQUILIBRIUM ACHIEVED"
 
@@ -361,10 +363,10 @@ class ThermalModeController:
         # Robust True Idle Detection (Low Package Power + Low dGPU power/util + Stable Thermals)
         is_safe_idle = (cpu < 25 and gpu < 10 and cpu_p < 20.0 and gpu_p < 15.0 and max(cpu_t, gpu_t) < 62.0)
 
-        if gpu > 70:
+        if gpu > 35 or gpu_p > 25.0:
             wp_phase = WorkloadPhase.SUSTAINED_LOAD
-            fingerprint = "SUSTAINED_GPU_RENDER"
-        elif cpu > 70 and gpu < 30:
+            fingerprint = "GAMING_GPU_LOAD" if gpu > 45 else "SUSTAINED_GPU_RENDER"
+        elif cpu > 55 and gpu < 25:
             wp_phase = WorkloadPhase.SUSTAINED_LOAD
             fingerprint = "CPU_COMPILE"
         elif is_safe_idle:

@@ -26,9 +26,9 @@ export function CoolingLayer({ scene }: { scene: THREE.Object3D }) {
   return (
     <>
       {activeCoolingRacks.map((pos, i) => (
-        <mesh key={i} position={[pos.x, pos.y + 2, pos.z]}>
-          <cylinderGeometry args={[0.5, 0.5, 4, 8]} />
-          <meshBasicMaterial color="#6C8FA0" transparent opacity={0.4} wireframe />
+        <mesh key={i} position={[pos.x, pos.y + 1, pos.z]}>
+          <cylinderGeometry args={[0.3, 0.3, 1.5, 6]} />
+          <meshBasicMaterial color="#00aaff" transparent opacity={0.15} wireframe />
         </mesh>
       ))}
     </>

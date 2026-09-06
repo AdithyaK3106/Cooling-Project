@@ -1,0 +1,8 @@
+{
+  "repo": "C:\\Users\\urbra\\OneDrive\\Desktop\\Projects\\Cooling project",
+  "chronos_sqlite": "C:\\Users\\urbra\\OneDrive\\Desktop\\Projects\\Cooling project\\.chronos\\chronos.db",
+  "chronos_kuzu_path": "C:\\Users\\urbra\\OneDrive\\Desktop\\Projects\\Cooling project\\.chronos\\graph",
+  "llm_model": "openrouter/anthropic/claude-3-haiku",
+  "auto_triggers": "1",
+  "rule_backend": "git-native"
+}

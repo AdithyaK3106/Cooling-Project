@@ -27,6 +27,8 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
           else if (rackData.risk_score >= 0.4) targetColor = COLORS.amber;
         }
 
+        console.log(`ThermalLayer checking rack ${child.userData.rackId}, data exists: ${!!rackData}`);
+
         console.log(`ThermalLayer: Rack ${child.userData.rackId} matched. Data exists: ${!!rackData}, Color:`, targetColor);
 
         child.traverse((mesh: any) => {
@@ -39,6 +41,12 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
                 ? materials.map((m: any) => m.clone())
                 : mesh.material.clone();
               mesh.userData.uniqueMaterial = true;
+              
+              // Add black outlines as requested by user
+              const edges = new THREE.EdgesGeometry(mesh.geometry);
+              const lineMat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
+              const line = new THREE.LineSegments(edges, lineMat);
+              mesh.add(line);
             }
 
             const activeMats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
@@ -46,12 +54,9 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
             activeMats.forEach((mat: any) => {
               if (mat.emissive !== undefined) {
                 mat.emissive.copy(targetColor);
-                mat.emissiveIntensity = rackData ? 1.0 : 0.0;
-                mat.needsUpdate = true;
-              } else if (mat.color !== undefined) {
-                mat.color.copy(targetColor);
-                mat.needsUpdate = true;
+                mat.emissiveIntensity = rackData ? 0.2 + rackData.risk_score * 1.5 : 0.0;
               }
+              mat.needsUpdate = true;
             });
           }
         });

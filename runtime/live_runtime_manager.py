@@ -77,6 +77,7 @@ class LiveRuntimeManager:
             self.events_log.pop(0)
 
     def start(self):
+        self.health_monitor.reset_baseline()
         self.running = True
         self._loop_thread = threading.Thread(target=self._runtime_loop)
         self._loop_thread.daemon = True

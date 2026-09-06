@@ -47,15 +47,11 @@ def run_demo():
     print("[*] Launching Mission Control Dashboard at: http://localhost:3000/")
     webbrowser.open("http://localhost:3000/")
     
-    print("[*] Dashboard launched. Running 60-second deterministic orchestration timeline loop...")
-    print("[*] The timeline will automatically cycle through:")
-    print("    1. Idle State")
-    print("    2. Heavy Workload Detection (Predictive Risk Spikes)")
-    print("    3. Predictive Ramping (Leading Reactivity)")
-    print("    4. Thermal Stabilization (Reactive Lags)")
-    print("    5. Recovery & Idle")
+    print("[*] Dashboard launched. Running live local telemetry orchestration loop...")
+    print("[*] The system is now reading local hardware telemetry and dynamically")
+    print("    adjusting Lenovo Legion Toolkit thermal profiles in real-time.")
     print("------------------------------------------------------")
-    print("[*] Press Ctrl+C to stop the demonstration.")
+    print("[*] Press Ctrl+C to stop the orchestration.")
     
     try:
         # Keep running

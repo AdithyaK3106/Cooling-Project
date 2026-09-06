@@ -10,6 +10,12 @@ class RuntimeHealthMonitor:
         self.start_memory = self.process.memory_info().rss
         self.state = "HEALTHY"
 
+    def reset_baseline(self):
+        """Reset memory and timing baselines after model loading completes."""
+        self.start_memory = self.process.memory_info().rss
+        self.last_inference_time = time.time()
+        self.last_telemetry_time = time.time()
+
     def mark_inference(self):
         self.last_inference_time = time.time()
 
