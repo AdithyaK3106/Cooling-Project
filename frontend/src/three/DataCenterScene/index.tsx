@@ -5,6 +5,10 @@ import { CameraController } from '../Camera';
 
 import { useUiStore } from '../../stores/uiStore';
 
+import { ThermalLayer } from '../Layers/ThermalLayer';
+import { CoolingLayer } from '../Layers/CoolingLayer';
+import { GNNLayer } from '../Layers/GNNLayer';
+
 function Model() {
   const { scene } = useGLTF('/models/room_server.glb');
   const setSelectedRackId = useUiStore((state) => state.setSelectedRackId);
@@ -21,23 +25,28 @@ function Model() {
   }, [scene]);
 
   return (
-    <primitive 
-      object={scene} 
-      onClick={(e: any) => {
-        e.stopPropagation();
-        // Traverse up to find the rack node
-        let node = e.object;
-        while (node && node.name !== 'rack' && node.parent) {
-          node = node.parent;
-        }
-        if (node && node.name === 'rack') {
-          setSelectedRackId(node.userData.rackId);
-        } else {
-          setSelectedRackId(null);
-        }
-      }}
-      onPointerMissed={() => setSelectedRackId(null)}
-    />
+    <group>
+      <primitive 
+        object={scene} 
+        onClick={(e: any) => {
+          e.stopPropagation();
+          let node = e.object;
+          while (node && node.name !== 'rack' && node.parent) {
+            node = node.parent;
+          }
+          if (node && node.name === 'rack') {
+            setSelectedRackId(node.userData.rackId);
+          } else {
+            setSelectedRackId(null);
+          }
+        }}
+        onPointerMissed={() => setSelectedRackId(null)}
+      />
+      
+      <ThermalLayer scene={scene} />
+      <CoolingLayer scene={scene} />
+      <GNNLayer scene={scene} />
+    </group>
   );
 }
 
