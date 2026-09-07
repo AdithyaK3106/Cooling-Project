@@ -17,6 +17,16 @@ const TOTAL_SEGMENTS_PER_EDGE = SEGMENTS_PER_EDGE + PULSES_PER_EDGE * CHEVRON_SE
 const TOTAL_VERTICES = MAX_EDGES * TOTAL_SEGMENTS_PER_EDGE * 2;
 const MAX_PULSES = MAX_EDGES * PULSES_PER_EDGE;
 
+// Existing risk color thresholds used across the application (RacksTab, OverviewTab, KeyPerformancePanel):
+// - HIGH / CRITICAL: risk_score > 0.55 -> Red
+// - MEDIUM / MODERATE: risk_score >= 0.35 && <= 0.55 -> Amber/Yellow
+// - LOW: risk_score < 0.35 -> Cool Blue/Cyan
+const RISK_RACK_COLORS = {
+  low: new THREE.Color('#06b6d4'),     // Cool cyan / sky blue (restrained)
+  medium: new THREE.Color('#f59e0b'),  // Amber / warm yellow
+  high: new THREE.Color('#ef4444'),    // Red
+};
+
 interface TopologyEdge {
   source: string;
   target: string;
@@ -41,6 +51,50 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
     });
     return map;
   }, [scene]);
+
+  // 1b. Cache rack meshes and clone materials once for dynamic risk color mapping
+  const rackMeshesMap = useMemo(() => {
+    const map = new Map<string, THREE.Mesh[]>();
+    if (!scene) return map;
+
+    scene.traverse((child) => {
+      if (child.userData && child.userData.rackId) {
+        const meshes: THREE.Mesh[] = [];
+        child.traverse((mesh: any) => {
+          if (mesh.isMesh && mesh.material) {
+            if (!mesh.userData.__gnnRiskMaterialCloned && !mesh.userData.uniqueMaterial) {
+              mesh.material = Array.isArray(mesh.material)
+                ? mesh.material.map((m: any) => m.clone())
+                : mesh.material.clone();
+              mesh.userData.__gnnRiskMaterialCloned = true;
+            }
+            meshes.push(mesh);
+          }
+        });
+        map.set(child.userData.rackId, meshes);
+      }
+    });
+
+    return map;
+  }, [scene]);
+
+  // Reset rack emissives on unmount (e.g., when switching from RISK to AIRFLOW)
+  useEffect(() => {
+    return () => {
+      rackMeshesMap.forEach((meshes) => {
+        meshes.forEach((mesh) => {
+          const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+          mats.forEach((mat: any) => {
+            if (mat.emissive !== undefined) {
+              mat.emissive.set(0x000000);
+              mat.emissiveIntensity = 0;
+              mat.needsUpdate = true;
+            }
+          });
+        });
+      });
+    };
+  }, [rackMeshesMap]);
 
   // 2. Build edges matching exact existing graph topology and paths
   const edges = useMemo(() => {
@@ -116,7 +170,7 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
   }, [edges.length]);
 
   // 4. Animation loop: update sinusoidal traveling heat waves and moving directional energy pulses
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     const posArray = posAttr.array as Float32Array;
     const colArray = colAttr.array as Float32Array;
@@ -362,6 +416,51 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
 
     posAttr.needsUpdate = true;
     colAttr.needsUpdate = true;
+
+    // 5. Dynamic rack risk-state color mapping with smooth lerp transitions (~0.6-0.8s)
+    const lerpFactor = Math.min(1.0, (delta || 0.016) * 2.5);
+
+    rackMeshesMap.forEach((meshes, rackId) => {
+      const numMatch = rackId.match(/\d+/);
+      const rackNum = numMatch ? parseInt(numMatch[0], 10) : -1;
+      const rackData = telemetry?.racks?.find((r: any) => 
+        r.id === rackId || 
+        (rackNum > 0 && parseInt(String(r.id || '').replace(/\D+/g, ''), 10) === rackNum)
+      );
+      const risk = rackData?.risk_score ?? 0;
+
+      // Reuses existing fleet classification (RacksTab, OverviewTab, KeyPerformancePanel):
+      // High/Critical: risk > 0.55 -> Red
+      // Medium/Moderate: risk >= 0.35 && <= 0.55 -> Amber/Yellow
+      // Low: risk < 0.35 -> Cool Blue/Cyan
+      let targetColor = RISK_RACK_COLORS.low;
+      let targetIntensity = 0.20;
+
+      if (risk > 0.55) {
+        targetColor = RISK_RACK_COLORS.high;
+        targetIntensity = 0.52;
+      } else if (risk >= 0.35) {
+        targetColor = RISK_RACK_COLORS.medium;
+        targetIntensity = 0.35;
+      }
+
+      for (let m = 0; m < meshes.length; m++) {
+        const mesh = meshes[m];
+        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+        for (let j = 0; j < mats.length; j++) {
+          const mat = mats[j] as any;
+          if (mat.emissive !== undefined) {
+            mat.emissive.lerp(targetColor, lerpFactor);
+            mat.emissiveIntensity = THREE.MathUtils.lerp(
+              mat.emissiveIntensity !== undefined ? mat.emissiveIntensity : 0,
+              targetIntensity,
+              lerpFactor
+            );
+            mat.needsUpdate = true;
+          }
+        }
+      }
+    });
   });
 
   return (
