@@ -47,6 +47,15 @@ export function togglePauseSimulation() {
   notifyConfigListeners();
 }
 
+export function stepSimulation() {
+  const wasPaused = isPaused;
+  isPaused = false;
+  tickSimulation();
+  isPaused = wasPaused;
+  addEvent(`Stepped forward +1 tick (Epoch ${epoch})`, 'ACTION', 'CONTROLS');
+  notifyConfigListeners();
+}
+
 export function setSimulationParams(newLoad: number, newNoise: number, newDissipation = 1.0, newThermalMult = 1.0) {
   load = Math.max(10, Math.min(100, newLoad));
   noise = Math.max(0, Math.min(50, newNoise));
@@ -136,11 +145,11 @@ function generateSyntheticWorkload(rackIdx: number, baseLoad: number, noiseFacto
   const loadScale = baseLoad / 0.35;
   const rackBias = [1.25, 0.88, 1.12, 0.78, 1.35][rackIdx % 5] || 1.0;
 
-  // Add organic sine-wave + random fluctuation so values fluctuate visibly every tick
-  const t = Date.now() / 1000;
+  // Workload math depends strictly on simulation epoch tick count so pausing freezes time
+  const t = epoch * 0.15;
   const sine1 = Math.sin(t * 0.9 + rackIdx * 1.3);
   const sine2 = Math.cos(t * 1.5 + rackIdx * 0.7);
-  const n = () => (Math.random() - 0.5) * noiseFactor * 3.0;
+  const n = () => (Math.sin(epoch * 3.1 + rackIdx * 2.7) * noiseFactor * 2.0);
 
   let cpu = Math.min(99, Math.max(10, traceCpu * 100 * loadScale * rackBias + sine1 * 14 + n() * 6));
   let gpu = Math.min(99, Math.max(5, traceGpu * 100 * loadScale * rackBias + sine2 * 16 + n() * 6));

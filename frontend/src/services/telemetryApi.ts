@@ -27,11 +27,19 @@ export async function getTelemetry(): Promise<any> {
   return fetchApi<any>('/telemetry');
 }
 
-export function useTelemetry(pollingIntervalMs = 100) {
+export function useTelemetry(overrideInterval?: number) {
+  const mode = localStorage.getItem('thervo_mode') || 'SIMULATED';
+  const config = getSimulationConfig();
+  
+  let refetchInterval: number | false = overrideInterval ?? 200;
+  if (mode === 'SIMULATED') {
+    refetchInterval = config.isPaused ? false : config.simSpeedMs;
+  }
+
   return useQuery({
     queryKey: TELEMETRY_QUERY_KEY,
     queryFn: getTelemetry,
-    refetchInterval: pollingIntervalMs, // 10Hz telemetry ticks
+    refetchInterval,
     retry: 3,
   });
 }

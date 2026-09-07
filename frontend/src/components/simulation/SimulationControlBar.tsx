@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { 
   Play, Pause, Flame, Zap, RotateCcw, 
-  Thermometer, Activity, Sliders, Wind, FastForward
+  Thermometer, Activity, Sliders, Wind, FastForward, SkipForward
 } from 'lucide-react';
 import { 
   getSimulationConfig, 
   setSimulationSpeed, 
   togglePauseSimulation, 
+  stepSimulation,
   setSimulationParams, 
   injectGlobalSpike, 
   injectRandomSpike, 
@@ -26,11 +27,12 @@ export function SimulationControlBar() {
   }, []);
 
   const speeds = [
-    { label: '0.25x', ms: 2000, desc: '2.0s tick (Ultra Slow)' },
-    { label: '0.5x', ms: 1000, desc: '1.0s tick (Slow)' },
-    { label: '1.0x', ms: 500, desc: '0.5s tick (Normal)' },
-    { label: '2.0x', ms: 250, desc: '0.25s tick (Fast)' },
-    { label: '4.0x', ms: 100, desc: '0.1s tick (Turbo)' },
+    { label: '0.1x', ms: 5000, desc: '5.0s per tick (Super Slow)' },
+    { label: '0.25x', ms: 2000, desc: '2.0s per tick (Very Slow)' },
+    { label: '0.5x', ms: 1000, desc: '1.0s per tick (Slow)' },
+    { label: '1.0x', ms: 500, desc: '0.5s per tick (Standard)' },
+    { label: '2.0x', ms: 250, desc: '0.25s per tick (Fast)' },
+    { label: '4.0x', ms: 100, desc: '0.1s per tick (Turbo)' },
   ];
 
   return (
@@ -43,17 +45,17 @@ export function SimulationControlBar() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-white tracking-wide">Simulation & Thermal Physics Controller</h3>
+              <h3 className="text-sm font-bold text-white tracking-wide">Simulation Physics & Speed Master Controller</h3>
               <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-full border ${
                 config.isPaused 
                   ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' 
                   : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40 animate-pulse'
               }`}>
-                {config.isPaused ? 'PAUSED' : `RUNNING (${(1000 / config.simSpeedMs).toFixed(1)} Hz)`}
+                {config.isPaused ? 'PAUSED' : `RUNNING (${(1000 / config.simSpeedMs).toFixed(1)} Hz — ${config.simSpeedMs}ms step)`}
               </span>
             </div>
             <p className="text-xs text-gray-400">
-              Control simulation execution speed, thermal heat generation curves, and fan cooling dissipation rates in real-time.
+              Set exact simulation step speed (up to 5 seconds per tick), freeze physics, step tick-by-tick, or adjust thermal heat load.
             </p>
           </div>
         </div>
@@ -63,7 +65,7 @@ export function SimulationControlBar() {
           {/* Play/Pause Button */}
           <button
             onClick={() => togglePauseSimulation()}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 border ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-md active:scale-95 border ${
               config.isPaused
                 ? 'bg-emerald-600/30 text-emerald-300 border-emerald-500/50 hover:bg-emerald-600/50'
                 : 'bg-amber-600/30 text-amber-300 border-amber-500/50 hover:bg-amber-600/50'
@@ -71,6 +73,15 @@ export function SimulationControlBar() {
           >
             {config.isPaused ? <Play size={14} className="fill-current" /> : <Pause size={14} className="fill-current" />}
             {config.isPaused ? 'Resume Simulation' : 'Pause Simulation'}
+          </button>
+
+          {/* Step Forward Button */}
+          <button
+            onClick={() => stepSimulation()}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-cyan-600/30 text-cyan-300 border border-cyan-500/50 hover:bg-cyan-600/50 transition-all shadow-md active:scale-95"
+            title="Step simulation forward by exactly 1 tick"
+          >
+            <SkipForward size={14} /> Step +1 Tick
           </button>
 
           {/* Toggle Expand Sliders */}
@@ -97,7 +108,7 @@ export function SimulationControlBar() {
                 {config.simSpeedMs}ms / tick
               </span>
             </div>
-            <div className="grid grid-cols-5 gap-1 mt-1">
+            <div className="grid grid-cols-6 gap-1 mt-1">
               {speeds.map((s) => {
                 const isActive = config.simSpeedMs === s.ms;
                 return (
