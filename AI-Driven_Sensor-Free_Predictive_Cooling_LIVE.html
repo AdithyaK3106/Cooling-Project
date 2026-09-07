@@ -2772,7 +2772,7 @@ function renderFloorPlan() {
         <span class="fru-id">${rack.name.replace('RACK-', '')}</span>
         <span class="fru-badge ${ec.badgeClass}">${ec.label}</span>
       </div>
-      <div class="fru-risk-val">${(rack.riskScore * 100).toFixed(0)}%</div>
+      <div class="fru-risk-val">${Math.round(rack.riskScore * 100)}%</div>
       ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="fru-cooling">❄ COOLING ACTIVE</span>' : ''}
     `;
 
