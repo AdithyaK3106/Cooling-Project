@@ -365,6 +365,7 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
   });
 
   return (
+    <>
       {/* 1. Base Subtle Guide Arch (Clean Wireframe Baseline) */}
       {edges.map((edge) => (
         <Line
