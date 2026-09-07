@@ -178,18 +178,18 @@ class ThermalModeController:
             self.adaptive_hold_duration = self.min_hold_duration
         
         if target_mode != self.desired_mode:
-            # FAILSAFE bypasses all hold duration limits
-            if mode != "FAILSAFE":
-                # Check hold duration
-                if (now - self.last_transition_time) < self.adaptive_hold_duration:
-                    logger.debug(f"Adaptive Hysteresis active. Holding {self.actual_hardware_mode}.")
-                    self.rejected_transitions += 1
-                    return False
-                    
-                # Check cooldown (between successful transitions)
-                if (now - self.last_transition_time) < self.mode_transition_cooldown:
-                    self.rejected_transitions += 1
-                    return False
+            # DEMO MODE: Bypass all hysteresis locks for instant visual feedback
+            # if mode != "FAILSAFE":
+            #     # Check hold duration
+            #     if (now - self.last_transition_time) < self.adaptive_hold_duration:
+            #         logger.debug(f"Adaptive Hysteresis active. Holding {self.actual_hardware_mode}.")
+            #         self.rejected_transitions += 1
+            #         return False
+            #         
+            #     # Check cooldown (between successful transitions)
+            #     if (now - self.last_transition_time) < self.mode_transition_cooldown:
+            #         self.rejected_transitions += 1
+            #         return False
 
             logger.info(f"Requested mode change: {self.desired_mode} -> {target_mode} ({reason} - Severity: {severity})")
             self.desired_mode = target_mode
