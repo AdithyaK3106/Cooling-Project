@@ -11,6 +11,7 @@ from datetime import datetime
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.fan_controller import HardwareFanController
+from src.hardware.thermal_mode_controller import ThermalModeController
 
 # Configure Node 1 IP here (will be the Personal Hotspot IP, usually 192.168.137.1)
 NODE1_IP = "192.168.137.1"
@@ -66,6 +67,7 @@ def main():
     print(f"[*] Safe-Command Fallback Timeout: {FALLBACK_TIMEOUT}s")
     
     fan_controller = HardwareFanController()
+    thermal_controller = ThermalModeController()
     last_valid_command_time = time.monotonic()
     is_fallback = False
     
@@ -92,6 +94,16 @@ def main():
                     # In real life this calls Toolkit. Here we use our HardwareFanController
                     fan_controller.write_target(risk_score=data.get("risk_score", 0.5), target_percent=fan_target, policy_state=mode, is_stabilizing=False)
                     
+                    # Also actually apply the Lenovo toolkit mode!
+                    toolkit_mode = "BALANCED"
+                    if fan_target > 70:
+                        toolkit_mode = "PERFORMANCE"
+                    elif fan_target < 30:
+                        toolkit_mode = "QUIET"
+                        
+                    thermal_controller.set_mode(toolkit_mode, reason="THERVO_SYNC", severity="HIGH" if toolkit_mode == "PERFORMANCE" else "LOW")
+                    thermal_controller.reconcile()
+                    
             else:
                 raise Exception(f"HTTP {response.status_code}")
                 
@@ -106,6 +118,8 @@ def main():
                 is_fallback = True
                 # Call fan_controller with a safe state
                 fan_controller.write_target(risk_score=1.0, target_percent=100.0, policy_state="FALLBACK", is_stabilizing=False)
+                thermal_controller.set_mode("FAILSAFE", reason="DISCONNECT_TIMEOUT", severity="CRITICAL")
+                thermal_controller.reconcile()
                 
         time.sleep(1.0)
 
