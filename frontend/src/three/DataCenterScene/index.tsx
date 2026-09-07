@@ -110,8 +110,28 @@ function Model() {
     const nodesToRemove: THREE.Object3D[] = [];
 
     scene.traverse((child: any) => {
-      // Hide roof/ceiling so we can see inside and click
-      if (child.name.toLowerCase().includes('roof') || child.name.toLowerCase().includes('ceiling') || child.name.toLowerCase().includes('top plane')) {
+      // Keep only the clean data-center floor (bottom plane tiles) and hide all old white room boundaries
+      // (vertical walls, ceilings, doors, glass, windows, columns, and decorative plants)
+      // leaving only the clean floor and the new black industrial perimeter wall enclosing the racks
+      const lowerName = child.name.toLowerCase();
+      const parentLowerName = child.parent?.name?.toLowerCase() || '';
+
+      if (child.name.startsWith('Wall_') && child.type === 'Object3D') {
+        child.visible = true;
+      } else if (lowerName.includes('bottom_plane') || lowerName.includes('floor')) {
+        child.visible = true;
+      } else if (
+        lowerName.includes('interior') || lowerName.includes('exterior') || lowerName.includes('top_plane') ||
+        lowerName.includes('roof') || lowerName.includes('ceiling') || lowerName.includes('top plane') ||
+        lowerName.includes('wall') || parentLowerName.includes('wall') ||
+        lowerName.includes('glass') || parentLowerName.includes('glass') ||
+        lowerName.includes('door') || parentLowerName.includes('door') ||
+        lowerName.includes('window') || parentLowerName.includes('window') ||
+        lowerName.includes('column') || parentLowerName.includes('column') ||
+        lowerName.includes('plant') || parentLowerName.includes('plant') ||
+        lowerName.includes('flowerpot') || parentLowerName.includes('flowerpot') ||
+        lowerName.includes('metal') || parentLowerName.includes('metal')
+      ) {
         child.visible = false;
       }
 
