@@ -23,8 +23,8 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
     if (!telemetry || !telemetry.topology) return [];
 
     return telemetry.topology
-      .filter((edge) => positions.has(edge.source) && positions.has(edge.target))
-      .map((edge) => {
+      .filter((edge: any) => positions.has(edge.source) && positions.has(edge.target))
+      .map((edge: any) => {
         const start = positions.get(edge.source)!;
         const end = positions.get(edge.target)!;
         
@@ -44,7 +44,7 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
 
   return (
     <>
-      {edges.map((edge, i) => (
+      {edges.map((edge: any, i: number) => (
         <Line 
           key={i} 
           points={edge.points} 

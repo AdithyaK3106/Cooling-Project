@@ -8,6 +8,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { ThermalLayer } from '../Layers/ThermalLayer';
 import { GNNLayer } from '../Layers/GNNLayer';
 import { AirflowLayer } from '../Layers/AirflowLayer';
+import { StatsLayer } from '../Layers/StatsLayer';
 import { Html } from '@react-three/drei';
 import { useTelemetry } from '../../services/telemetryApi';
 import * as THREE from 'three';
@@ -98,7 +99,7 @@ function Model() {
   }, [hoveredRackId, scene]);
 
   const hoveredRackData = React.useMemo(() => {
-    return telemetry?.racks.find((r) => r.id === hoveredRackId);
+    return telemetry?.racks.find((r: any) => r.id === hoveredRackId);
   }, [telemetry, hoveredRackId]);
 
   return (
@@ -160,6 +161,7 @@ function Model() {
 
       {isReady && (
         <>
+          <StatsLayer scene={scene} />
           {activeLayer === 'THERMAL' && <ThermalLayer scene={scene} />}
           {activeLayer === 'RISK' && <GNNLayer scene={scene} />}
           {activeLayer === 'AIRFLOW' && <AirflowLayer />}

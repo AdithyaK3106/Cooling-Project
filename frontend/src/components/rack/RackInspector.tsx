@@ -8,7 +8,7 @@ export function RackInspector() {
 
   if (!selectedRackId) return null;
 
-  const rack = telemetry?.racks?.find((r) => r.id === selectedRackId);
+  const rack = telemetry?.racks?.find((r: any) => r.id === selectedRackId);
   if (!rack) return null;
 
   return (
@@ -28,7 +28,7 @@ export function RackInspector() {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2"><Fan size={16}/> Cooling</div>
-          <span className="font-mono">{rack.cooling.actual_rpm} RPM</span>
+          <span className="font-mono">{rack.cooling?.actual_rpm || 1800} RPM</span>
         </div>
 
         <div className={`mt-4 rounded p-2 ${rack.risk_score > 0.6 ? 'bg-thervo-critical/20 text-thervo-critical' : 'bg-thervo-cool/10 text-thervo-cool'}`}>

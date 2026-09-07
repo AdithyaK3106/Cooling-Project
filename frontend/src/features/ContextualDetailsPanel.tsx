@@ -1,7 +1,7 @@
 import { useTelemetry } from '../services/telemetryApi';
 import { useUiStore } from '../stores/uiStore';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
-import { Activity, Thermometer, Fan, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Activity, Thermometer, Fan, AlertTriangle, CheckCircle2, Sparkles } from 'lucide-react';
 
 export function ContextualDetailsPanel() {
   const selectedRackId = useUiStore((state) => state.selectedRackId);
@@ -49,13 +49,36 @@ export function ContextualDetailsPanel() {
         <MetricRow icon={<Thermometer size={16}/>} label="Temperature" value={rack.telemetry.cpu_temp} unit="°C" highlight={isDanger || isWarning} />
       </div>
 
-      <div className="mt-4 pt-4 border-t border-white/10 space-y-4 font-mono text-sm">
-        <div className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">AI Insights</div>
-        <MetricRow icon={<Activity size={16}/>} label="XGBoost Pred" value={rack.ai_insights?.xgb_pred ? rack.ai_insights.xgb_pred * 100 : 0} unit="%" />
-        <MetricRow icon={<Activity size={16}/>} label="GNN Embed" value={rack.ai_insights?.gnn_embed ? rack.ai_insights.gnn_embed * 100 : 0} unit="%" format={(v: number) => v.toFixed(2)} />
+      {/* Explainable AI (XAI) Cooling Rationale */}
+      <div className="mt-4 pt-4 border-t border-white/10">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-xs font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Sparkles size={14} /> XAI Cooling Rationale
+          </div>
+          <span className="text-[10px] font-mono bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded border border-cyan-500/30">
+            {rack.ai_insights?.primary_driver || 'Multivariate Model'}
+          </span>
+        </div>
+
+        {/* Natural Language AI Decision Explanation */}
+        <p className="text-xs text-gray-300 bg-white/5 p-2.5 rounded-lg border border-white/5 leading-relaxed font-sans">
+          {rack.ai_insights?.explanation || 'Chassis thermal risk evaluated from GNN spatial graph propagation and XGBoost tree inference.'}
+        </p>
+
+        {/* SHAP Feature Contribution Bars */}
+        <div className="mt-3 space-y-2 font-mono text-[11px]">
+          <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">XAI Feature Importance Impact</div>
+          {rack.ai_insights?.xai_attribution && (
+            <>
+              <XaiBar label="GPU Thermal Contribution" pct={rack.ai_insights.xai_attribution.gpu} color="bg-amber-500" />
+              <XaiBar label="CPU Thread Contribution" pct={rack.ai_insights.xai_attribution.cpu} color="bg-blue-500" />
+              <XaiBar label="GNN Spatial Heat Diffusion" pct={rack.ai_insights.xai_attribution.gnn} color="bg-purple-500" />
+            </>
+          )}
+        </div>
       </div>
 
-      <div className={`mt-6 rounded-lg p-3 border ${isDanger ? 'border-red-500/30 bg-red-500/10' : isWarning ? 'border-yellow-500/30 bg-yellow-500/10' : 'border-green-500/20 bg-green-500/5'}`}>
+      <div className={`mt-5 rounded-lg p-3 border ${isDanger ? 'border-red-500/30 bg-red-500/10' : isWarning ? 'border-yellow-500/30 bg-yellow-500/10' : 'border-green-500/20 bg-green-500/5'}`}>
         <div className="flex justify-between items-baseline mb-1">
           <span className="text-xs text-gray-400">Risk Score</span>
           <span className={`font-mono text-lg ${statusColor}`}>{(rack.risk_score * 100).toFixed(1)}%</span>
@@ -66,16 +89,25 @@ export function ContextualDetailsPanel() {
           <div className="mt-2 pt-2 border-t border-white/5 flex items-center justify-between text-cyan-400 text-xs">
             <div className="flex items-center gap-2">
               <Fan size={12} className="animate-spin" />
-              <span>PREDICTIVE COOLING ACTIVE</span>
+              <span>PREDICTIVE COOLING ACTIVE ({rack.cooling.actual_rpm} RPM)</span>
             </div>
           </div>
         )}
       </div>
+    </div>
+  );
+}
 
-      <button className="mt-4 w-full flex items-center justify-between rounded bg-white/5 px-4 py-2 text-xs font-bold text-gray-300 transition-colors hover:bg-white/10 hover:text-white group">
-        <span>VIEW DETAILS</span>
-        <ChevronRight size={14} className="transition-transform group-hover:translate-x-1" />
-      </button>
+function XaiBar({ label, pct, color }: { label: string; pct: number; color: string }) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-gray-400">
+        <span>{label}</span>
+        <span className="font-bold text-white">{pct}%</span>
+      </div>
+      <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+        <div className={`h-full ${color} transition-all duration-300`} style={{ width: `${Math.min(100, Math.max(0, pct))}%` }} />
+      </div>
     </div>
   );
 }
