@@ -21,6 +21,7 @@ import sys
 import time
 import pickle
 import subprocess
+import threading
 import numpy as np
 import pandas as pd
 import psutil
@@ -94,6 +95,30 @@ class InferenceEngine:
         if run_parity_check:
             self._startup_parity_check()
 
+        self._wmi_cpu_val = 0.0
+        self._start_wmi_cpu_thread()
+
+    def _start_wmi_cpu_thread(self):
+        def _wmi_loop():
+            while True:
+                try:
+                    res = subprocess.run(
+                        ["wmic", "cpu", "get", "loadpercentage"],
+                        capture_output=True, text=True, timeout=3
+                    )
+                    if res.returncode == 0:
+                        lines = [L for L in res.stdout.split("\n") if L.strip()]
+                        if len(lines) >= 2:
+                            val = lines[1].strip()
+                            if val.isdigit():
+                                self._wmi_cpu_val = float(val)
+                except Exception:
+                    pass
+                time.sleep(1.0)
+                
+        t = threading.Thread(target=_wmi_loop, daemon=True)
+        t.start()
+
     def _startup_parity_check(self) -> None:
         sample = {'cpu': 50.0, 'gpu': 40.0, 'memory': 60.0, 'disk_io': 1_000_000.0, 'network_io': 500_000.0}
         vec_a = self.processor.process_single(sample)
@@ -155,34 +180,10 @@ class InferenceEngine:
                     pass
             self._last_pid_update = now_mono
 
-        # 2. Get system CPU percent from our own cpu_times baseline.
-        # Task Manager averages over ~1s; a 0.1s window undersamples badly (measured
-        # 2.0% vs 6.3% at the same instant), so re-measure at most once per second
-        # even though the runtime loop ticks at 10Hz. Non-blocking: the window is the
-        # gap between our own samples, so there is nothing to sleep on.
-        if now_mono - self._last_cpu_query >= 1.0:
-            cur = psutil.cpu_times()
-            prev = self._cpu_times_prev
-            # busy = everything except idle (and iowait, which is idle-with-pending-IO
-            # on Linux; absent on Windows).
-            def _total(t):
-                return sum(v for v in t)
-
-            def _idle(t):
-                return getattr(t, 'idle', 0.0) + getattr(t, 'iowait', 0.0)
-
-            delta_total = _total(cur) - _total(prev)
-            delta_idle = _idle(cur) - _idle(prev)
-            if delta_total > 0:
-                busy_pct = 100.0 * (delta_total - delta_idle) / delta_total
-                self._cached_cpu = min(100.0, max(0.0, busy_pct))
-            # else: counters did not advance; keep the previous cached value.
-            self._cpu_times_prev = cur
-            # Stamp AFTER the read, so the 1s window is measured from when the sample
-            # completed rather than from the top of a tick that may run long.
-            self._last_cpu_query = time.monotonic()
-
-        sys_cpu = self._cached_cpu
+        # 2. Get system CPU percent from WMI background thread
+        # This matches Task Manager's Processor Utility scaling exactly and updates every 1s
+        # without blocking the 10Hz telemetry loop.
+        sys_cpu = getattr(self, '_wmi_cpu_val', 0.0)
 
 
         # 3. Calculate browser-only CPU consumption (optional smoothing, not subtraction)

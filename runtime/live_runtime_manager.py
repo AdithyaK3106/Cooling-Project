@@ -232,6 +232,24 @@ class LiveRuntimeManager:
                 gpu_temp += random.uniform(-0.5, 0.5)
                 # Keep the scripted power draw consistent with the scripted load
                 power_draw = 15.0 + 0.35 * cpu_util + 0.55 * gpu_util
+
+                raw_data = {
+                    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+                    "cpu": cpu_util,
+                    "gpu": gpu_util,
+                    "memory": mem_util,
+                    "disk_io": disk_io,
+                    "network_io": network_io,
+                    "cpu_temp": cpu_temp,
+                    "gpu_temp": gpu_temp,
+                    "cpu_power": 15.0 + 0.35 * cpu_util,
+                    "gpu_power": 0.55 * gpu_util,
+                    "cpu_util": cpu_util,
+                    "gpu_util": gpu_util,
+                    "mem_util": mem_util,
+                    "power_draw": power_draw,
+                }
+
             
             # Emit warnings if needed
             if gpu_temp > 85.0:

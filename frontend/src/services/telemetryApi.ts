@@ -1,11 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from './apiClient';
 import type { ThervoTelemetry } from '../types/telemetry';
+import { tickSimulation, getSimulatedTelemetry } from './simulation';
 
 export const TELEMETRY_QUERY_KEY = ['telemetry'];
 
-export async function getTelemetry(): Promise<ThervoTelemetry> {
-  return fetchApi<ThervoTelemetry>('/telemetry');
+// Start the simulation loop
+setInterval(() => {
+  if (localStorage.getItem('thervo_mode') === 'SIMULATED') {
+    tickSimulation();
+  }
+}, 250);
+
+export async function getTelemetry(): Promise<any> {
+  const mode = localStorage.getItem('thervo_mode') || 'LOCAL';
+  if (mode === 'SIMULATED') {
+    return getSimulatedTelemetry();
+  }
+  return fetchApi<any>('/telemetry');
 }
 
 export function useTelemetry(pollingIntervalMs = 100) {

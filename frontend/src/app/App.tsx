@@ -8,6 +8,7 @@ import { ThermalMapTab } from '../pages/ThermalMapTab';
 import { RacksTab } from '../pages/RacksTab';
 import { PredictionsTab } from '../pages/PredictionsTab';
 import { EventsTab } from '../pages/EventsTab';
+import { DualNodeDemo } from '../pages/DualNodeDemo';
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,8 @@ export function App() {
           
           <main className="flex-1 overflow-auto relative">
             <Routes>
-              <Route path="/" element={<Navigate to="/overview" replace />} />
+              <Route path="/" element={<Navigate to="/dual-node" replace />} />
+              <Route path="/dual-node" element={<DualNodeDemo />} />
               <Route path="/overview" element={<OverviewTab />} />
               <Route path="/thermal-map" element={<ThermalMapTab />} />
               <Route path="/racks" element={<RacksTab />} />

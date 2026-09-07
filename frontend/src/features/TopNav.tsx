@@ -1,8 +1,25 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { Box, User } from 'lucide-react';
 
 
 export function TopNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mode = localStorage.getItem('thervo_mode') || 'LOCAL';
+
+  const handleModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMode = e.target.value;
+    localStorage.setItem('thervo_mode', newMode);
+    if (newMode === 'LOCAL') {
+      navigate('/dual-node');
+    } else {
+      navigate('/overview');
+    }
+    // Force a small reload or just let React Query refetch, but reload ensures clean state
+    window.location.reload();
+  };
+
+  const isLocal = mode === 'LOCAL';
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/10 bg-[#0B0E14] px-6">
@@ -12,6 +29,7 @@ export function TopNav() {
       </div>
 
       <nav className="flex items-center gap-2">
+        <NavItem to="/dual-node" label="Dual Node" />
         <NavItem to="/overview" label="Overview" />
         <NavItem to="/thermal-map" label="Thermal Map" />
         <NavItem to="/racks" label="Racks" />
@@ -20,8 +38,13 @@ export function TopNav() {
       </nav>
 
       <div className="flex items-center gap-6">
-        <select className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs font-semibold text-gray-300 outline-none">
-          <option>Main Facility ▾</option>
+        <select 
+          value={mode}
+          onChange={handleModeChange}
+          className="bg-white/5 border border-white/10 rounded px-2 py-1 text-xs font-semibold text-cyan-400 outline-none cursor-pointer hover:bg-white/10 transition-colors"
+        >
+          <option value="LOCAL">Local Hardware Demo</option>
+          <option value="SIMULATED">Simulated Datacenter</option>
         </select>
         
         <div className="flex items-center gap-2 text-xs font-bold text-gray-400">

@@ -1295,14 +1295,45 @@
             const gpuPwr = Math.abs(diag.gpu_power_transient_score || 0);
 
             // Compute dynamic proportional feature weights based on live incoming telemetry & model risk
-            const wGpu = Math.max(5, (gpu * 0.50) + (gtemp > 55 ? (gtemp - 45) * 1.5 : 0) + (gpuPwr * 2.5));
-            const wCpu = Math.max(5, (cpu * 0.45) + (ctemp > 55 ? (ctemp - 45) * 1.2 : 0));
-            const wTherm = Math.max(3, (rVel * 800) + (tAcc * 500) + (soak * 0.5));
-            const wMem = Math.max(2, (mem * 0.15) + (dio > 5 ? 10 : 0));
+            const wGpu = Math.max(5, gpu);
+            const wCpu = Math.max(5, cpu);
+            const wTherm = Math.max(3, (ctemp > 60 ? (ctemp - 60) : 0) + (gtemp > 60 ? (gtemp - 60) : 0));
+            const wMem = Math.max(2, mem);
             const totalW = wGpu + wCpu + wTherm + wMem;
-
+            
             const pctGpu = Math.round((wGpu / totalW) * 100);
             const pctCpu = Math.round((wCpu / totalW) * 100);
+            const pctTherm = Math.round((wTherm / totalW) * 100);
+            const pctMem = Math.round((wMem / totalW) * 100);
+
+            // Update UI elements
+            document.getElementById('dash-bn-gpu').style.width = pctGpu + '%';
+            document.getElementById('dash-bn-cpu').style.width = pctCpu + '%';
+            document.getElementById('dash-bn-therm').style.width = pctTherm + '%';
+            document.getElementById('dash-bn-mem').style.width = pctMem + '%';
+
+            // We must carefully replace the text Content inside the spans without breaking the HTML
+            const bnEl = document.getElementById('dash-bn-container');
+            if (bnEl) {
+                bnEl.innerHTML = `
+                <div class="flex items-center justify-between mt-2 text-sm">
+                    <span class="text-secondary-container">GPU Workload</span>
+                    <span class="${pctGpu > 35 ? 'text-error font-bold' : 'text-secondary-container font-bold'}">${pctGpu}% Contribution</span>
+                </div>
+                <div class="flex items-center justify-between mt-1 text-sm">
+                    <span class="text-primary">CPU Threads</span>
+                    <span class="${pctCpu > 35 ? 'text-error font-bold' : 'text-primary font-bold'}">${pctCpu}% Contribution</span>
+                </div>
+                <div class="flex items-center justify-between mt-1 text-sm">
+                    <span class="text-error">Thermal Saturation</span>
+                    <span class="${pctTherm > 35 ? 'text-error font-bold' : 'text-error font-bold'}">${pctTherm}% Contribution</span>
+                </div>
+                <div class="flex items-center justify-between mt-1 text-sm">
+                    <span class="text-tertiary-container">Memory / IO</span>
+                    <span class="text-tertiary-container font-bold">${pctMem}% Contribution</span>
+                </div>
+                `;
+            }
 
             let primaryDriver = "Nominal Baseline Equilibrium";
             let actionBadge = "Monitoring";
@@ -1697,7 +1728,16 @@
                     futVal = f60 + ((f120 - f60) * ((i - futSteps * 0.6) / (futSteps * 0.4)));
                 }
             } else {
-                futVal = isSpiking ? latestVal + Math.sin(i * 0.2) * (latestVal * 0.1) : latestVal + Math.sin(i*0.1)*1;
+                if (dataArray === cpuHist || dataArray === gpuHist) {
+                    futVal = latestVal;
+                } else if (dataArray === ctempHist || dataArray === gtempHist) {
+                    // Thermal momentum projection
+                    const soak = diag.thermal_soak_index || 0;
+                    const rVel = diag.risk_velocity || 0;
+                    futVal = latestVal + (soak * i * 0.1) + (rVel * risk * i * 2);
+                } else {
+                    futVal = latestVal;
+                }
             }
             futVal = Math.max(minVal, Math.min(maxVal, futVal));
             const normY = (futVal - minVal) / range;
@@ -1771,7 +1811,11 @@
                         hoverVal = f60 + ((f120 - f60) * ((step - futSteps * 0.6) / (futSteps * 0.4)));
                     }
                 } else {
-                    hoverVal = isSpiking ? latestVal + Math.sin(step * 0.2) * (latestVal * 0.1) : latestVal + Math.sin(step * 0.1) * 1;
+                    if (dataArray === cpuHist || dataArray === gpuHist) {
+                        hoverVal = latestVal;
+                    } else {
+                        hoverVal = latestVal;
+                    }
                 }
             }
             hoverVal = Math.max(minVal, Math.min(maxVal, hoverVal));
@@ -2127,7 +2171,10 @@
 
         // Variance / Conf DOM update
         setVal('pred-variance', `±${(spread*0.5).toFixed(2)}`);
-        setVal('pred-conf-pct', `${(98 - risk*10 + Math.sin(predState.confidencePhase)*2).toFixed(1)}%`);
+        predState.confidencePhase += 0.05; // Still tick for other animation
+        
+        // Render stable confidence
+        setVal('pred-conf-pct', `${Math.max(10, 98 - risk*20).toFixed(1)}%`);
 
         ctx.strokeStyle = 'rgba(255,255,255,0.02)';
         for(let y=0; y<h; y+=15) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
