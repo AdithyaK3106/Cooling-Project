@@ -14,8 +14,11 @@ import {
   resetSimulation,
   subscribeSimulationConfig 
 } from '../../services/simulation';
+import { useUiStore } from '../../stores/uiStore';
 
 export function SimulationControlBar() {
+  const { uiThemeMode } = useUiStore();
+  const isTelemetry = uiThemeMode === 'TELEMETRY';
   const [config, setConfig] = useState(getSimulationConfig());
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -36,25 +39,25 @@ export function SimulationControlBar() {
   ];
 
   return (
-    <div className="w-full rounded-md border border-neutral-800 bg-[#15181e] p-4 shadow-md font-sans">
+    <div className={isTelemetry ? "w-full rounded-xl border border-white/10 bg-[#0B0E14]/80 p-4 backdrop-blur shadow-2xl font-sans" : "w-full rounded-md border border-neutral-800 bg-[#15181e] p-4 shadow-md font-sans"}>
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">
+          <div className={isTelemetry ? "p-2 rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.2)]" : "p-2 rounded bg-neutral-800 text-neutral-300 border border-neutral-700"}>
             <Sliders size={16} />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-xs font-bold text-neutral-100 uppercase tracking-wide font-sans">Simulation Execution & Physics Control</h3>
+              <h3 className={isTelemetry ? "text-xs font-bold text-white uppercase tracking-wider font-mono" : "text-xs font-bold text-neutral-100 uppercase tracking-wide font-sans"}>Simulation Execution & Physics Control</h3>
               <span className={`px-2 py-0.5 text-[10px] font-mono font-bold rounded-sm border ${
                 config.isPaused 
-                  ? 'bg-amber-950/80 text-amber-300 border-amber-800' 
-                  : 'bg-emerald-950/80 text-emerald-300 border-emerald-800'
+                  ? (isTelemetry ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-amber-950/80 text-amber-300 border-amber-800')
+                  : (isTelemetry ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_#06b6d4]' : 'bg-emerald-950/80 text-emerald-300 border-emerald-800')
               }`}>
                 {config.isPaused ? 'PAUSED' : `RUNNING (${(1000 / config.simSpeedMs).toFixed(1)} Hz — ${config.simSpeedMs}ms step)`}
               </span>
             </div>
-            <p className="text-[11px] text-neutral-400 font-mono mt-0.5">
+            <p className={isTelemetry ? "text-[11px] text-gray-400 font-mono mt-0.5" : "text-[11px] text-neutral-400 font-mono mt-0.5"}>
               Adjust execution step frequency, freeze simulation state, or tune thermal dissipation curves.
             </p>
           </div>
