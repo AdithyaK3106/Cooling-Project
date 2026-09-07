@@ -1,47 +1,69 @@
 // @ts-nocheck
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Line } from '@react-three/drei';
+import { OrbitControls, Html, Line, Float } from '@react-three/drei';
 import { useTelemetry } from '../services/telemetryApi';
 import * as THREE from 'three';
 
 function Laptop({ position, isMain, risk, fan, mode, connected }) {
   const baseColor = isMain ? '#3b82f6' : (connected ? '#10b981' : '#6b7280'); // Blue for main, Green/Gray for neighbor
   const heatColor = new THREE.Color(baseColor).lerp(new THREE.Color('#ef4444'), risk); // Red based on risk
+  const isHighRisk = risk > 0.6;
 
   return (
     <group position={position}>
-      {/* Base */}
-      <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[4, 0.2, 3]} />
-        <meshStandardMaterial color={heatColor} />
-      </mesh>
-      {/* Screen */}
-      <mesh position={[0, 1.5, -1.4]} rotation={[-0.2, 0, 0]}>
-        <boxGeometry args={[4, 3, 0.2]} />
-        <meshStandardMaterial color={heatColor} />
-      </mesh>
-      {/* Screen Content (Glowing when risk high) */}
-      <mesh position={[0, 1.5, -1.29]} rotation={[-0.2, 0, 0]}>
-        <planeGeometry args={[3.8, 2.8]} />
-        <meshBasicMaterial color={new THREE.Color(0,0,0).lerp(new THREE.Color('#ef4444'), risk * 0.5)} />
-      </mesh>
-      
-      <Html position={[0, 4, 0]} center style={{ pointerEvents: 'none' }}>
-        <div className="bg-[#0B0E14]/90 border border-white/20 p-4 rounded-xl shadow-2xl text-sm w-56 text-gray-200 backdrop-blur-xl">
+      <Float speed={2} rotationIntensity={0.1} floatIntensity={0.5} floatingRange={[-0.2, 0.2]}>
+        {/* Base */}
+        <mesh position={[0, 0, 0]}>
+          <boxGeometry args={[4, 0.2, 3]} />
+          <meshStandardMaterial color={heatColor} />
+        </mesh>
+        {/* Screen */}
+        <mesh position={[0, 1.5, -1.4]} rotation={[-0.2, 0, 0]}>
+          <boxGeometry args={[4, 3, 0.2]} />
+          <meshStandardMaterial color={heatColor} />
+        </mesh>
+        {/* Screen Content (Glowing when risk high) */}
+        <mesh position={[0, 1.5, -1.29]} rotation={[-0.2, 0, 0]}>
+          <planeGeometry args={[3.8, 2.8]} />
+          <meshBasicMaterial color={new THREE.Color(0,0,0).lerp(new THREE.Color('#ef4444'), risk * 0.5)} />
+        </mesh>
+
+        {/* Holographic Glowing Ring under the laptop */}
+        {connected && (
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.5, 0]}>
+            <ringGeometry args={[2.5, 2.8, 32]} />
+            <meshBasicMaterial color={heatColor} transparent opacity={0.3 + (isHighRisk ? 0.3 : 0)} side={THREE.DoubleSide} />
+          </mesh>
+        )}
+      </Float>
+
+      {/* Connecting Line from Laptop to Board */}
+      <Line points={[[0, 1.5, 0], [0, 6, 0]]} color={heatColor} lineWidth={1.5} transparent opacity={0.3} dashed dashScale={10} dashSize={1} dashOffset={0} />
+
+      <Html position={[0, 7, 0]} center style={{ pointerEvents: 'none' }}>
+        <div className={`bg-[#0B0E14]/90 border ${isHighRisk ? 'border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.2)]' : 'border-white/20 shadow-2xl'} p-4 rounded-xl text-sm w-64 text-gray-200 backdrop-blur-xl transition-all duration-300`}>
           <div className="font-mono font-bold text-white mb-2 border-b border-white/20 pb-2 flex justify-between items-center">
-            <span>{isMain ? 'NODE 1 (MAIN)' : 'NODE 2 (NEIGHBOR)'}</span>
+            <span className="flex items-center gap-2">
+              {isHighRisk && <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />}
+              {isMain ? 'NODE 1 (MAIN)' : 'NODE 2 (NEIGHBOR)'}
+            </span>
             <span className={`px-2 py-0.5 rounded text-[10px] ${!connected ? 'bg-gray-600' : (mode === 'THERVO' ? 'bg-purple-600' : 'bg-blue-600')}`}>
               {!connected ? 'DISCONNECTED' : mode}
             </span>
           </div>
-          <div className="flex justify-between py-1">
-            <span className="text-gray-400">Risk Score</span>
-            <span className="font-mono font-bold" style={{color: risk > 0.7 ? '#ef4444' : '#10b981'}}>{(risk * 100).toFixed(0)}%</span>
+          <div className="flex justify-between py-1 items-center">
+            <span className="text-gray-400">Thermal Risk</span>
+            <span className="font-mono font-bold text-lg" style={{color: isHighRisk ? '#ef4444' : '#10b981'}}>{(risk * 100).toFixed(0)}%</span>
           </div>
-          <div className="flex justify-between py-1">
-            <span className="text-gray-400">Fan Speed</span>
-            <span className="font-mono text-cyan-400">{fan?.toFixed(0) || 0}%</span>
+          <div className="flex justify-between py-1 items-center">
+            <span className="text-gray-400">Fan RPM Target</span>
+            <div className="flex items-center gap-2">
+              <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                <div className="h-full bg-cyan-400 transition-all duration-300" style={{ width: `${fan || 0}%` }} />
+              </div>
+              <span className="font-mono text-cyan-400 text-xs w-8 text-right">{fan?.toFixed(0) || 0}%</span>
+            </div>
           </div>
         </div>
       </Html>
