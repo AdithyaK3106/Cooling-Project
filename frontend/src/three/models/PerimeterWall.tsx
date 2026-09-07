@@ -34,6 +34,20 @@ export function PerimeterWall() {
       roughness: 0.28,
     });
 
+    const sconceMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#38bdf8'),
+      emissive: new THREE.Color('#0284c7'),
+      emissiveIntensity: 0.85,
+      roughness: 0.25,
+      metalness: 0.80,
+    });
+
+    const sconceHousingMat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color('#14171e'),
+      metalness: 0.85,
+      roughness: 0.25,
+    });
+
     // Wall dimensions: Enclosing 5x5 rack cluster (±9.6m on X, ±13.0m on Z)
     const wallHeight = 2.60;
     const wallThick = 0.26;
@@ -44,7 +58,7 @@ export function PerimeterWall() {
     const frontHalfLength = 7.4; // X span from corner ±9.6 to portal ±2.2
 
     return {
-      materials: { wallBodyMat, trimMat, capMat },
+      materials: { wallBodyMat, trimMat, capMat, sconceMat, sconceHousingMat },
       geometries: {
         // Left & right continuous walls
         sideWall: new THREE.BoxGeometry(wallThick, wallHeight - plinthHeight - capHeight, sideLength),
@@ -61,6 +75,10 @@ export function PerimeterWall() {
 
         // Structural corner & intermediate pilasters
         pilaster: new THREE.BoxGeometry(0.38, wallHeight + 0.06, 0.38),
+
+        // Architectural wall accent luminaires
+        sconceHousing: new THREE.BoxGeometry(0.18, 0.05, 0.08),
+        sconceLens: new THREE.BoxGeometry(0.14, 0.015, 0.06),
       },
     };
   }, []);
@@ -120,6 +138,25 @@ export function PerimeterWall() {
       <mesh geometry={geometries.pilaster} material={materials.trimMat} position={[2.2, wallHeight / 2, -13.0]} castShadow receiveShadow raycast={() => null} />
       <mesh geometry={geometries.pilaster} material={materials.trimMat} position={[-2.2, wallHeight / 2, 13.0]} castShadow receiveShadow raycast={() => null} />
       <mesh geometry={geometries.pilaster} material={materials.trimMat} position={[2.2, wallHeight / 2, 13.0]} castShadow receiveShadow raycast={() => null} />
+
+      {/* ─── 6. ARCHITECTURAL WALL ACCENT SCONCES ─── */}
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[-9.38, 2.15, 0]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[-9.38, 2.13, 0]} raycast={() => null} />
+
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[9.38, 2.15, 0]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[9.38, 2.13, 0]} raycast={() => null} />
+
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[-2.2, 2.15, -12.78]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[-2.2, 2.13, -12.78]} raycast={() => null} />
+
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[2.2, 2.15, -12.78]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[2.2, 2.13, -12.78]} raycast={() => null} />
+
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[-2.2, 2.15, 12.78]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[-2.2, 2.13, 12.78]} raycast={() => null} />
+
+      <mesh geometry={geometries.sconceHousing} material={materials.sconceHousingMat} position={[2.2, 2.15, 12.78]} raycast={() => null} />
+      <mesh geometry={geometries.sconceLens} material={materials.sconceMat} position={[2.2, 2.13, 12.78]} raycast={() => null} />
     </group>
   );
 }

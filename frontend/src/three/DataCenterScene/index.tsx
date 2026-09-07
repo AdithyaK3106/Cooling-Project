@@ -120,6 +120,15 @@ function Model() {
         child.visible = true;
       } else if (lowerName.includes('bottom_plane') || lowerName.includes('floor')) {
         child.visible = true;
+        // Refine floor tile material: clean raised-floor sheen with subtle realistic reflections
+        if (child.isMesh && child.material) {
+          const mat = Array.isArray(child.material) ? child.material[0] : child.material;
+          if (mat) {
+            mat.roughness = 0.35;
+            mat.metalness = 0.15;
+            mat.needsUpdate = true;
+          }
+        }
       } else if (
         lowerName.includes('interior') || lowerName.includes('exterior') || lowerName.includes('top_plane') ||
         lowerName.includes('roof') || lowerName.includes('ceiling') || lowerName.includes('top plane') ||
@@ -533,12 +542,26 @@ function PerfExposer() {
 export function DataCenterScene() {
   return (
     <div className="h-full w-full">
-      <Canvas camera={{ position: [50, 50, 50], fov: 45 }}>
+      <Canvas camera={{ position: [50, 50, 50], fov: 45 }} shadows>
         <PerfExposer />
-        <color attach="background" args={['#1A1C23']} />
+        {/* Dark, professional enterprise data-center environment */}
+        <color attach="background" args={['#111319']} />
         
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[10, 20, 10]} intensity={1.5} />
+        {/* Subtle ambient lighting */}
+        <ambientLight intensity={0.42} />
+        <hemisphereLight args={['#ffffff', '#0f172a', 0.22]} />
+
+        {/* Soft overhead key illumination for rack geometry and floor reflections */}
+        <directionalLight
+          position={[12, 26, 14]}
+          intensity={1.15}
+          castShadow
+          shadow-mapSize-width={1024}
+          shadow-mapSize-height={1024}
+        />
+
+        {/* Subtle cross-fill light to soften rack shadows */}
+        <directionalLight position={[-14, 18, -12]} intensity={0.35} />
         
         <Suspense fallback={null}>
           <Model />

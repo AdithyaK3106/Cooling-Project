@@ -82,6 +82,7 @@ interface SharedGeometries {
   fanRing: THREE.RingGeometry;
   sidePanelRecess: THREE.BoxGeometry;
   floorHalo: THREE.PlaneGeometry;
+  microLed: THREE.BoxGeometry;
 }
 
 let sharedGeometries: SharedGeometries | null = null;
@@ -103,6 +104,7 @@ function getSharedGeometries(): SharedGeometries {
       fanRing: new THREE.RingGeometry(0.18, 0.28, 24),
       sidePanelRecess: new THREE.BoxGeometry(0.01, 2.10, 1.10),
       floorHalo: new THREE.PlaneGeometry(1.26, 1.46),
+      microLed: new THREE.BoxGeometry(0.014, 0.014, 0.012),
     };
   }
   return sharedGeometries;
@@ -124,12 +126,24 @@ export function createDetailedServerRack(rackId: string): THREE.Group {
   const riskAccentMat = new THREE.MeshStandardMaterial({
     color: new THREE.Color('#06b6d4'),
     emissive: new THREE.Color('#06b6d4'),
-    emissiveIntensity: 0.65,
+    emissiveIntensity: 0.70,
     roughness: 0.20,
     metalness: 0.40,
   });
-  // Mark material and userData so GNNLayer recognizes it as the risk indicator
   (riskAccentMat as any).__isRiskAccentMaterial = true;
+
+  // Soft semi-transparent floor underglow reflection
+  const floorGlowMat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color('#06b6d4'),
+    emissive: new THREE.Color('#06b6d4'),
+    emissiveIntensity: 0.35,
+    transparent: true,
+    opacity: 0.24,
+    roughness: 0.40,
+    metalness: 0.10,
+    depthWrite: false,
+  });
+  (floorGlowMat as any).__isRiskAccentMaterial = true;
 
   // 1. CHASSIS SHELL (Dark Graphite Metal)
   // Left side wall
@@ -156,10 +170,10 @@ export function createDetailedServerRack(rackId: string): THREE.Group {
   footer.position.set(0, 0.02, 0);
   cabinet.add(footer);
 
-  // Subtle floor underglow / light around the rack base
-  const floorGlow = new THREE.Mesh(geoms.floorHalo, riskAccentMat);
+  // Subtle floor underglow / light reflection around the rack base
+  const floorGlow = new THREE.Mesh(geoms.floorHalo, floorGlowMat);
   floorGlow.rotation.x = -Math.PI / 2;
-  floorGlow.position.set(0, 0.005, 0);
+  floorGlow.position.set(0, 0.006, 0);
   floorGlow.userData = { isRiskAccent: true };
   cabinet.add(floorGlow);
 
@@ -242,6 +256,15 @@ export function createDetailedServerRack(rackId: string): THREE.Group {
     const driveBays = new THREE.Mesh(geoms.driveBayGroup, mats.driveBay);
     driveBays.position.set(0, bladeY, 0.62);
     cabinet.add(driveBays);
+
+    // Tiny micro activity LEDs on server face (Power green, Activity blue)
+    const ledPower = new THREE.Mesh(geoms.microLed, mats.statusLedGreen);
+    ledPower.position.set(-0.432, bladeY, 0.629);
+    cabinet.add(ledPower);
+
+    const ledActivity = new THREE.Mesh(geoms.microLed, mats.statusLedBlue);
+    ledActivity.position.set(-0.412, bladeY, 0.629);
+    cabinet.add(ledActivity);
 
     // Subtle horizontal risk accent indicator along each server blade
     const bladeAccent = new THREE.Mesh(geoms.bladeIndicatorBar, riskAccentMat);

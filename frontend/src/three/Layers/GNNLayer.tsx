@@ -168,20 +168,23 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
         const sourceRisk = sourceRack?.risk_score ?? 0;
         const effectiveHeat = Math.max(edge.weight, sourceRisk * 0.88);
 
-        // Heat flow color tiers - Deep crimson / dark red heat lines & arrows
-        let color = '#7f1d1d'; // Deep muted crimson (< 0.35)
-        let rgb = { r: 127 / 255, g: 29 / 255, b: 29 / 255 };
-        if (effectiveHeat > 0.55) {
-          color = '#8b1010'; // Deep dark crimson (> 0.55)
-          rgb = { r: 139 / 255, g: 16 / 255, b: 16 / 255 };
-        } else if (effectiveHeat >= 0.35) {
-          color = '#991b1b'; // Deep crimson (0.35 - 0.55)
-          rgb = { r: 153 / 255, g: 27 / 255, b: 27 / 255 };
-        }
+        // Heat flow color tiers matching user specification:
+        // HIGH HEAT FLOW (> 0.55) -> deep professional red
+        // MODERATE HEAT FLOW (0.35 - 0.55) -> amber/orange
+        // LOW HEAT FLOW (< 0.35) -> soft cyan/blue
+        let color = '#0284c7'; // Soft cyan/blue (< 0.35)
+        let rgb = { r: 2 / 255, g: 132 / 255, b: 199 / 255 };
+        let lineWidth = 1.4;
 
-        // Change 2: Slightly thicker red/high-risk lines (2.0) vs moderate/low (1.5)
-        // Previous uniform thickness was 1.2
-        const lineWidth = effectiveHeat > 0.55 ? 2.0 : 1.5;
+        if (effectiveHeat > 0.55) {
+          color = '#b91c1c'; // Deep professional red (> 0.55)
+          rgb = { r: 185 / 255, g: 28 / 255, b: 28 / 255 };
+          lineWidth = 2.0;
+        } else if (effectiveHeat >= 0.35) {
+          color = '#d97706'; // Warm amber/orange (0.35 - 0.55)
+          rgb = { r: 217 / 255, g: 119 / 255, b: 6 / 255 };
+          lineWidth = 1.6;
+        }
 
         return {
           id: `${edge.source}->${edge.target}-${idx}`,
@@ -273,10 +276,10 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
           const alphaHead = Math.min(1.0, 0.95 * env);
           const alphaWing = Math.min(1.0, 0.70 * env);
 
-          // Core head brightness: deep dark crimson, clearly defined against light floor
-          const headR = Math.min(1.0, rgb.r * 1.15);
-          const headG = Math.max(0.0, rgb.g * 0.85);
-          const headB = Math.max(0.0, rgb.b * 0.85);
+          // Core head brightness: refined bright core with restrained glow matching its line family
+          const headR = Math.min(1.0, rgb.r * 1.30);
+          const headG = Math.min(1.0, rgb.g * 1.30);
+          const headB = Math.min(1.0, rgb.b * 1.30);
 
           // Segment 1: Tip -> Left Wing
           posArray[posPtr++] = head.x; posArray[posPtr++] = head.y; posArray[posPtr++] = head.z;
