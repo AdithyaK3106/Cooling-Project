@@ -1,13 +1,34 @@
 import { useTelemetry } from '../services/telemetryApi';
 import { useUiStore } from '../stores/uiStore';
 import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
+import { getSimulatedTelemetry } from '../services/simulation';
 import { Activity, Thermometer, Fan, AlertTriangle, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export function ContextualDetailsPanel() {
   const selectedRackId = useUiStore((state) => state.selectedRackId);
   const { data: telemetry } = useTelemetry();
 
-  if (!selectedRackId || !telemetry) {
+  const numMatch = (selectedRackId || '').match(/\d+/);
+  const rackNum = numMatch ? parseInt(numMatch[0], 10) : -1;
+  const matchRack = (r: any) => 
+    r.id === selectedRackId || 
+    r.id === `A0${rackNum}` || 
+    r.id === `A${rackNum}` ||
+    (rackNum > 0 && parseInt(r.id.replace(/\D+/g, ''), 10) === rackNum);
+
+  const sim = getSimulatedTelemetry();
+  const simRack = sim?.racks?.find(matchRack);
+  const fromTelem = telemetry?.racks?.find(matchRack);
+  const rack = fromTelem ? {
+    ...fromTelem,
+    ...(simRack && (simRack.coolingActive !== undefined || simRack.overrideEnabled !== undefined) ? {
+      coolingActive: simRack.coolingActive,
+      overrideEnabled: simRack.overrideEnabled,
+      cooling: { ...fromTelem.cooling, status: (simRack.coolingActive || simRack.overrideEnabled) ? 'predictive intervention' : (fromTelem.cooling?.status || 'normal') }
+    } : {})
+  } : simRack;
+
+  if (!selectedRackId || !rack) {
     return (
       <div className="w-80 rounded-xl border border-white/10 bg-[#0B0E14]/80 p-5 backdrop-blur-xl shadow-2xl transition-all duration-300">
         <h2 className="mb-3 text-sm font-bold tracking-widest text-gray-500 uppercase">System Status</h2>
@@ -19,9 +40,6 @@ export function ContextualDetailsPanel() {
       </div>
     );
   }
-
-  const rack = telemetry.racks?.find((r: any) => r.id === selectedRackId);
-  if (!rack) return null;
 
   const isDanger = rack.risk_score > 0.7;
   const isWarning = rack.risk_score > 0.4 && !isDanger;

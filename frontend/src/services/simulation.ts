@@ -1,4 +1,3 @@
-import type { ThervoTelemetry } from '../types/telemetry';
 
 const NUM_RACKS = 25;
 let currentMode = 'DATA_CENTER_SIMULATION';
@@ -56,10 +55,12 @@ let racks = Array.from({length: NUM_RACKS}, (_, i) => ({
   zone: ZONES[i],
   cpu: 0, gpu: 0, memory: 0, diskIO: 0, network: 0,
   gnnEmbed: 0, riskScore: 0, xgbPred: 0,
-  coolingActive: false, overrideEnabled: false, spikeBonus: 0
+  coolingActive: false, overrideEnabled: false, spikeBonus: 0,
+  manualDisengaged: false,
+  coolingProgress: 0.0
 }));
 
-function generateSyntheticWorkload(rackIdx: number, epoch: number, baseLoad: number, noiseFactor: number) {
+function generateSyntheticWorkload(rackIdx: number, _epoch: number, baseLoad: number, noiseFactor: number) {
   let traceCpu = 0.28, traceGpu = 0.32, traceMem = 0.35, traceDisk = 0.20, traceNet = 0.25;
   const loadScale = baseLoad / 0.35;
   const rackBias = [1.25, 0.88, 1.12, 0.78, 1.35][rackIdx % 5] || 1.0;
@@ -89,12 +90,15 @@ function computeGNNEmbeddings(rackFeatures: any[]) {
   for (let i = 0; i < NUM_RACKS; i++) {
     const self = rackFeatures[i];
     const selfCooling = racks[i] ? (racks[i].coolingActive || racks[i].overrideEnabled) : false;
-    const selfCoolFactor = selfCooling ? 0.45 : 1.0;
+    const progress = (racks[i] as any)?.coolingProgress ?? (selfCooling ? 1.0 : 0.0);
+    const selfCoolFactor = 1.0 - (1.0 - 0.45) * progress;
 
     const neighbors = adjList[i].map(j => {
       const feat = rackFeatures[j];
       const jCooling = racks[j] ? (racks[j].coolingActive || racks[j].overrideEnabled) : false;
-      return { heat: (feat.cpu * 0.6 + feat.gpu * 0.4) * (jCooling ? 0.45 : 1.0) };
+      const jProgress = (racks[j] as any)?.coolingProgress ?? (jCooling ? 1.0 : 0.0);
+      const jCoolFactor = 1.0 - (1.0 - 0.45) * jProgress;
+      return { heat: (feat.cpu * 0.6 + feat.gpu * 0.4) * jCoolFactor };
     });
 
     const neighborHeat = neighbors.length > 0 ? neighbors.reduce((s, n) => s + n.heat, 0) / neighbors.length : 0;
@@ -120,7 +124,7 @@ export function tickSimulation() {
     const rawCompositeRisk = rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25;
 
     if (!rack.coolingActive) {
-      if (rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) {
+      if ((rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) && !rack.manualDisengaged) {
         rack.coolingActive = true;
         alertCount++;
       }
@@ -131,8 +135,21 @@ export function tickSimulation() {
     }
 
     const isCooled = rack.coolingActive || rack.overrideEnabled;
-    const targetRisk = isCooled ? (rawCompositeRisk * 0.45) : rawCompositeRisk;
-    const lerpFactor = isCooled ? 0.38 : 0.20;
+    if (isCooled) {
+      if ((rack as any).coolingProgress === undefined) (rack as any).coolingProgress = 0.0;
+      (rack as any).coolingProgress = Math.min(1.0, (rack as any).coolingProgress + 0.025);
+    } else {
+      if ((rack as any).coolingProgress !== undefined && (rack as any).coolingProgress > 0) {
+        (rack as any).coolingProgress = Math.max(0.0, (rack as any).coolingProgress - 0.10);
+      } else {
+        (rack as any).coolingProgress = 0.0;
+      }
+    }
+
+    const progress = (rack as any).coolingProgress ?? (isCooled ? 1.0 : 0.0);
+    const coolRatio = 1.0 - (1.0 - 0.45) * progress;
+    const targetRisk = rawCompositeRisk * coolRatio;
+    const lerpFactor = 0.08;
 
     if (rack.riskScore === 0) rack.riskScore = parseFloat(targetRisk.toFixed(4));
     else rack.riskScore = parseFloat((rack.riskScore * (1 - lerpFactor) + targetRisk * lerpFactor).toFixed(4));
@@ -165,8 +182,39 @@ export function getSimulatedTelemetry(): any {
       id: r.id,
       telemetry: { cpu_util: r.cpu, gpu_util: r.gpu, cpu_temp: r.riskScore * 100 },
       risk_score: r.riskScore,
-      cooling: { status: r.coolingActive ? 'predictive intervention' : 'normal' },
+      cooling: { status: (r.coolingActive || r.overrideEnabled) ? 'predictive intervention' : 'normal' },
+      coolingActive: r.coolingActive,
+      overrideEnabled: r.overrideEnabled,
       ai_insights: { gnn_embed: r.gnnEmbed, xgb_pred: r.xgbPred, zone: r.zone }
     }))
   };
+}
+
+export function setRackCooling(rackId: string, enabled: boolean) {
+  const numMatch = (rackId || '').match(/\d+/);
+  const rackNum = numMatch ? parseInt(numMatch[0], 10) : -1;
+  const target = racks.find(r => 
+    r.id === rackId || 
+    r.id === `A0${rackNum}` || 
+    r.id === `A${rackNum}` ||
+    (rackNum > 0 && parseInt(r.id.replace(/\D+/g, ''), 10) === rackNum)
+  );
+  if (target) {
+    target.overrideEnabled = enabled;
+    target.coolingActive = enabled;
+    (target as any).manualDisengaged = !enabled;
+    if (enabled) {
+      // Preserve starting telemetry values without any instant jump.
+      // Reset coolingProgress to 0 to begin the gradual reduction transition.
+      (target as any).coolingProgress = 0.0;
+    } else {
+      (target as any).coolingProgress = 0.0;
+      target.riskScore = Math.min(0.40, target.riskScore);
+    }
+  }
+}
+
+if (typeof window !== 'undefined') {
+  (window as any).__setRackCooling = setRackCooling;
+  (window as any).__racks = racks;
 }
