@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { TopNav } from '../features/TopNav';
-import { StatusStrip } from '../features/StatusStrip';
 import { OverviewTab } from '../pages/OverviewTab';
 import { ThermalMapTab } from '../pages/ThermalMapTab';
 
@@ -18,7 +17,6 @@ export function App() {
       <Router>
         <div className="flex h-screen flex-col bg-[#0B0E14] text-white overflow-hidden font-sans">
           <TopNav />
-          <StatusStrip />
           
           <main className="flex-1 overflow-auto relative">
             <Routes>
