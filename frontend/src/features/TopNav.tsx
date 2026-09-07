@@ -29,12 +29,17 @@ export function TopNav() {
       </div>
 
       <nav className="flex items-center gap-2">
-        <NavItem to="/dual-node" label="Dual Node" />
-        <NavItem to="/overview" label="Overview" />
-        <NavItem to="/thermal-map" label="Thermal Map" />
-        <NavItem to="/racks" label="Racks" />
-        <NavItem to="/predictions" label="Predictions" />
-        <NavItem to="/events" label="Events" />
+        {isLocal ? (
+          <NavItem to="/dual-node" label="Dual Node" />
+        ) : (
+          <>
+            <NavItem to="/overview" label="Overview" />
+            <NavItem to="/thermal-map" label="Thermal Map" />
+            <NavItem to="/racks" label="Racks" />
+            <NavItem to="/predictions" label="Predictions" />
+            <NavItem to="/events" label="Events" />
+          </>
+        )}
       </nav>
 
       <div className="flex items-center gap-6">
