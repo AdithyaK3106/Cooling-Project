@@ -7,22 +7,58 @@ def cpu_burner():
     while True:
         _ = [x**2 for x in range(10000)]
 
-def run_stress_test(duration=30):
+def gpu_burner():
+    """Use PyTorch to load the GPU to ~50%."""
+    try:
+        import torch
+        if not torch.cuda.is_available():
+            print("\n[!] CUDA not available. Skipping GPU stress test.")
+            return
+            
+        # Create a reasonably large tensor
+        a = torch.randn(8192, 8192, device='cuda')
+        b = torch.randn(8192, 8192, device='cuda')
+        
+        while True:
+            t0 = time.time()
+            # Matrix multiplication to stress CUDA cores
+            c = torch.matmul(a, b)
+            # Synchronize to ensure execution finishes before timing
+            torch.cuda.synchronize()
+            t1 = time.time()
+            
+            compute_time = t1 - t0
+            # To get 50% utilization, we sleep for the exact same duration as the compute took
+            time.sleep(compute_time)
+            
+    except ImportError:
+        print("\n[!] PyTorch not installed. Skipping GPU stress test.")
+    except Exception as e:
+        print(f"\n[!] GPU stress error: {e}")
+
+def run_stress_test(duration=60):
     print("======================================================")
-    print(" THERVO - NODE 1 STRESS TEST")
+    print(" THERVO - NODE 1 STRESS TEST (CPU + GPU)")
     print("======================================================")
-    print(f"[*] Starting CPU Burner across all cores for {duration} seconds...")
+    
+    num_cores = 15
+    print(f"[*] Starting {num_cores} CPU Burner processes...")
     
     processes = []
-    # Use max cores - 1 to leave room for the OS and our agent
-    num_cores = max(1, multiprocessing.cpu_count() - 1)
     
+    # Start CPU processes
     for i in range(num_cores):
         p = multiprocessing.Process(target=cpu_burner)
         p.start()
         processes.append(p)
         
-    print(f"[*] Spawning {num_cores} processes. Watch the dashboard for heat propagation!")
+    # Start GPU process
+    print("[*] Starting GPU Burner process (~50% utilization)...")
+    gpu_p = multiprocessing.Process(target=gpu_burner)
+    gpu_p.start()
+    processes.append(gpu_p)
+        
+    print(f"\n[*] All stress processes running. Watch the dashboard for heat propagation!")
     
     try:
         # Wait for the specified duration with a progress bar
