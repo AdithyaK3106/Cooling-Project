@@ -22,38 +22,67 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
       
       scene.traverse((child) => {
         if (child.userData && child.userData.rackId) {
-          const meshes: any[] = [];
+          const accentMeshes: any[] = [];
+          const fallbackMeshes: any[] = [];
           
           child.traverse((mesh: any) => {
             if (mesh.isMesh && mesh.material) {
+              if (mesh.userData?.isRiskAccent || (mesh.material as any)?.__isRiskAccentMaterial) {
+                accentMeshes.push(mesh);
+              } else {
+                fallbackMeshes.push(mesh);
+              }
+            }
+          });
+          
+          if (accentMeshes.length > 0) {
+            rackMap.set(child.userData.rackId, accentMeshes);
+          } else {
+            fallbackMeshes.forEach((mesh: any) => {
               const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-              
               if (!mesh.userData.uniqueMaterial) {
                 mesh.material = Array.isArray(mesh.material) 
                   ? materials.map((m: any) => m.clone())
                   : mesh.material.clone();
                 mesh.userData.uniqueMaterial = true;
                 
-                // Only add outlines to the main rack body to save draw calls
-                if (mesh.name.match(/Rack body/i)) {
+                if (mesh.name && mesh.name.match(/Rack body/i)) {
                   const edges = new THREE.EdgesGeometry(mesh.geometry);
                   const lineMat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 2 });
                   const line = new THREE.LineSegments(edges, lineMat);
                   mesh.add(line);
                 }
               }
-              
-              meshes.push(mesh);
-            }
-          });
-          
-          rackMap.set(child.userData.rackId, meshes);
+            });
+            rackMap.set(child.userData.rackId, fallbackMeshes);
+          }
         }
       });
       
       (scene as any).__thermalRackMap = rackMap;
       (scene as any).__thermalCached = true;
     }
+  }, [scene]);
+
+  // Clean up emissives on unmount
+  useEffect(() => {
+    return () => {
+      if ((scene as any)?.__thermalRackMap) {
+        const rackMap: Map<string, any[]> = (scene as any).__thermalRackMap;
+        rackMap.forEach((meshes) => {
+          meshes.forEach((mesh) => {
+            const activeMats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            activeMats.forEach((mat: any) => {
+              if (mat.emissive !== undefined) {
+                mat.emissive.set(0x000000);
+                mat.emissiveIntensity = 0;
+                mat.needsUpdate = true;
+              }
+            });
+          });
+        });
+      }
+    };
   }, [scene]);
 
   useEffect(() => {

@@ -14,6 +14,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTelemetry, TELEMETRY_QUERY_KEY } from '../../services/telemetryApi';
 import { tickSimulation, getSimulatedTelemetry, setRackCooling } from '../../services/simulation';
 import { useSetRackCooling } from '../../services/controlApi';
+import { createDetailedServerRack } from '../models/ServerRackCabinet';
+import { PerimeterWall } from '../models/PerimeterWall';
 import * as THREE from 'three';
 
 function Model() {
@@ -158,6 +160,19 @@ function Model() {
         );
         // Reset rotation so they all face forward neatly
         child.rotation.set(0, 0, 0);
+
+        // Hide original low-poly placeholder meshes
+        child.children.forEach((c: any) => {
+          if (!c.userData?.isDetailedCabinet) {
+            c.visible = false;
+          }
+        });
+
+        // Attach realistic enterprise server cabinet
+        if (!child.children.some((c: any) => c.userData?.isDetailedCabinet)) {
+          const cabinet = createDetailedServerRack(rackId);
+          child.add(cabinet);
+        }
       }
     });
 
@@ -468,6 +483,7 @@ function Model() {
 
       {isReady && (
         <>
+          <PerimeterWall />
           <StatsLayer scene={scene} />
           {activeLayer === 'THERMAL' && <ThermalLayer scene={scene} />}
           {activeLayer === 'RISK' && <GNNLayer scene={scene} />}
@@ -487,6 +503,7 @@ function PerfExposer() {
     (window as any).__gl = gl;
     (window as any).__scene = scene;
     (window as any).__camera = camera;
+    (window as any).__THREE = THREE;
     (window as any).__setHoveredRackId = setHoveredRackId;
     (window as any).__setSelectedRackId = setSelectedRackId;
   }, [gl, scene, camera, setHoveredRackId, setSelectedRackId]);
