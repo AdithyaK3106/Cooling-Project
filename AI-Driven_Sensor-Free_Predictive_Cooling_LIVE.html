@@ -1503,22 +1503,22 @@
     </div>
     <div class="sim-controls-form">
       <div class="slider-field">
-        <div class="sf-header"><span>SIM SPEED</span><span class="sf-val mono" id="speedVal">1x</span></div>
-        <input type="range" id="speedSlider" min="1" max="5" value="1" step="1">
+        <div class="sf-header"><span>SIM SPEED</span><span class="sf-val mono" id="drawerSpeedVal">1x</span></div>
+        <input type="range" id="drawerSpeedSlider" min="1" max="5" value="1" step="1">
       </div>
       <div class="slider-field">
-        <div class="sf-header"><span>WORKLOAD INTENSITY</span><span class="sf-val mono" id="loadVal">35%</span></div>
-        <input type="range" id="loadSlider" min="10" max="100" value="35" step="5">
+        <div class="sf-header"><span>WORKLOAD INTENSITY</span><span class="sf-val mono" id="drawerLoadVal">35%</span></div>
+        <input type="range" id="drawerLoadSlider" min="10" max="100" value="35" step="5">
       </div>
       <div class="slider-field">
-        <div class="sf-header"><span>THERMAL NOISE</span><span class="sf-val mono" id="noiseVal">12%</span></div>
-        <input type="range" id="noiseSlider" min="0" max="30" value="12" step="1">
+        <div class="sf-header"><span>THERMAL NOISE</span><span class="sf-val mono" id="drawerNoiseVal">12%</span></div>
+        <input type="range" id="drawerNoiseSlider" min="0" max="30" value="12" step="1">
       </div>
       <div class="sim-actions-grid">
-        <button class="btn btn-navy" id="btnRun">▶ Run Sim</button>
-        <button class="btn btn-outline" id="btnStop">■ Stop</button>
-        <button class="btn btn-stress" id="btnInjectSpike">⚡ Inject Spike</button>
-        <button class="btn btn-success-enterprise" id="btnCoolAll">❄ Cool All High Risk</button>
+        <button class="btn btn-navy" id="drawerBtnRun">▶ Run Sim</button>
+        <button class="btn btn-outline" id="drawerBtnStop">■ Stop</button>
+        <button class="btn btn-stress" id="drawerBtnInjectSpike">⚡ Inject Spike</button>
+        <button class="btn btn-success-enterprise" id="drawerBtnCoolAll">❄ Cool All High Risk</button>
       </div>
     </div>
   </div>
@@ -2757,30 +2757,52 @@ function renderFloorPlan() {
   const rowC = document.getElementById('floorRowC');
   if (!rowA || !rowB || !rowC) return;
 
-  rowA.innerHTML = ''; rowB.innerHTML = ''; rowC.innerHTML = '';
-
   racks.forEach((rack, i) => {
-    const unit = document.createElement('div');
+    const row = rack.zone === 'A' ? rowA : (rack.zone === 'B' ? rowB : rowC);
+    const colIdx = (rack.zone === 'A') ? i : (rack.zone === 'B' ? (i - 4) : (i - 8));
+    let unit = row.children[colIdx];
     const ec = getRiskEnterpriseClass(rack.riskScore);
-    
-    unit.className = `floor-rack-unit ${i === selectedRack ? 'selected' : ''}`;
-    unit.style.background = ec.bg;
-    unit.style.borderColor = ec.border;
+    const pctStr = `${Math.round(rack.riskScore * 100)}%`;
 
-    unit.innerHTML = `
-      <div class="fru-header">
-        <span class="fru-id">${rack.name.replace('RACK-', '')}</span>
-        <span class="fru-badge ${ec.badgeClass}">${ec.label}</span>
-      </div>
-      <div class="fru-risk-val">${Math.round(rack.riskScore * 100)}%</div>
-      ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="fru-cooling">❄ COOLING ACTIVE</span>' : ''}
-    `;
+    if (!unit) {
+      unit = document.createElement('div');
+      unit.className = `floor-rack-unit ${i === selectedRack ? 'selected' : ''}`;
+      unit.style.background = ec.bg;
+      unit.style.borderColor = ec.border;
+      unit.innerHTML = `
+        <div class="fru-header">
+          <span class="fru-id">${rack.name.replace('RACK-', '')}</span>
+          <span class="fru-badge ${ec.badgeClass}">${ec.label}</span>
+        </div>
+        <div class="fru-risk-val">${pctStr}</div>
+        ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="fru-cooling">❄ COOLING ACTIVE</span>' : ''}
+      `;
+      unit.addEventListener('click', () => selectRack(i));
+      row.appendChild(unit);
+    } else {
+      unit.className = `floor-rack-unit ${i === selectedRack ? 'selected' : ''}`;
+      unit.style.background = ec.bg;
+      unit.style.borderColor = ec.border;
 
-    unit.addEventListener('click', () => selectRack(i));
+      const badge = unit.querySelector('.fru-badge');
+      if (badge) {
+        badge.className = `fru-badge ${ec.badgeClass}`;
+        badge.textContent = ec.label;
+      }
 
-    if (rack.zone === 'A') rowA.appendChild(unit);
-    else if (rack.zone === 'B') rowB.appendChild(unit);
-    else rowC.appendChild(unit);
+      const val = unit.querySelector('.fru-risk-val');
+      if (val) {
+        val.textContent = pctStr;
+      }
+
+      const coolingEl = unit.querySelector('.fru-cooling');
+      const isCooling = rack.coolingActive || rack.overrideEnabled;
+      if (isCooling && !coolingEl) {
+        unit.insertAdjacentHTML('beforeend', '<span class="fru-cooling">❄ COOLING ACTIVE</span>');
+      } else if (!isCooling && coolingEl) {
+        coolingEl.remove();
+      }
+    }
   });
 }
 
@@ -3256,40 +3278,74 @@ function addLog(msg, type = '') {
   log.scrollTop = log.scrollHeight;
 }
 
-// ─── CONTROLS EVENT LISTENERS ───
-document.getElementById('speedSlider')?.addEventListener('input', function() {
-  document.getElementById('speedVal').textContent = this.value + 'x';
+// ─── CONTROLS EVENT LISTENERS & LIVE SYNCHRONIZATION ───
+function handleSpeedChange(newSpeed) {
+  const speed = parseInt(newSpeed);
+  const valEl = document.getElementById('speedVal');
+  const drawerValEl = document.getElementById('drawerSpeedVal');
+  const slider = document.getElementById('speedSlider');
+  const drawerSlider = document.getElementById('drawerSpeedSlider');
+  if (valEl) valEl.textContent = speed + 'x';
+  if (drawerValEl) drawerValEl.textContent = speed + 'x';
+  if (slider && slider.value != speed) slider.value = speed;
+  if (drawerSlider && drawerSlider.value != speed) drawerSlider.value = speed;
   if (simRunning) {
     clearInterval(simInterval);
-    simInterval = setInterval(simTick, 1000 / parseInt(this.value));
+    simInterval = setInterval(simTick, 1000 / speed);
   }
-});
+}
 
-document.getElementById('loadSlider')?.addEventListener('input', function() {
-  document.getElementById('loadVal').textContent = this.value + '%';
-});
+function handleLoadChange(newLoad) {
+  const load = parseInt(newLoad);
+  const valEl = document.getElementById('loadVal');
+  const drawerValEl = document.getElementById('drawerLoadVal');
+  const slider = document.getElementById('loadSlider');
+  const drawerSlider = document.getElementById('drawerLoadSlider');
+  if (valEl) valEl.textContent = load + '%';
+  if (drawerValEl) drawerValEl.textContent = load + '%';
+  if (slider && slider.value != load) slider.value = load;
+  if (drawerSlider && drawerSlider.value != load) drawerSlider.value = load;
+  if (simRunning) {
+    simTick();
+  } else {
+    autonomousDrift();
+  }
+}
 
-document.getElementById('noiseSlider')?.addEventListener('input', function() {
-  document.getElementById('noiseVal').textContent = this.value + '%';
-});
+function handleNoiseChange(newNoise) {
+  const noise = parseInt(newNoise);
+  const valEl = document.getElementById('noiseVal');
+  const drawerValEl = document.getElementById('drawerNoiseVal');
+  const slider = document.getElementById('noiseSlider');
+  const drawerSlider = document.getElementById('drawerNoiseSlider');
+  if (valEl) valEl.textContent = noise + '%';
+  if (drawerValEl) drawerValEl.textContent = noise + '%';
+  if (slider && slider.value != noise) slider.value = noise;
+  if (drawerSlider && drawerSlider.value != noise) drawerSlider.value = noise;
+  if (simRunning) {
+    simTick();
+  } else {
+    autonomousDrift();
+  }
+}
 
-document.getElementById('btnRun')?.addEventListener('click', () => {
+function handleSimRun() {
   if (simRunning) return;
   simRunning = true;
   const speed = parseInt(document.getElementById('speedSlider').value);
   simInterval = setInterval(simTick, 1000 / speed);
   document.getElementById('statusText').textContent = 'SYSTEM OPERATIONAL';
   addLog('▶ Simulation started — Live GNN + XGBoost predictive pipeline active', 'info');
-});
+}
 
-document.getElementById('btnStop')?.addEventListener('click', () => {
+function handleSimStop() {
   simRunning = false;
   clearInterval(simInterval);
   document.getElementById('statusText').textContent = 'SIMULATION PAUSED';
   addLog('■ Simulation paused', 'warn');
-});
+}
 
-document.getElementById('btnInjectSpike')?.addEventListener('click', () => {
+function handleInjectSpike() {
   const target = Math.floor(Math.random() * NUM_RACKS);
   const rack = racks[target];
   rack.spikeBonus = 55;
@@ -3317,9 +3373,9 @@ document.getElementById('btnInjectSpike')?.addEventListener('click', () => {
   updateGNNGraph();
   updateSelectedDetail();
   updateModelStats();
-});
+}
 
-document.getElementById('btnCoolAll')?.addEventListener('click', () => {
+function handleCoolAll() {
   let count = 0;
   racks.forEach(rack => {
     if (rack.riskScore > 0.55) {
@@ -3332,7 +3388,28 @@ document.getElementById('btnCoolAll')?.addEventListener('click', () => {
   updateRackCards();
   updateHeatmap();
   updateModelStats();
-});
+}
+
+document.getElementById('speedSlider')?.addEventListener('input', function() { handleSpeedChange(this.value); });
+document.getElementById('drawerSpeedSlider')?.addEventListener('input', function() { handleSpeedChange(this.value); });
+
+document.getElementById('loadSlider')?.addEventListener('input', function() { handleLoadChange(this.value); });
+document.getElementById('drawerLoadSlider')?.addEventListener('input', function() { handleLoadChange(this.value); });
+
+document.getElementById('noiseSlider')?.addEventListener('input', function() { handleNoiseChange(this.value); });
+document.getElementById('drawerNoiseSlider')?.addEventListener('input', function() { handleNoiseChange(this.value); });
+
+document.getElementById('btnRun')?.addEventListener('click', handleSimRun);
+document.getElementById('drawerBtnRun')?.addEventListener('click', handleSimRun);
+
+document.getElementById('btnStop')?.addEventListener('click', handleSimStop);
+document.getElementById('drawerBtnStop')?.addEventListener('click', handleSimStop);
+
+document.getElementById('btnInjectSpike')?.addEventListener('click', handleInjectSpike);
+document.getElementById('drawerBtnInjectSpike')?.addEventListener('click', handleInjectSpike);
+
+document.getElementById('btnCoolAll')?.addEventListener('click', handleCoolAll);
+document.getElementById('drawerBtnCoolAll')?.addEventListener('click', handleCoolAll);
 
 document.getElementById('btnDeployCool')?.addEventListener('click', () => {
   const rack = racks[selectedRack];

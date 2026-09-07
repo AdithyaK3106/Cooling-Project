@@ -48,8 +48,8 @@ export function RacksTab() {
     <div className="flex h-full w-full p-6 gap-6 overflow-hidden">
       
       {/* Main Fleet Column */}
-      <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-[#0B0E14]/80 backdrop-blur shadow-2xl overflow-hidden">
-        <div className="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
+      <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-[#0B0E14]/80 backdrop-blur shadow-2xl overflow-visible">
+        <div className="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4 relative z-10">
           <div>
             <h2 className="text-xl font-bold text-white tracking-wide">Rack Fleet</h2>
             <p className="text-sm text-gray-400">{displayList.length} racks matching criteria</p>
@@ -61,13 +61,14 @@ export function RacksTab() {
               <select 
                 value={filterRisk} 
                 onChange={e => setFilterRisk(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none"
+                style={{ colorScheme: 'dark' }}
+                className="bg-[#0B0E14] border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none cursor-pointer hover:border-white/20 transition-colors [color-scheme:dark]"
               >
-                <option value="all">All</option>
-                <option value="low">Low (&lt;35%)</option>
-                <option value="med">Medium (35-55%)</option>
-                <option value="high">High (55-75%)</option>
-                <option value="crit">Critical (&gt;75%)</option>
+                <option value="all" className="bg-[#0B0E14] text-white">All</option>
+                <option value="low" className="bg-[#0B0E14] text-white">Low (&lt;35%)</option>
+                <option value="med" className="bg-[#0B0E14] text-white">Medium (35-55%)</option>
+                <option value="high" className="bg-[#0B0E14] text-white">High (55-75%)</option>
+                <option value="crit" className="bg-[#0B0E14] text-white">Critical (&gt;75%)</option>
               </select>
             </div>
             
@@ -76,11 +77,12 @@ export function RacksTab() {
               <select 
                 value={filterCooling} 
                 onChange={e => setFilterCooling(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none"
+                style={{ colorScheme: 'dark' }}
+                className="bg-[#0B0E14] border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none cursor-pointer hover:border-white/20 transition-colors [color-scheme:dark]"
               >
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="all" className="bg-[#0B0E14] text-white">All</option>
+                <option value="active" className="bg-[#0B0E14] text-white">Active</option>
+                <option value="inactive" className="bg-[#0B0E14] text-white">Inactive</option>
               </select>
             </div>
 
@@ -89,20 +91,21 @@ export function RacksTab() {
               <select 
                 value={sortFleet} 
                 onChange={e => setSortFleet(e.target.value)}
-                className="bg-white/5 border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none"
+                style={{ colorScheme: 'dark' }}
+                className="bg-[#0B0E14] border border-white/10 rounded px-3 py-1.5 text-sm text-white outline-none cursor-pointer hover:border-white/20 transition-colors [color-scheme:dark]"
               >
-                <option value="risk-desc">Risk (High to Low)</option>
-                <option value="risk-asc">Risk (Low to High)</option>
-                <option value="cpu-desc">CPU Utilization</option>
-                <option value="gpu-desc">GPU Utilization</option>
-                <option value="id">Rack ID</option>
+                <option value="risk-desc" className="bg-[#0B0E14] text-white">Risk (High to Low)</option>
+                <option value="risk-asc" className="bg-[#0B0E14] text-white">Risk (Low to High)</option>
+                <option value="cpu-desc" className="bg-[#0B0E14] text-white">CPU Utilization</option>
+                <option value="gpu-desc" className="bg-[#0B0E14] text-white">GPU Utilization</option>
+                <option value="id" className="bg-[#0B0E14] text-white">Rack ID</option>
               </select>
             </div>
           </div>
         </div>
 
         {/* Fleet Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 rounded-b-xl">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {displayList.map(rack => {
               const isSelected = rack.id === selectedRackId;
