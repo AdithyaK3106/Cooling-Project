@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useTelemetry } from '../../services/telemetryApi';
-import { Text, Billboard } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 
 export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
@@ -10,9 +10,7 @@ export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
     const map = new Map<string, THREE.Vector3>();
     if (!scene) return map;
     scene.traverse((child) => {
-      // Ensure the rack hasn't been stripped from the scene
       if (child.userData && child.userData.rackId && child.parent !== null) {
-        // Double check it's actually in the active scene graph
         let isActive = true;
         let node = child;
         while (node) {
@@ -36,56 +34,36 @@ export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
     <>
       {Array.from(rackPositions.entries()).map(([rackId, pos]) => {
         const rack = telemetry.racks.find((r: any) => r.id === rackId);
+        if (!rack) return null;
 
-        if (!rack) {
-          return (
-            <Billboard key={rackId} position={[pos.x, pos.y + 1.2, pos.z]} follow={true}>
-              <Text
-                position={[0, 0, 0]}
-                fontSize={0.08}
-                color="#888888"
-                anchorX="center"
-                anchorY="bottom"
-                outlineWidth={0.008}
-                outlineColor="black"
-              >
-                WAITING FOR TELEMETRY
-              </Text>
-            </Billboard>
-          );
-        }
+        const risk = rack.risk_score || 0;
+        const riskPct = Math.round(risk * 100);
 
-        // Color temperature text based on risk
-        let tempColor = "#00ffff"; // cool
-        if (rack.risk_score >= 0.8) tempColor = "#ff3333";
-        else if (rack.risk_score >= 0.6) tempColor = "#ff9900";
-        else if (rack.risk_score >= 0.4) tempColor = "#ffff00";
+        let badgeBg = 'bg-emerald-950/80 border-emerald-500/80 text-emerald-300';
+        if (risk >= 0.75) badgeBg = 'bg-red-950/90 border-red-500 text-red-200 animate-pulse';
+        else if (risk >= 0.55) badgeBg = 'bg-orange-950/80 border-orange-500 text-orange-200';
+        else if (risk >= 0.35) badgeBg = 'bg-amber-950/80 border-amber-500 text-amber-200';
+
+        const isCooled = rack.cooling?.status === 'predictive intervention' || rack.cooling?.override;
 
         return (
-          <Billboard key={rack.id} position={[pos.x, pos.y + 1.2, pos.z]} follow={true}>
-            <Text
-              position={[0, 0.15, 0]}
-              fontSize={0.15}
-              color="white"
-              anchorX="center"
-              anchorY="bottom"
-              outlineWidth={0.015}
-              outlineColor="black"
-            >
-              {rack.id}
-            </Text>
-            <Text
-              position={[0, 0, 0]}
-              fontSize={0.12}
-              color={tempColor}
-              anchorX="center"
-              anchorY="bottom"
-              outlineWidth={0.012}
-              outlineColor="black"
-            >
-              {rack.telemetry.cpu_temp.toFixed(1)}°C
-            </Text>
-          </Billboard>
+          <Html
+            key={rack.id}
+            position={[pos.x, pos.y + 2.5, pos.z]}
+            center
+            style={{ pointerEvents: 'none', userSelect: 'none' }}
+          >
+            <div className={`px-2 py-1 rounded-lg border backdrop-blur-md shadow-lg flex flex-col items-center gap-0.5 text-[10px] font-mono whitespace-nowrap transition-all duration-300 ${badgeBg}`}>
+              <div className="font-bold tracking-wider flex items-center gap-1 text-white">
+                <span>{rack.id}</span>
+                {isCooled && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />}
+              </div>
+              <div className="flex items-center gap-1.5 text-[9px]">
+                <span className="font-bold">RISK {riskPct}%</span>
+                <span className="opacity-70">CPU {rack.telemetry?.cpu_util?.toFixed(0)}%</span>
+              </div>
+            </div>
+          </Html>
         );
       })}
     </>
