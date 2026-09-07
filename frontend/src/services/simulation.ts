@@ -2,10 +2,68 @@ const NUM_RACKS = 25;
 let currentMode = 'DATA_CENTER_SIMULATION';
 let load = 50;
 let noise = 12;
+let dissipationRate = 1.0;
+let thermalMultiplier = 1.0;
+let simSpeedMs = 500;
+let isPaused = false;
 let epoch = 0;
 let totalPreds = 0;
 let alertCount = 0;
 let eventsList: Array<{ time: string; source: string; category: string; message: string }> = [];
+
+let configListeners: Array<() => void> = [];
+
+function notifyConfigListeners() {
+  configListeners.forEach(cb => cb());
+}
+
+export function subscribeSimulationConfig(callback: () => void) {
+  configListeners.push(callback);
+  return () => {
+    configListeners = configListeners.filter(cb => cb !== callback);
+  };
+}
+
+export function getSimulationConfig() {
+  return {
+    load,
+    noise,
+    dissipationRate,
+    thermalMultiplier,
+    simSpeedMs,
+    isPaused
+  };
+}
+
+export function setSimulationSpeed(speedMs: number) {
+  simSpeedMs = Math.max(50, Math.min(3000, speedMs));
+  addEvent(`Simulation speed updated to ${simSpeedMs}ms / tick (${(1000/simSpeedMs).toFixed(1)} Hz)`, 'ACTION', 'CONTROLS');
+  notifyConfigListeners();
+}
+
+export function togglePauseSimulation() {
+  isPaused = !isPaused;
+  addEvent(isPaused ? 'Simulation PAUSED' : 'Simulation RESUMED', 'ACTION', 'CONTROLS');
+  notifyConfigListeners();
+}
+
+export function setSimulationParams(newLoad: number, newNoise: number, newDissipation = 1.0, newThermalMult = 1.0) {
+  load = Math.max(10, Math.min(100, newLoad));
+  noise = Math.max(0, Math.min(50, newNoise));
+  dissipationRate = Math.max(0.2, Math.min(3.0, newDissipation));
+  thermalMultiplier = Math.max(0.5, Math.min(3.0, newThermalMult));
+  addEvent(`Physics tuned: Load ${load}%, Cool Rate ${dissipationRate.toFixed(1)}x, Noise ${noise}%`, 'ACTION', 'CONTROLS');
+  notifyConfigListeners();
+}
+
+export function injectGlobalSpike() {
+  racks.forEach(r => {
+    r.spikeBonus += 65;
+  });
+  alertCount += NUM_RACKS;
+  addEvent('EMERGENCY: Global thermal heat spike injected across ALL 25 racks!', 'WARN', 'SIMULATION');
+  notifyConfigListeners();
+}
 
 const ZONES = Array.from({length: NUM_RACKS}, (_, i) => {
   if (i < 5) return 'A';
@@ -108,12 +166,12 @@ function computeGNNEmbeddings(rackFeatures: any[]) {
   for (let i = 0; i < NUM_RACKS; i++) {
     const self = rackFeatures[i];
     const selfCooling = racks[i] ? (racks[i].coolingActive || racks[i].overrideEnabled) : false;
-    const selfCoolFactor = selfCooling ? 0.45 : 1.0;
+    const selfCoolFactor = selfCooling ? (0.45 / Math.max(0.2, dissipationRate)) : 1.0;
 
     const neighbors = adjList[i].map(j => {
       const feat = rackFeatures[j];
       const jCooling = racks[j] ? (racks[j].coolingActive || racks[j].overrideEnabled) : false;
-      return { heat: (feat.cpu * 0.6 + feat.gpu * 0.4) * (jCooling ? 0.45 : 1.0) };
+      return { heat: (feat.cpu * 0.6 + feat.gpu * 0.4) * (jCooling ? (0.45 / Math.max(0.2, dissipationRate)) : 1.0) };
     });
 
     const neighborHeat = neighbors.length > 0 ? neighbors.reduce((s, n) => s + n.heat, 0) / neighbors.length : 0;
@@ -124,9 +182,11 @@ function computeGNNEmbeddings(rackFeatures: any[]) {
 }
 
 export function tickSimulation() {
+  if (isPaused) return;
+
   epoch++;
   totalPreds += NUM_RACKS;
-  const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, load/100, noise/100));
+  const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, (load / 100) * thermalMultiplier, noise / 100));
   const gnnEmbeds = computeGNNEmbeddings(rawFeatures);
 
   racks.forEach((rack, i) => {
@@ -152,17 +212,13 @@ export function tickSimulation() {
     }
 
     const isCooled = rack.coolingActive || rack.overrideEnabled;
-    const targetRisk = isCooled ? (rawCompositeRisk * 0.40) : rawCompositeRisk;
+    const coolFactor = Math.min(0.85, 0.40 / Math.max(0.2, dissipationRate));
+    const targetRisk = isCooled ? (rawCompositeRisk * coolFactor) : rawCompositeRisk;
     
-    // Fast responsive updates so numbers and colors change visibly every tick
-    rack.riskScore = parseFloat((rack.riskScore * 0.65 + targetRisk * 0.35).toFixed(4));
+    // Smooth responsive interpolation based on tick speed
+    const stepRatio = Math.min(0.75, Math.max(0.15, 0.35 * (simSpeedMs / 250)));
+    rack.riskScore = parseFloat((rack.riskScore * (1 - stepRatio) + targetRisk * stepRatio).toFixed(4));
   });
-}
-
-export function setSimulationParams(newLoad: number, newNoise: number) {
-  load = newLoad;
-  noise = newNoise;
-  addEvent(`Tuned load: ${load}%, noise: ${noise}%`, 'ACTION', 'CONTROLS');
 }
 
 export function injectRandomSpike() {

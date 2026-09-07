@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react';
 import { useTelemetry } from '../services/telemetryApi';
 import { useUiStore } from '../stores/uiStore';
 import { ContextualDetailsPanel } from '../features/ContextualDetailsPanel';
-import { Snowflake, Cpu, Activity, HardDrive, Wifi } from 'lucide-react';
+import { SimulationControlBar } from '../components/simulation/SimulationControlBar';
+import { Snowflake, Cpu, HardDrive, Wifi } from 'lucide-react';
 
 export function RacksTab() {
   const { data: telemetry } = useTelemetry();
@@ -46,9 +47,11 @@ export function RacksTab() {
   }, [racks, filterRisk, filterCooling, sortFleet]);
 
   return (
-    <div className="flex h-full w-full p-6 gap-6 overflow-hidden bg-[#07090E] text-white">
+    <div className="flex h-full w-full p-6 flex-col gap-6 overflow-y-auto bg-[#07090E] text-white">
+      <SimulationControlBar />
       
-      {/* Main Fleet Column */}
+      {/* Main Fleet Layout */}
+      <div className="flex h-full w-full gap-6 overflow-hidden">
       <div className="flex-1 flex flex-col rounded-xl border border-white/10 bg-[#0B0E14]/80 backdrop-blur shadow-2xl overflow-hidden">
         <div className="p-6 border-b border-white/10 flex flex-wrap justify-between items-center gap-4">
           <div>
@@ -191,6 +194,7 @@ export function RacksTab() {
       {/* Right Details Panel */}
       <div className="w-80 shrink-0">
         <ContextualDetailsPanel />
+      </div>
       </div>
 
     </div>

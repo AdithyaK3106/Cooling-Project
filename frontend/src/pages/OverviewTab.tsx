@@ -4,7 +4,8 @@ import { CompactBottomBar } from '../features/CompactBottomBar';
 import { useTelemetry } from '../services/telemetryApi';
 import { useUiStore } from '../stores/uiStore';
 import { useInjectSpike, useToggleRackOverride, useResetSimulation } from '../services/controlApi';
-import { Flame, RefreshCw, Snowflake, Cpu, Activity, HardDrive, Wifi, ShieldAlert } from 'lucide-react';
+import { SimulationControlBar } from '../components/simulation/SimulationControlBar';
+import { Flame, RefreshCw, Snowflake, Cpu, Activity, HardDrive, Wifi } from 'lucide-react';
 
 export function OverviewTab() {
   const { data: telemetry } = useTelemetry();
@@ -25,6 +26,9 @@ export function OverviewTab() {
   return (
     <div className="flex h-full w-full flex-col gap-6 p-6 overflow-y-auto bg-[#07090E] text-white">
       
+      {/* Simulation Physics & Speed Controller */}
+      <SimulationControlBar />
+
       {/* Top Section Header & Global Status Bar */}
       <div className="flex flex-wrap justify-between items-center bg-[#0B0E14]/90 p-4 rounded-xl border border-white/10 backdrop-blur shadow-2xl gap-4">
         <div>

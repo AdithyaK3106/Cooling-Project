@@ -1,15 +1,23 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from './apiClient';
-import { tickSimulation, getSimulatedTelemetry } from './simulation';
+import { tickSimulation, getSimulatedTelemetry, getSimulationConfig, subscribeSimulationConfig } from './simulation';
 
 export const TELEMETRY_QUERY_KEY = ['telemetry'];
 
-// Start the simulation loop
-setInterval(() => {
-  if (localStorage.getItem('thervo_mode') === 'SIMULATED') {
-    tickSimulation();
-  }
-}, 250);
+let simulationTimer: any = null;
+
+function syncSimulationTimer() {
+  if (simulationTimer) clearInterval(simulationTimer);
+  const config = getSimulationConfig();
+  simulationTimer = setInterval(() => {
+    if (localStorage.getItem('thervo_mode') === 'SIMULATED') {
+      tickSimulation();
+    }
+  }, config.simSpeedMs);
+}
+
+syncSimulationTimer();
+subscribeSimulationConfig(syncSimulationTimer);
 
 export async function getTelemetry(): Promise<any> {
   const mode = localStorage.getItem('thervo_mode') || 'LOCAL';
