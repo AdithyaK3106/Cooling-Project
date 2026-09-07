@@ -256,13 +256,8 @@ class ThermalModeController:
             reason = ""
             
             # Dynamically match active mode's adaptive hold duration from hardware controller
-            active_hold_duration = 20.0
-            if self.active_mode == ThermalMode.FAILSAFE:
-                active_hold_duration = 0.0
-            elif self.active_mode == ThermalMode.PERFORMANCE:
-                active_hold_duration = 25.0
-            elif self.active_mode in (ThermalMode.QUIET, ThermalMode.SILENT_RECOVERY):
-                active_hold_duration = 10.0
+            # DEMO OVERRIDE: Set all hold durations to 0 for instant demo responsiveness!
+            active_hold_duration = 0.0
                 
             hold_expired = (current_time - self.last_switch_time) >= active_hold_duration
             
