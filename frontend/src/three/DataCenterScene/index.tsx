@@ -98,7 +98,7 @@ function Model() {
   }, [hoveredRackId, scene]);
 
   const hoveredRackData = React.useMemo(() => {
-    return telemetry?.racks.find((r) => r.id === hoveredRackId);
+    return telemetry?.racks.find((r: any) => r.id === hoveredRackId);
   }, [telemetry, hoveredRackId]);
 
   return (

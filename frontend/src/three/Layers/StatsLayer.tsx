@@ -35,7 +35,7 @@ export function StatsLayer({ scene }: { scene: THREE.Object3D }) {
   return (
     <>
       {Array.from(rackPositions.entries()).map(([rackId, pos]) => {
-        const rack = telemetry.racks.find(r => r.id === rackId);
+        const rack = telemetry.racks.find((r: any) => r.id === rackId);
 
         if (!rack) {
           return (

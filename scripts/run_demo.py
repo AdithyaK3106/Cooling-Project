@@ -13,7 +13,11 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 class DashboardHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path == '/':
-            self.path = '/Index.html'
+            dist_index = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'dist', 'index.html')
+            if os.path.exists(dist_index):
+                self.path = '/frontend/dist/index.html'
+            else:
+                self.path = '/Index.html'
         return super().do_GET()
         
     def log_message(self, format, *args):

@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-09-07T16:07:59.327848",
-  "future_risk": 0.3313155007958412,
-  "target_fan_percent": 55.0,
-  "policy_state": "BALANCED",
+  "timestamp": "2026-09-07T17:19:31.886695",
+  "future_risk": 0.5538493884265423,
+  "target_fan_percent": 85.0,
+  "policy_state": "THERVO",
   "stabilization_active": false
 }

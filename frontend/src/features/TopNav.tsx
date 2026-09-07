@@ -1,10 +1,8 @@
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { Box, User } from 'lucide-react';
-
 
 export function TopNav() {
   const navigate = useNavigate();
-  const location = useLocation();
   const mode = localStorage.getItem('thervo_mode') || 'LOCAL';
 
   const handleModeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

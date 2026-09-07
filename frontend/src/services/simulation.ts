@@ -1,5 +1,3 @@
-import type { ThervoTelemetry } from '../types/telemetry';
-
 const NUM_RACKS = 25;
 let currentMode = 'DATA_CENTER_SIMULATION';
 let load = 50;
@@ -7,6 +5,7 @@ let noise = 12;
 let epoch = 0;
 let totalPreds = 0;
 let alertCount = 0;
+let eventsList: Array<{ time: string; source: string; category: string; message: string }> = [];
 
 const ZONES = Array.from({length: NUM_RACKS}, (_, i) => {
   if (i < 5) return 'A';
@@ -52,30 +51,50 @@ function xgbPredict(features: number[]) {
 }
 
 let racks = Array.from({length: NUM_RACKS}, (_, i) => ({
-  id: `A0${i+1}`,
+  id: `A0${i+1 < 10 ? '0' + (i+1) : (i+1)}`,
   zone: ZONES[i],
   cpu: 0, gpu: 0, memory: 0, diskIO: 0, network: 0,
   gnnEmbed: 0, riskScore: 0, xgbPred: 0,
   coolingActive: false, overrideEnabled: false, spikeBonus: 0
 }));
 
-function generateSyntheticWorkload(rackIdx: number, epoch: number, baseLoad: number, noiseFactor: number) {
+function getTimeString() {
+  const now = new Date();
+  return `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+}
+
+function addEvent(message: string, category: string = 'ACTION', source: string = 'SIMULATION') {
+  eventsList.unshift({
+    time: getTimeString(),
+    source,
+    category,
+    message
+  });
+  if (eventsList.length > 20) eventsList.pop();
+}
+
+function generateSyntheticWorkload(rackIdx: number, baseLoad: number, noiseFactor: number) {
   let traceCpu = 0.28, traceGpu = 0.32, traceMem = 0.35, traceDisk = 0.20, traceNet = 0.25;
   const loadScale = baseLoad / 0.35;
   const rackBias = [1.25, 0.88, 1.12, 0.78, 1.35][rackIdx % 5] || 1.0;
-  const n = () => (Math.random() - 0.5) * noiseFactor * 2.0;
 
-  let cpu = Math.min(99, Math.max(10, traceCpu * 100 * loadScale * rackBias + n() * 6));
-  let gpu = Math.min(99, Math.max(5, traceGpu * 100 * loadScale * rackBias + n() * 6));
-  let memory = Math.min(99, Math.max(18, traceMem * 100 * (0.85 + loadScale * 0.15) + n() * 4));
-  let diskIO = Math.min(99, Math.max(3, traceDisk * 100 * loadScale + n() * 5));
-  let network = Math.min(99, Math.max(5, traceNet * 100 * loadScale + n() * 6));
+  // Add organic sine-wave + random fluctuation so values fluctuate visibly every tick
+  const t = Date.now() / 1000;
+  const sine1 = Math.sin(t * 0.9 + rackIdx * 1.3);
+  const sine2 = Math.cos(t * 1.5 + rackIdx * 0.7);
+  const n = () => (Math.random() - 0.5) * noiseFactor * 3.0;
+
+  let cpu = Math.min(99, Math.max(10, traceCpu * 100 * loadScale * rackBias + sine1 * 14 + n() * 6));
+  let gpu = Math.min(99, Math.max(5, traceGpu * 100 * loadScale * rackBias + sine2 * 16 + n() * 6));
+  let memory = Math.min(99, Math.max(18, traceMem * 100 * (0.85 + loadScale * 0.15) + Math.sin(t * 0.4 + rackIdx) * 6 + n() * 3));
+  let diskIO = Math.min(99, Math.max(3, traceDisk * 100 * loadScale * (1 + Math.abs(sine2) * 0.6) + n() * 8));
+  let network = Math.min(99, Math.max(5, traceNet * 100 * loadScale * (1 + Math.abs(sine1) * 0.7) + n() * 10));
 
   const activeRack = racks[rackIdx];
   if (activeRack && activeRack.spikeBonus > 0) {
     cpu = Math.min(99, cpu + activeRack.spikeBonus);
     gpu = Math.min(99, gpu + activeRack.spikeBonus * 0.9);
-    activeRack.spikeBonus *= 0.90;
+    activeRack.spikeBonus *= 0.88;
     if (activeRack.spikeBonus < 0.5) activeRack.spikeBonus = 0;
   }
   return { cpu, gpu, memory, diskIO, network };
@@ -107,7 +126,7 @@ function computeGNNEmbeddings(rackFeatures: any[]) {
 export function tickSimulation() {
   epoch++;
   totalPreds += NUM_RACKS;
-  const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, epoch, load/100, noise/100));
+  const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, load/100, noise/100));
   const gnnEmbeds = computeGNNEmbeddings(rawFeatures);
 
   racks.forEach((rack, i) => {
@@ -120,33 +139,84 @@ export function tickSimulation() {
     const rawCompositeRisk = rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25;
 
     if (!rack.coolingActive) {
-      if (rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) {
+      if (rawCompositeRisk >= 0.55 || rack.riskScore >= 0.55) {
         rack.coolingActive = true;
         alertCount++;
+        addEvent(`Auto predictive cooling engaged on ${rack.id}`, 'WARN', 'GNN_AI');
       }
     } else {
-      if (rack.riskScore <= 0.45 && rawCompositeRisk <= 0.45 && !rack.overrideEnabled) {
+      if (rack.riskScore <= 0.42 && rawCompositeRisk <= 0.42 && !rack.overrideEnabled) {
         rack.coolingActive = false;
+        addEvent(`Thermal equilibrium reached on ${rack.id}`, 'HEALTHY', 'THERMAL');
       }
     }
 
     const isCooled = rack.coolingActive || rack.overrideEnabled;
-    const targetRisk = isCooled ? (rawCompositeRisk * 0.45) : rawCompositeRisk;
-    const lerpFactor = isCooled ? 0.38 : 0.20;
-
-    if (rack.riskScore === 0) rack.riskScore = parseFloat(targetRisk.toFixed(4));
-    else rack.riskScore = parseFloat((rack.riskScore * (1 - lerpFactor) + targetRisk * lerpFactor).toFixed(4));
+    const targetRisk = isCooled ? (rawCompositeRisk * 0.40) : rawCompositeRisk;
+    
+    // Fast responsive updates so numbers and colors change visibly every tick
+    rack.riskScore = parseFloat((rack.riskScore * 0.65 + targetRisk * 0.35).toFixed(4));
   });
+}
+
+export function setSimulationParams(newLoad: number, newNoise: number) {
+  load = newLoad;
+  noise = newNoise;
+  addEvent(`Tuned load: ${load}%, noise: ${noise}%`, 'ACTION', 'CONTROLS');
+}
+
+export function injectRandomSpike() {
+  const randomRack = racks[Math.floor(Math.random() * racks.length)];
+  if (randomRack) {
+    randomRack.spikeBonus += 70;
+    addEvent(`Workload spike injected into ${randomRack.id}`, 'WARN', 'SIMULATION');
+  }
+}
+
+export function injectRackSpike(rackId: string) {
+  const rack = racks.find(r => r.id === rackId);
+  if (rack) {
+    rack.spikeBonus += 70;
+    addEvent(`Thermal load spike applied to ${rack.id}`, 'WARN', 'SIMULATION');
+  }
+}
+
+export function toggleRackOverride(rackId: string) {
+  const rack = racks.find(r => r.id === rackId);
+  if (rack) {
+    rack.overrideEnabled = !rack.overrideEnabled;
+    const statusStr = rack.overrideEnabled ? 'OVERRIDE ENABLED' : 'OVERRIDE RELEASED';
+    addEvent(`Manual cooling ${statusStr} for ${rack.id}`, 'ACTION', 'USER');
+  }
+}
+
+export function resetSimulation() {
+  epoch = 0;
+  totalPreds = 0;
+  alertCount = 0;
+  load = 50;
+  noise = 12;
+  eventsList = [];
+  racks.forEach(r => {
+    r.cpu = 0; r.gpu = 0; r.memory = 0; r.diskIO = 0; r.network = 0;
+    r.gnnEmbed = 0; r.riskScore = 0; r.xgbPred = 0;
+    r.coolingActive = false; r.overrideEnabled = false; r.spikeBonus = 0;
+  });
+  addEvent('Simulation state reset to baseline', 'HEALTHY', 'SYSTEM');
 }
 
 export function getSimulatedTelemetry(): any {
   const topology = GNN_EDGES.map(([a,b]) => ({
-    source: `A0${a+1}`, target: `A0${b+1}`,
+    source: racks[a].id, target: racks[b].id,
     weight: ((racks[a].riskScore + racks[b].riskScore) / 2) > 0.5 ? 0.9 : 0.3
   }));
 
   const hotZones = racks.filter(r => r.riskScore > 0.55).length;
   const modelAccuracy = Math.min(99.5, 91.0 + Math.sin(epoch * 0.07) * 1.8 + Math.min(epoch * 0.02, 4)).toFixed(1);
+
+  if (eventsList.length === 0) {
+    addEvent('Simulated Datacenter Environment Active', 'HEALTHY', 'CORE');
+  }
 
   return {
     operating_mode: currentMode,
@@ -159,13 +229,26 @@ export function getSimulatedTelemetry(): any {
       total_predictions: totalPreds,
       active_alerts: alertCount
     },
-    events: [],
+    events: eventsList,
     topology,
     racks: racks.map(r => ({
       id: r.id,
-      telemetry: { cpu_util: r.cpu, gpu_util: r.gpu, cpu_temp: r.riskScore * 100 },
+      telemetry: {
+        cpu_util: parseFloat(r.cpu.toFixed(1)),
+        gpu_util: parseFloat(r.gpu.toFixed(1)),
+        mem_util: parseFloat(r.memory.toFixed(1)),
+        disk_io: parseFloat(r.diskIO.toFixed(1)),
+        network_io: parseFloat(r.network.toFixed(1)),
+        cpu_temp: parseFloat((35 + r.riskScore * 50).toFixed(1)),
+        gpu_temp: parseFloat((38 + r.riskScore * 48).toFixed(1)),
+        power_draw: parseFloat((100 + r.cpu * 3 + r.gpu * 4).toFixed(1))
+      },
       risk_score: r.riskScore,
-      cooling: { status: r.coolingActive ? 'predictive intervention' : 'normal' },
+      cooling: {
+        status: (r.coolingActive || r.overrideEnabled) ? 'predictive intervention' : 'normal',
+        override: r.overrideEnabled,
+        actual_rpm: Math.round(1000 + r.riskScore * 3500)
+      },
       ai_insights: { gnn_embed: r.gnnEmbed, xgb_pred: r.xgbPred, zone: r.zone }
     }))
   };

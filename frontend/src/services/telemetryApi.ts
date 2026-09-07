@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from './apiClient';
-import type { ThervoTelemetry } from '../types/telemetry';
 import { tickSimulation, getSimulatedTelemetry } from './simulation';
 
 export const TELEMETRY_QUERY_KEY = ['telemetry'];

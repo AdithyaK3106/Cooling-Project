@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>THERV0 — Predictive Thermal Intelligence Operations Console</title>
+<title>THERVO - ACM — Predictive Thermal Intelligence Operations Console</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -43,6 +43,175 @@
 
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  }
+
+  /* ─── DARK THEME OVERRIDES ─── */
+  [data-theme="dark"] {
+    --bg-app: #080D18;
+    --bg-surface: #0D1626;
+    --bg-subtle: #111C2E;
+    --bg-muted: #16233A;
+    --bg-primary: #080D18;
+    --bg-secondary: #0D1626;
+    --bg-panel: #111C2E;
+    --bg-elevated: #16233A;
+    --border-color: #30435F;
+    --border-light: #24344D;
+    --border-subtle: #24344D;
+    --border-default: #30435F;
+
+    --text-primary: #F4F7FB;
+    --text-secondary: #AAB8CC;
+    --text-muted: #71819A;
+    --text-light: #71819A;
+    --text-subtle: #AAB8CC;
+
+    --brand-primary: #3b82f6;
+    --brand-hover: #60a5fa;
+    --brand-light: #16233A;
+
+    --risk-low: #4ADE80;
+    --risk-low-bg: #0B3A2D;
+    --risk-low-border: #0F8F68;
+
+    --risk-med: #FBBF24;
+    --risk-med-bg: #3A2508;
+    --risk-med-border: #D97706;
+
+    --risk-high: #FB923C;
+    --risk-high-bg: #3B1708;
+    --risk-high-border: #EA580C;
+
+    --risk-crit: #F87171;
+    --risk-crit-bg: #3A0D12;
+    --risk-crit-border: #DC2626;
+  }
+
+  /* ─── DARK MODE CONTRAST & VISIBILITY ENHANCEMENTS ─── */
+  [data-theme="dark"] .modal-card {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+  [data-theme="dark"] .modal-head {
+    background: var(--bg-subtle);
+    border-color: var(--border-light);
+  }
+  [data-theme="dark"] select,
+  [data-theme="dark"] input[type="text"],
+  [data-theme="dark"] input[type="range"] {
+    background: var(--bg-subtle);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+  [data-theme="dark"] select option {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+  }
+  [data-theme="dark"] .btn-outline {
+    background: var(--bg-subtle);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  [data-theme="dark"] .btn-outline:hover {
+    background: var(--border-color);
+    color: #ffffff;
+  }
+  [data-theme="dark"] .btn-navy {
+    background: #0284c7;
+    color: #ffffff;
+  }
+  [data-theme="dark"] .btn-navy:hover {
+    background: #0369a1;
+  }
+  [data-theme="dark"] .nav-link.active {
+    background: #1e293b;
+    color: #38bdf8;
+  }
+  [data-theme="dark"] code,
+  [data-theme="dark"] .mono {
+    color: #e2e8f0;
+  }
+  [data-theme="dark"] table th {
+    color: #94a3b8;
+    background: var(--bg-subtle);
+  }
+  [data-theme="dark"] table td {
+    color: var(--text-primary);
+    border-color: var(--border-light);
+  }
+  [data-theme="dark"] .log-area {
+    background: var(--bg-app);
+    border-color: var(--border-light);
+    color: var(--text-primary);
+  }
+  [data-theme="dark"] [style*="background:#ffffff"],
+  [data-theme="dark"] [style*="background: #ffffff"],
+  [data-theme="dark"] [style*="background:#fafafa"],
+  [data-theme="dark"] [style*="background: #fafafa"],
+  [data-theme="dark"] [style*="background:#f8fafc"],
+  [data-theme="dark"] [style*="background: #f8fafc"] {
+    background: var(--bg-surface) !important;
+    color: var(--text-primary) !important;
+  }
+  [data-theme="dark"] [style*="background:var(--bg-subtle)"],
+  [data-theme="dark"] [style*="background: var(--bg-subtle)"] {
+    background: var(--bg-subtle) !important;
+    color: var(--text-primary) !important;
+  }
+  [data-theme="dark"] [style*="color:var(--text-primary)"],
+  [data-theme="dark"] [style*="color: var(--text-primary)"],
+  [data-theme="dark"] [style*="color:var(--text-secondary)"],
+  [data-theme="dark"] [style*="color: var(--text-secondary)"] {
+    color: var(--text-primary) !important;
+  }
+  [data-theme="dark"] [style*="color:var(--text-muted)"],
+  [data-theme="dark"] [style*="color: var(--text-muted)"] {
+    color: var(--text-muted) !important;
+  }
+  [data-theme="dark"] [style*="background:#eff6ff"],
+  [data-theme="dark"] [style*="background: #eff6ff"] {
+    background: #1e293b !important;
+    color: #38bdf8 !important;
+    border-color: #0284c7 !important;
+  }
+  [data-theme="dark"] [style*="background:#f0fdf4"],
+  [data-theme="dark"] [style*="background: #f0fdf4"],
+  [data-theme="dark"] [style*="background:#dcfce7"] {
+    background: #064e3b !important;
+    color: #4ade80 !important;
+  }
+  [data-theme="dark"] [style*="background:#fef3c7"],
+  [data-theme="dark"] [style*="background: #fef3c7"] {
+    background: #451a03 !important;
+    color: #fbbf24 !important;
+  }
+  [data-theme="dark"] [style*="background:#fee2e2"],
+  [data-theme="dark"] [style*="background: #fee2e2"],
+  [data-theme="dark"] [style*="background:#ffedd5"] {
+    background: #450a0a !important;
+    color: #f87171 !important;
+  }
+
+  .theme-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+  }
+
+  .theme-toggle-btn:hover {
+    background: var(--border-light);
+    border-color: var(--border-color);
   }
 
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -1389,7 +1558,7 @@
         <line x1="6" y1="6" x2="6.01" y2="6"></line>
         <line x1="6" y1="18" x2="6.01" y2="18"></line>
       </svg>
-      <span class="brand-title">THERVO</span>
+      <span class="brand-title">THERVO - ACM</span>
     </div>
   </div>
 
@@ -1398,7 +1567,9 @@
     <a href="#thermal-map" class="nav-link" data-tab="thermal-map">Thermal Map</a>
     <a href="#racks" class="nav-link" data-tab="racks">Racks</a>
     <a href="#predictions" class="nav-link" data-tab="predictions">Predictions</a>
+    <a href="#ai-model" class="nav-link" data-tab="ai-model">AI Model</a>
     <a href="#events" class="nav-link" data-tab="events">Events</a>
+    <a href="#datasets" class="nav-link" data-tab="datasets">Datasets</a>
   </nav>
 
   <div class="header-controls">
@@ -1423,6 +1594,11 @@
       </label>
       <span id="thervoSwitchStatusText" class="thervo-status-text">ON</span>
     </div>
+
+    <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleAppTheme()" title="Toggle Light / Dark Mode">
+      <span id="themeToggleIcon">☀️</span>
+      <span id="themeToggleText" class="mono">Light</span>
+    </button>
 
     <div class="user-profile" title="Account Profile">
       <span class="avatar">SR</span>
@@ -1469,6 +1645,11 @@
   <!-- SINGLE COMPACT METRICS STRIP -->
   <div class="metrics-strip-container">
     <div class="metrics-strip">
+      <div class="ms-item">
+        <span class="ms-label">CURRENT PHASE</span>
+        <span class="ms-val mono" id="currentPhaseVal" style="font-size:12px; color:var(--brand-primary); font-weight:700;">1. WARMUP</span>
+      </div>
+      <div class="ms-divider"></div>
       <div class="ms-item">
         <span class="ms-label">AVG RISK</span>
         <span class="ms-val mono" id="avgRiskVal">21%</span>
@@ -1520,300 +1701,682 @@
         <button class="btn btn-stress" id="btnInjectSpike">⚡ Inject Spike</button>
         <button class="btn btn-success-enterprise" id="btnCoolAll">❄ Cool All High Risk</button>
       </div>
+      <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:10px 14px; margin-top:8px;">
+        <div style="font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:8px;">
+          PRESET THERMAL SITUATIONS (TRIGGER >72% THRESHOLD CROSSINGS LIVE)
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-sm btn-stress" onclick="triggerThermalSituation('llm-surge')">🔥 Situation A: LLM Training Surge (>72% Threshold)</button>
+          <button class="btn btn-sm btn-outline" onclick="triggerThermalSituation('gnn-spillover')">⚡ Situation B: GNN Neighbor Spillover</button>
+          <button class="btn btn-sm btn-stress" onclick="triggerThermalSituation('cluster-burst')">🌊 Situation C: Multi-Rack Cluster Burst</button>
+          <button class="btn btn-sm btn-outline" onclick="triggerThermalSituation('normalize')">❄ Situation D: Workload Release (<60%)</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="dashboard-grid">
-    
-    <!-- LEFT & CENTER MAIN AREA (HERO VISUALIZATION) -->
-    <div class="main-column">
+  <!-- SPA VIEW 1: OVERVIEW -->
+  <div id="view-overview" class="spa-view-container">
+    <div class="dashboard-grid">
+      
+      <!-- LEFT & CENTER MAIN AREA (HERO VISUALIZATION) -->
+      <div class="main-column">
 
-      <!-- HERO SECTION: DATA CENTER THERMAL OVERVIEW -->
-      <section class="card-panel">
-        <div class="panel-head">
-          <div>
-            <h2 class="panel-title">Data Center Thermal Overview</h2>
-            <p class="panel-subtitle">Real-time inferred thermal state across the facility floor layout</p>
-          </div>
-          <div class="floor-legend">
-            <span class="legend-item"><span class="legend-dot low"></span> Low (&lt;35%)</span>
-            <span class="legend-item"><span class="legend-dot med"></span> Med (35-55%)</span>
-            <span class="legend-item"><span class="legend-dot high"></span> High (55-75%)</span>
-            <span class="legend-item"><span class="legend-dot crit"></span> Crit (&gt;75%)</span>
-          </div>
-        </div>
-
-        <!-- TOP-DOWN DATA CENTER FLOOR LAYOUT -->
-        <div class="floor-plan-container">
-          <div class="floor-rows">
-            <div class="floor-row">
-              <div class="row-label">ROW A · COLD AISLE 1</div>
-              <div class="rack-units-row" id="floorRowA"></div>
-            </div>
-            <div class="floor-row">
-              <div class="row-label">ROW B · HOT AISLE</div>
-              <div class="rack-units-row" id="floorRowB"></div>
-            </div>
-            <div class="floor-row">
-              <div class="row-label">ROW C · COLD AISLE 2</div>
-              <div class="rack-units-row" id="floorRowC"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- THERMAL PROPAGATION / GNN TOPOLOGY -->
-        <div class="gnn-section">
-          <div class="gnn-header">
+        <!-- HERO SECTION: DATA CENTER THERMAL OVERVIEW -->
+        <section class="card-panel">
+          <div class="panel-head">
             <div>
-              <h3 class="gnn-title">Thermal Propagation</h3>
-              <p class="gnn-subtitle">GNN-estimated heat influence between adjacent racks</p>
+              <h2 class="panel-title">Data Center Thermal Overview</h2>
+              <p class="panel-subtitle">Real-time inferred thermal state across the facility floor layout</p>
             </div>
-            <div class="gnn-legend">
-              <span class="legend-line self"></span> Self heat
-              <span class="legend-line neighbor"></span> Neighbor influence
-              <span class="legend-line predicted"></span> Predicted propagation
+            <div class="floor-legend">
+              <span class="legend-item"><span class="legend-dot low"></span> Low (&lt;35%)</span>
+              <span class="legend-item"><span class="legend-dot med"></span> Med (35-55%)</span>
+              <span class="legend-item"><span class="legend-dot high"></span> High (55-75%)</span>
+              <span class="legend-item"><span class="legend-dot crit"></span> Crit (&gt;75%)</span>
             </div>
           </div>
-          <div class="canvas-wrap">
-            <canvas id="gnnCanvas"></canvas>
-          </div>
-        </div>
-      </section>
 
-      <!-- RACK FLEET VIEW -->
-      <section class="card-panel">
-        <div class="panel-head flex-wrap">
-          <div>
-            <h2 class="panel-title">Rack Fleet</h2>
-            <p class="panel-subtitle">12 monitored racks · click to inspect contextual details</p>
-          </div>
-          <div class="fleet-filter-bar">
-            <div class="filter-group">
-              <label>Risk:</label>
-              <select id="filterRisk" class="select-sm">
-                <option value="all">All</option>
-                <option value="low">Low (&lt;35%)</option>
-                <option value="med">Medium (35-55%)</option>
-                <option value="high">High (55-75%)</option>
-                <option value="crit">Critical (&gt;75%)</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label>Cooling:</label>
-              <select id="filterCooling" class="select-sm">
-                <option value="all">All</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <label>Sort:</label>
-              <select id="sortFleet" class="select-sm">
-                <option value="risk-desc">Risk (High to Low)</option>
-                <option value="risk-asc">Risk (Low to High)</option>
-                <option value="cpu-desc">CPU Utilization</option>
-                <option value="gpu-desc">GPU Utilization</option>
-                <option value="id">Rack ID</option>
-              </select>
+          <!-- TOP-DOWN DATA CENTER FLOOR LAYOUT -->
+          <div class="floor-plan-container">
+            <div class="floor-rows">
+              <div class="floor-row">
+                <div class="row-label">ROW A · COLD AISLE 1</div>
+                <div class="rack-units-row" id="floorRowA"></div>
+              </div>
+              <div class="floor-row">
+                <div class="row-label">ROW B · HOT AISLE</div>
+                <div class="rack-units-row" id="floorRowB"></div>
+              </div>
+              <div class="floor-row">
+                <div class="row-label">ROW C · COLD AISLE 2</div>
+                <div class="rack-units-row" id="floorRowC"></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="rack-grid" id="rackGrid"></div>
-      </section>
+          <!-- THERMAL PROPAGATION / GNN TOPOLOGY -->
+          <div class="gnn-section">
+            <div class="gnn-header">
+              <div>
+                <h3 class="gnn-title">Thermal Propagation</h3>
+                <p class="gnn-subtitle">GNN-estimated heat influence between adjacent racks</p>
+              </div>
+              <div class="gnn-legend">
+                <span class="legend-line self"></span> Self heat
+                <span class="legend-line neighbor"></span> Neighbor influence
+                <span class="legend-line predicted"></span> Predicted propagation
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="gnnCanvas"></canvas>
+            </div>
+          </div>
+        </section>
 
+        <!-- RACK FLEET VIEW -->
+        <section class="card-panel">
+          <div class="panel-head flex-wrap">
+            <div>
+              <h2 class="panel-title">Rack Fleet</h2>
+              <p class="panel-subtitle">12 monitored racks · click to inspect contextual details</p>
+            </div>
+            <div class="fleet-filter-bar">
+              <div class="filter-group">
+                <label>Risk:</label>
+                <select id="filterRisk" class="select-sm">
+                  <option value="all">All</option>
+                  <option value="low">Low (&lt;35%)</option>
+                  <option value="med">Medium (35-55%)</option>
+                  <option value="high">High (55-75%)</option>
+                  <option value="crit">Critical (&gt;75%)</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Cooling:</label>
+                <select id="filterCooling" class="select-sm">
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label>Sort:</label>
+                <select id="sortFleet" class="select-sm">
+                  <option value="risk-desc">Risk (High to Low)</option>
+                  <option value="risk-asc">Risk (Low to High)</option>
+                  <option value="cpu-desc">CPU Utilization</option>
+                  <option value="gpu-desc">GPU Utilization</option>
+                  <option value="id">Rack ID</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="rack-grid" id="rackGrid"></div>
+        </section>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR: CONTEXTUAL INSPECTOR RAIL (300px) -->
+      <div class="side-column">
+
+        <!-- SELECTED RACK DETAIL & OPERATIONAL RECOMMENDATION -->
+        <section class="card-panel side-panel" id="selectedDetail">
+          <div class="side-panel-header">
+            <div>
+              <span class="panel-tag">SELECTED RACK</span>
+              <h2 class="detail-title" id="detailTitle">RACK-A11</h2>
+            </div>
+            <div id="detailRiskBadge" class="rack-risk-badge risk-high">HIGH 58%</div>
+          </div>
+          <p class="detail-sub" id="detailSub">Zone A · GNN Node 0 · Cooling OFF</p>
+
+          <!-- PRIMARY INSIGHT BOX -->
+          <div class="recommendation-box">
+            <div class="rec-head">
+              <span class="rec-title">PRIMARY INSIGHT</span>
+              <span class="rec-badge" id="recBadge">Maintain Cooling</span>
+            </div>
+            <p class="rec-text" id="recText">
+              Maintain cooling on Rack A11. Predicted thermal risk is trending upward.
+            </p>
+            <div class="rec-meta">
+              <div class="rm-item">
+                <span class="rm-label">Risk Trend</span>
+                <span class="rm-val" id="recTrend">↑ Increasing</span>
+              </div>
+              <div class="rm-item">
+                <span class="rm-label">Neighbor Influence</span>
+                <span class="rm-val" id="recNeighbor">+8%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COOLING ACTION BUTTONS -->
+          <div class="action-buttons">
+            <button class="btn btn-navy btn-sm" id="btnDeployCool">Deploy Cooling</button>
+            <button class="btn btn-outline btn-sm" id="btnRemoveCool">Disengage</button>
+          </div>
+
+          <!-- PROGRESSIVE DISCLOSURE ACCORDIONS -->
+          <div class="inspector-accordions" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
+            
+            <details class="insp-accordion">
+              <summary class="insp-summary"><span>Live Telemetry</span> <span class="insp-arrow">▸</span></summary>
+              <div class="insp-content metric-grid-2col">
+                <div class="m-card"><span class="m-label">CPU UTIL</span><span class="m-val mono" id="d-cpu">77.6%</span></div>
+                <div class="m-card"><span class="m-label">GPU UTIL</span><span class="m-val mono" id="d-gpu">79.1%</span></div>
+                <div class="m-card"><span class="m-label">MEMORY</span><span class="m-val mono" id="d-mem">67.7%</span></div>
+                <div class="m-card"><span class="m-label">DISK I/O</span><span class="m-val mono" id="d-disk">22.2%</span></div>
+                <div class="m-card"><span class="m-label">NETWORK</span><span class="m-val mono" id="d-net">17.2%</span></div>
+                <div class="m-card highlight"><span class="m-label">THERMAL RISK</span><span class="m-val mono" id="d-risk">57.8%</span></div>
+              </div>
+            </details>
+
+            <details class="insp-accordion">
+              <summary class="insp-summary"><span>AI Model Explanation</span> <span class="insp-arrow">▸</span></summary>
+              <div class="insp-content" style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>XGBoost Prediction:</span><span class="mono" id="d-xgb">53.0%</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:11px;">
+                  <span>GNN Spatial Embed:</span><span class="mono" id="d-gnn">0.7239</span>
+                </div>
+                <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-top:4px;">FEATURE IMPORTANCE</div>
+                <div id="featureImportance"></div>
+              </div>
+            </details>
+
+            <details class="insp-accordion">
+              <summary class="insp-summary"><span>Risk History Trend</span> <span class="insp-arrow">▸</span></summary>
+              <div class="insp-content history-canvas-wrap">
+                <canvas id="historyCanvas"></canvas>
+              </div>
+            </details>
+
+          </div>
+        </section>
+
+        <!-- THERMAL HEATMAP (COMPACT SIDE PANEL) -->
+        <section class="card-panel side-panel">
+          <div class="panel-head-sm">
+            <h3 class="side-panel-title">Thermal Risk Heatmap</h3>
+            <span class="text-sub">Matrix</span>
+          </div>
+          <div class="heatmap-row" id="heatmapGrid"></div>
+        </section>
+
+      </div>
     </div>
 
-    <!-- RIGHT SIDEBAR: CONTEXTUAL INSPECTOR RAIL (300px) -->
-    <div class="side-column">
+    <!-- BOTTOM PANELS -->
+    <div class="bottom-grid">
 
-      <!-- SELECTED RACK DETAIL & OPERATIONAL RECOMMENDATION -->
-      <section class="card-panel side-panel" id="selectedDetail">
-        <div class="side-panel-header">
+      <!-- SIMULATION CONTROLS -->
+      <section class="card-panel">
+        <div class="panel-head-sm">
           <div>
-            <span class="panel-tag">SELECTED RACK</span>
-            <h2 class="detail-title" id="detailTitle">RACK-A11</h2>
-          </div>
-          <div id="detailRiskBadge" class="rack-risk-badge risk-high">HIGH 58%</div>
-        </div>
-        <p class="detail-sub" id="detailSub">Zone A · GNN Node 0 · Cooling OFF</p>
-
-        <!-- PRIMARY INSIGHT BOX -->
-        <div class="recommendation-box">
-          <div class="rec-head">
-            <span class="rec-title">PRIMARY INSIGHT</span>
-            <span class="rec-badge" id="recBadge">Maintain Cooling</span>
-          </div>
-          <p class="rec-text" id="recText">
-            Maintain cooling on Rack A11. Predicted thermal risk is trending upward.
-          </p>
-          <div class="rec-meta">
-            <div class="rm-item">
-              <span class="rm-label">Risk Trend</span>
-              <span class="rm-val" id="recTrend">↑ Increasing</span>
-            </div>
-            <div class="rm-item">
-              <span class="rm-label">Neighbor Influence</span>
-              <span class="rm-val" id="recNeighbor">+8%</span>
-            </div>
+            <h3 class="side-panel-title">Simulation Environment</h3>
+            <p class="panel-subtitle">Adjust workload conditions to observe predicted thermal behavior</p>
           </div>
         </div>
-
-        <!-- COOLING ACTION BUTTONS -->
-        <div class="action-buttons">
-          <button class="btn btn-navy btn-sm" id="btnDeployCool">Deploy Cooling</button>
-          <button class="btn btn-outline btn-sm" id="btnRemoveCool">Disengage</button>
-        </div>
-
-        <!-- PROGRESSIVE DISCLOSURE ACCORDIONS -->
-        <div class="inspector-accordions" style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-          
-          <details class="insp-accordion">
-            <summary class="insp-summary"><span>📊 Live Telemetry</span> <span class="insp-arrow">▸</span></summary>
-            <div class="insp-content metric-grid-2col">
-              <div class="m-card"><span class="m-label">CPU UTIL</span><span class="m-val mono" id="d-cpu">77.6%</span></div>
-              <div class="m-card"><span class="m-label">GPU UTIL</span><span class="m-val mono" id="d-gpu">79.1%</span></div>
-              <div class="m-card"><span class="m-label">MEMORY</span><span class="m-val mono" id="d-mem">67.7%</span></div>
-              <div class="m-card"><span class="m-label">DISK I/O</span><span class="m-val mono" id="d-disk">22.2%</span></div>
-              <div class="m-card"><span class="m-label">NETWORK</span><span class="m-val mono" id="d-net">17.2%</span></div>
-              <div class="m-card highlight"><span class="m-label">THERMAL RISK</span><span class="m-val mono" id="d-risk">57.8%</span></div>
+        <div class="sim-controls-form">
+          <div class="slider-field">
+            <div class="sf-header">
+              <span>SIM SPEED</span>
+              <span class="sf-val mono" id="speedVal2">1x</span>
             </div>
-          </details>
-
-          <details class="insp-accordion">
-            <summary class="insp-summary"><span>🧠 AI Model Explanation</span> <span class="insp-arrow">▸</span></summary>
-            <div class="insp-content" style="display:flex; flex-direction:column; gap:8px;">
-              <div style="display:flex; justify-content:space-between; font-size:11px;">
-                <span>XGBoost Prediction:</span><span class="mono" id="d-xgb">53.0%</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:11px;">
-                <span>GNN Spatial Embed:</span><span class="mono" id="d-gnn">0.7239</span>
-              </div>
-              <div style="font-size:10px; font-weight:700; color:var(--text-muted); margin-top:4px;">FEATURE IMPORTANCE</div>
-              <div id="featureImportance"></div>
+            <input type="range" id="speedSlider2" min="1" max="5" value="1" step="1">
+          </div>
+          <div class="slider-field">
+            <div class="sf-header">
+              <span>WORKLOAD INTENSITY</span>
+              <span class="sf-val mono" id="loadVal2">35%</span>
             </div>
-          </details>
-
-          <details class="insp-accordion">
-            <summary class="insp-summary"><span>📈 Risk History Trend</span> <span class="insp-arrow">▸</span></summary>
-            <div class="insp-content history-canvas-wrap">
-              <canvas id="historyCanvas"></canvas>
+            <input type="range" id="loadSlider2" min="10" max="100" value="35" step="5">
+          </div>
+          <div class="slider-field">
+            <div class="sf-header">
+              <span>THERMAL NOISE</span>
+              <span class="sf-val mono" id="noiseVal2">12%</span>
             </div>
-          </details>
+            <input type="range" id="noiseSlider2" min="0" max="30" value="12" step="1">
+          </div>
 
+          <div class="sim-actions-grid">
+            <button class="btn btn-navy" id="btnRun2">▶ Run Sim</button>
+            <button class="btn btn-outline" id="btnStop2">■ Stop</button>
+            <button class="btn btn-stress" id="btnInjectSpike2">⚡ Inject Spike</button>
+            <button class="btn btn-success-enterprise" id="btnCoolAll2">❄ Cool All Critical</button>
+          </div>
         </div>
       </section>
 
-      <!-- THERMAL HEATMAP (COMPACT SIDE PANEL) -->
-      <section class="card-panel side-panel">
+      <!-- MODEL STATUS -->
+      <section class="card-panel">
         <div class="panel-head-sm">
-          <h3 class="side-panel-title">Thermal Risk Heatmap</h3>
-          <span class="text-sub">Matrix</span>
+          <h3 class="side-panel-title">Prediction Engine</h3>
+          <span class="text-sub">Model Architecture</span>
         </div>
-        <div class="heatmap-row" id="heatmapGrid"></div>
+        <div class="engine-specs-grid">
+          <div class="spec-row">
+            <span class="spec-label">XGBoost Model</span>
+            <span class="spec-badge ok">ACTIVE</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">GNN Propagation</span>
+            <span class="spec-badge ok">ACTIVE</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Inference Mode</span>
+            <span class="spec-val">LIVE</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Feature Set</span>
+            <span class="spec-val">15 production features</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Model Accuracy</span>
+            <span class="spec-val mono" id="modelAccuracy">95.0%</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Total Predictions</span>
+            <span class="spec-val mono" id="predCount">1,332</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Alerts Fired</span>
+            <span class="spec-val mono" id="alertCount">14</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">GNN Topology</span>
+            <span class="spec-val mono"><span id="gnnNodes">12/12</span> nodes · <span id="gnnEdges">18/18</span> edges</span>
+          </div>
+          <div class="spec-row">
+            <span class="spec-label">Auto Threshold</span>
+            <span class="spec-val mono">72%</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPERATIONAL EVENTS LOG -->
+      <section class="card-panel">
+        <div class="panel-head-sm">
+          <h3 class="side-panel-title">Operational Events</h3>
+          <span class="text-sub">Live audit stream</span>
+        </div>
+        <div class="log-area" id="logArea"></div>
       </section>
 
     </div>
   </div>
 
-  <!-- BOTTOM PANELS -->
-  <div class="bottom-grid">
-
-    <!-- SIMULATION CONTROLS -->
-    <section class="card-panel">
-      <div class="panel-head-sm">
+  <!-- SPA VIEW 2: THERMAL MAP -->
+  <div id="view-thermal-map" class="spa-view-container" style="display:none;">
+    <div class="card-panel" style="margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
         <div>
-          <h3 class="side-panel-title">Simulation Environment</h3>
-          <p class="panel-subtitle">Adjust workload conditions to observe predicted thermal behavior</p>
+          <h2 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0;">Data Center Thermal Spatial Map</h2>
+          <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">Spatial rack heat distribution, zone boundaries & GNN thermal propagation</p>
+        </div>
+        <div style="display:flex; gap:16px; align-items:center; font-size:12px;">
+          <span><strong style="color:var(--risk-low);">● LOW</strong> (&lt;35%)</span>
+          <span><strong style="color:var(--risk-med);">● MEDIUM</strong> (35-54%)</span>
+          <span><strong style="color:var(--risk-high);">● HIGH</strong> (55-74%)</span>
+          <span><strong style="color:var(--risk-crit);">● CRITICAL</strong> (&ge;75%)</span>
         </div>
       </div>
-      <div class="sim-controls-form">
-        <div class="slider-field">
-          <div class="sf-header">
-            <span>SIM SPEED</span>
-            <span class="sf-val mono" id="speedVal">1x</span>
+
+      <div id="thermalMapZonesGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px;"></div>
+    </div>
+  </div>
+
+  <!-- SPA VIEW 3: RACKS MONITORING -->
+  <div id="view-racks" class="spa-view-container" style="display:none;">
+    <div class="card-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0;">Rack Fleet Monitoring</h2>
+          <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">High-density operational monitoring for all 12 data center server racks</p>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <select id="vRacksFilterRisk" style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer;" onchange="updateRacksView()">
+            <option value="all">Filter: All Risks</option>
+            <option value="low">Low Risk (&lt;35%)</option>
+            <option value="med">Medium Risk (35-54%)</option>
+            <option value="high">High Risk (55-74%)</option>
+            <option value="crit">Critical (&ge;75%)</option>
+          </select>
+          <select id="vRacksFilterCooling" style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:6px 12px; font-size:12px; cursor:pointer;" onchange="updateRacksView()">
+            <option value="all">Cooling: All States</option>
+            <option value="active">Cooling Active ❄</option>
+            <option value="idle">Cooling Standby</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="vRacksFleetGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:14px;"></div>
+    </div>
+  </div>
+
+  <!-- SPA VIEW 4: PREDICTIONS -->
+  <div id="view-predictions" class="spa-view-container" style="display:none;">
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px;">
+      
+      <!-- LEFT: Predictive Intelligence Table -->
+      <div class="card-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h2 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0;">Predictive Intelligence & Risk Forecast</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">Comparing live CURRENT RISK against XGBoost 30-Tree + GNN PREDICTED RISK</p>
           </div>
-          <input type="range" id="speedSlider" min="1" max="5" value="1" step="1">
+          <span style="background:#eff6ff; color:#0284c7; font-weight:700; font-size:11px; padding:4px 10px; border-radius:12px; border:1px solid #bfdbfe;">Live ML Inference Engine</span>
         </div>
-        <div class="slider-field">
-          <div class="sf-header">
-            <span>WORKLOAD INTENSITY</span>
-            <span class="sf-val mono" id="loadVal">35%</span>
+
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+            <thead>
+              <tr style="border-bottom:2px solid var(--border-light); color:var(--text-muted); font-size:11px;">
+                <th style="padding:10px 12px;">RACK ID</th>
+                <th style="padding:10px 12px;">ROLE PROFILE</th>
+                <th style="padding:10px 12px;">CURRENT RISK</th>
+                <th style="padding:10px 12px;">PREDICTED RISK</th>
+                <th style="padding:10px 12px;">TREND</th>
+                <th style="padding:10px 12px;">INTERVENTION FORECAST</th>
+              </tr>
+            </thead>
+            <tbody id="predictionsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- RIGHT: Model Architecture & Feature Importance -->
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="card-panel">
+          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0 0 10px 0;">Prediction Pipeline Specs</h3>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12px;">
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-light); padding-bottom:4px;"><span>XGBoost Trees:</span><span class="mono" style="font-weight:700;">30 Trees</span></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-light); padding-bottom:4px;"><span>GNN Spatial Edges:</span><span class="mono" style="font-weight:700;">18 Influence Edges</span></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-light); padding-bottom:4px;"><span>Inference Latency:</span><span class="mono" style="font-weight:700;">&lt; 3.8 ms</span></div>
+            <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-light); padding-bottom:4px;"><span>Current Stage:</span><span class="mono" id="predCurrentStage" style="font-weight:700; color:var(--brand-primary);">1. WARMUP</span></div>
+            <div style="display:flex; justify-content:space-between;"><span>Trigger Threshold:</span><span class="mono" style="font-weight:700; color:var(--risk-high);">&ge; 55% Risk</span></div>
           </div>
-          <input type="range" id="loadSlider" min="10" max="100" value="35" step="5">
         </div>
-        <div class="slider-field">
-          <div class="sf-header">
-            <span>THERMAL NOISE</span>
-            <span class="sf-val mono" id="noiseVal">12%</span>
+
+        <div class="card-panel">
+          <h3 style="font-size:14px; font-weight:700; color:var(--text-primary); margin:0 0 10px 0;">Feature Importance Weights</h3>
+          <div id="predFeatureImportance" style="display:flex; flex-direction:column; gap:6px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPA VIEW: AI MODEL (LIVE INTELLIGENCE PIPELINE) -->
+  <div id="view-ai-model" class="spa-view-container" style="display:none;">
+    <div style="display:flex; flex-direction:column; gap:20px;">
+      
+      <!-- HERO & PIPELINE HEADER -->
+      <div class="card-panel" style="padding:20px; background:var(--bg-surface);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+          <div>
+            <span class="panel-tag" style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:700; font-size:10px;">PREDICTIVE INTELLIGENCE ENGINE</span>
+            <h2 style="font-size:20px; font-weight:700; color:var(--text-primary); margin-top:4px;">How THERVO Turns Workload into Cooling Decisions</h2>
+            <p id="aiHumanLanguageSummary" style="color:var(--text-secondary); font-size:13px; margin-top:4px; max-width:900px; line-height:1.5;">
+              THERVO looks at workload patterns and how nearby racks may influence one another to predict thermal risk before physical heat builds up.
+            </p>
           </div>
-          <input type="range" id="noiseSlider" min="0" max="30" value="12" step="1">
+          <div>
+            <button class="btn btn-outline btn-sm" id="btnToggleTechDetails" onclick="toggleTechDetails()">Technical details →</button>
+          </div>
         </div>
 
-        <div class="sim-actions-grid">
-          <button class="btn btn-navy" id="btnRun">▶ Run Sim</button>
-          <button class="btn btn-outline" id="btnStop">■ Stop</button>
-          <button class="btn btn-stress" id="btnInjectSpike">⚡ Inject Spike</button>
-          <button class="btn btn-success-enterprise" id="btnCoolAll">❄ Cool All Critical</button>
+        <!-- TECHNICAL DETAILS COLLAPSIBLE EXPANSION -->
+        <div id="techDetailsDrawer" style="display:none; background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:8px; padding:14px 18px; margin-bottom:16px;">
+          <div style="font-size:11px; font-weight:700; color:var(--brand-primary); letter-spacing:0.5px; margin-bottom:6px;">MATHEMATICAL FORMULATION & ENSEMBLE SPECIFICATIONS</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; font-size:12px;">
+            <div>
+              <strong>XGBoost Model Params:</strong>
+              <div class="mono" style="color:var(--text-secondary); font-size:11px; margin-top:2px;">
+                • 30 Estimators<br>
+                • Learning Rate: 0.10<br>
+                • Max Depth: 4
+              </div>
+            </div>
+            <div>
+              <strong>GNN Embedding Formula:</strong>
+              <div class="mono" style="color:var(--text-secondary); font-size:11px; margin-top:2px;">
+                gnn_embedding =<br>
+                0.7 × self_heat + 0.3 × mean(neighbor_heat)
+              </div>
+            </div>
+            <div>
+              <strong>Composite Risk Function:</strong>
+              <div class="mono" style="color:var(--text-secondary); font-size:11px; margin-top:2px;">
+                final_risk =<br>
+                0.75 × XGBoost + 0.25 × GNN
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
 
-    <!-- MODEL STATUS -->
-    <section class="card-panel">
-      <div class="panel-head-sm">
-        <h3 class="side-panel-title">Prediction Engine</h3>
-        <span class="text-sub">Model Architecture</span>
-      </div>
-      <div class="engine-specs-grid">
-        <div class="spec-row">
-          <span class="spec-label">XGBoost Model</span>
-          <span class="spec-badge ok">ACTIVE</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">GNN Propagation</span>
-          <span class="spec-badge ok">ACTIVE</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Inference Mode</span>
-          <span class="spec-val">LIVE</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Feature Set</span>
-          <span class="spec-val">15 production features</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Model Accuracy</span>
-          <span class="spec-val mono" id="modelAccuracy">95.0%</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Total Predictions</span>
-          <span class="spec-val mono" id="predCount">1,332</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Alerts Fired</span>
-          <span class="spec-val mono" id="alertCount">14</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">GNN Topology</span>
-          <span class="spec-val mono"><span id="gnnNodes">12/12</span> nodes · <span id="gnnEdges">18/18</span> edges</span>
-        </div>
-        <div class="spec-row">
-          <span class="spec-label">Auto Threshold</span>
-          <span class="spec-val mono">72%</span>
-        </div>
-      </div>
-    </section>
+        <!-- SECTION 1 — THERVO MODEL PIPELINE VISUAL FLOW -->
+        <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:8px; padding:16px;">
+          <div style="font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:0.5px; margin-bottom:12px; text-transform:uppercase;">
+            HOW THERVO PREDICTS THERMAL RISK — PIPELINE FLOW
+          </div>
+          
+          <div class="pipeline-flow-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; position:relative;">
+            
+            <div class="pipe-node active" id="pipeNode0" onclick="selectPipeStage(0)" style="flex:1; min-width:140px; background:var(--bg-surface); border:2px solid var(--brand-primary); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:var(--brand-primary);">STEP 1</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">LIVE TELEMETRY</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">CPU, GPU, Net, I/O</div>
+            </div>
 
-    <!-- OPERATIONAL EVENTS LOG -->
-    <section class="card-panel">
-      <div class="panel-head-sm">
-        <h3 class="side-panel-title">Operational Events</h3>
-        <span class="text-sub">Live audit stream</span>
-      </div>
-      <div class="log-area" id="logArea"></div>
-    </section>
+            <div style="color:var(--brand-primary); font-weight:700; font-size:16px;">→</div>
 
+            <div class="pipe-node" id="pipeNode1" onclick="selectPipeStage(1)" style="flex:1; min-width:140px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:var(--text-muted);">STEP 2</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">15 FEATURES</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Workload Vectors</div>
+            </div>
+
+            <div style="color:var(--brand-primary); font-weight:700; font-size:16px;">→</div>
+
+            <div class="pipe-node" id="pipeNode2" onclick="selectPipeStage(2)" style="flex:1; min-width:140px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:var(--brand-primary);">STEP 3</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">XGBOOST</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">30 Estimators</div>
+            </div>
+
+            <div style="color:var(--brand-primary); font-weight:700; font-size:16px;">+</div>
+
+            <div class="pipe-node" id="pipeNode3" onclick="selectPipeStage(3)" style="flex:1; min-width:140px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:#0284c7;">STEP 4</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">GNN / TOPOLOGY</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">18 Spatial Edges</div>
+            </div>
+
+            <div style="color:var(--brand-primary); font-weight:700; font-size:16px;">=</div>
+
+            <div class="pipe-node" id="pipeNode4" onclick="selectPipeStage(4)" style="flex:1; min-width:140px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:var(--risk-med);">STEP 5</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">COMPOSITE RISK</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">75% XGB + 25% GNN</div>
+            </div>
+
+            <div style="color:var(--brand-primary); font-weight:700; font-size:16px;">→</div>
+
+            <div class="pipe-node" id="pipeNode5" onclick="selectPipeStage(5)" style="flex:1; min-width:140px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:10px; cursor:pointer; text-align:center; transition:all 0.2s;">
+              <div style="font-size:9px; font-weight:700; color:var(--risk-low);">DECISION</div>
+              <div style="font-weight:700; font-size:12px; color:var(--text-primary);">COOLING ACTION</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:2px;">72% Threshold Trigger</div>
+            </div>
+
+          </div>
+
+          <!-- INTERACTIVE PIPELINE EXPLANATION CARD -->
+          <div id="pipeStageDetailBox" style="margin-top:14px; background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; padding:14px;">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2 & 3: GRID SPLIT (LEFT: LIVE GNN RACK TOPOLOGY / RIGHT: THRESHOLD CURVE) -->
+      <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:20px;">
+        
+        <!-- SECTION 2 — LIVE GNN RACK TOPOLOGY MAPPING -->
+        <div class="card-panel" style="padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin:0;">RACK RELATIONSHIPS (Live Spatial Topology)</h3>
+              <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">Thermal risk can influence nearby racks · Click any rack node to highlight neighbor propagation</p>
+            </div>
+            <div style="font-size:11px; display:flex; gap:8px;">
+              <span><strong style="color:var(--risk-low);">● Low</strong></span>
+              <span><strong style="color:var(--risk-med);">● Med</strong></span>
+              <span><strong style="color:var(--risk-high);">● High</strong></span>
+              <span><strong style="color:var(--risk-crit);">● Crit</strong></span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 240px; gap:14px;">
+            <!-- TOPOLOGY CANVAS / GRAPH CONTAINER -->
+            <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:12px; height:360px; position:relative; overflow:hidden;" id="aiTopologyContainer">
+              <svg id="aiGnnSvg" style="width:100%; height:100%; position:absolute; top:0; left:0; pointer-events:none;"></svg>
+              <div id="aiGnnNodesGrid" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; height:100%; align-content:space-between; position:relative; z-index:2;"></div>
+            </div>
+
+            <!-- LIVE SELECTED RACK INSPECTOR PANEL -->
+            <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:0.5px;">SELECTED RACK INSPECTOR</div>
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span id="aiInspRackName" style="font-size:16px; font-weight:700; color:var(--text-primary);">RACK-A11</span>
+                <span id="aiInspRiskBadge" class="rack-risk-badge risk-low">LOW 25%</span>
+              </div>
+              <div id="aiInspSubText" style="font-size:11px; color:var(--text-secondary);">Zone A · Node 0 · Cooling Standby</div>
+              <hr style="border:none; border-top:1px solid var(--border-light);">
+
+              <div style="display:flex; flex-direction:column; gap:6px; font-size:12px;">
+                <div style="display:flex; justify-content:space-between;"><span>XGBoost Prediction:</span><span class="mono" id="aiInspXgbVal" style="font-weight:700;">24%</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>GNN Spatial Context:</span><span class="mono" id="aiInspGnnVal" style="font-weight:700;">28%</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Workload Heat Proxy:</span><span class="mono" id="aiInspHeatVal" style="font-weight:700;">25%</span></div>
+                <hr style="border:none; border-top:1px solid var(--border-light); margin:2px 0;">
+                <div style="display:flex; justify-content:space-between; font-weight:700;"><span>COMPOSITE RISK:</span><span class="mono" id="aiInspCompVal" style="color:var(--brand-primary);">25%</span></div>
+              </div>
+
+              <div id="aiInspCoolingStatus" style="background:#eff6ff; border:1px solid #bfdbfe; color:#0284c7; padding:6px; border-radius:4px; font-size:10px; font-weight:700; text-align:center; margin-top:auto;">
+                COOLING STANDBY (NO ACTION NEEDED)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3 — THRESHOLD / RISK CONTROL CURVE -->
+        <div class="card-panel" style="padding:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <h3 style="font-size:16px; font-weight:700; color:var(--text-primary); margin:0;">THERMAL RISK & COOLING THRESHOLD</h3>
+              <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">Risk regions, control response & automatic 72% cooling trigger</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <label style="font-size:11px; font-weight:600; color:var(--text-muted);">Trace Rack:</label>
+              <select id="aiRackTraceSelect" style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:4px; padding:3px 6px; font-size:11px;" onchange="updateAIModelView()">
+                <option value="system">Overall System Average</option>
+                <option value="0">RACK-A11</option>
+                <option value="1">RACK-A12</option>
+                <option value="2">RACK-A13</option>
+                <option value="3">RACK-A14</option>
+                <option value="4">RACK-B21</option>
+                <option value="5">RACK-B22</option>
+                <option value="6">RACK-B23</option>
+                <option value="7">RACK-B24</option>
+                <option value="8">RACK-C31</option>
+                <option value="9">RACK-C32</option>
+                <option value="10">RACK-C33</option>
+                <option value="11">RACK-C34</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- PRESET THERMAL SURGE SITUATIONS TRIGGER BAR -->
+          <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:8px 12px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+            <span style="font-size:10px; font-weight:700; color:var(--brand-primary);">TEST PRESET SITUATIONS:</span>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-stress" style="padding:4px 8px; font-size:10px;" onclick="triggerThermalSituation('llm-surge')">🔥 LLM Surge (>72%)</button>
+              <button class="btn btn-sm btn-outline" style="padding:4px 8px; font-size:10px;" onclick="triggerThermalSituation('gnn-spillover')">⚡ GNN Spillover</button>
+              <button class="btn btn-sm btn-stress" style="padding:4px 8px; font-size:10px;" onclick="triggerThermalSituation('cluster-burst')">🌊 Cluster Burst</button>
+              <button class="btn btn-sm btn-outline" style="padding:4px 8px; font-size:10px;" onclick="triggerThermalSituation('normalize')">❄ Workload Release (<60%)</button>
+            </div>
+          </div>
+
+          <!-- THRESHOLD CURVE CANVAS GRAPH -->
+          <div style="background:var(--bg-surface); border:1px solid var(--border-light); border-radius:6px; height:280px; position:relative; overflow:hidden; margin-bottom:12px;">
+            <canvas id="aiThresholdCanvas" style="width:100%; height:100%; display:block;"></canvas>
+          </div>
+
+          <!-- LIVE STATUS MARKER BADGE -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:6px; padding:10px 14px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:11px; font-weight:700; color:var(--text-muted);">LIVE RISK MARKER:</span>
+              <span id="aiLiveRiskMarker" class="mono" style="font-size:14px; font-weight:700; color:var(--brand-primary);">● 21% (LOW)</span>
+            </div>
+            <div id="aiThresholdActionBadge" style="background:#dcfce7; color:#166534; font-size:11px; font-weight:700; padding:4px 10px; border-radius:12px; border:1px solid #bbf7d0;">
+              NOMINAL — MONITORING
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COMPOSITE RISK COMPACT EQUATION STRIP -->
+      <div class="card-panel" style="padding:14px 20px; background:linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border-color:#bfdbfe;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div style="display:flex; align-items:center; gap:16px; font-size:13px; font-weight:700;">
+            <span style="color:var(--brand-primary);">COMPOSITE THERMAL RISK</span>
+            <span style="color:var(--text-muted); font-weight:400;">=</span>
+            <span style="background:#ffffff; padding:4px 10px; border-radius:6px; border:1px solid #cbd5e1;">75% XGBoost <span style="font-size:10px; color:var(--text-muted); font-weight:400;">(Workload Risk)</span></span>
+            <span style="color:var(--text-muted); font-weight:400;">+</span>
+            <span style="background:#ffffff; padding:4px 10px; border-radius:6px; border:1px solid #cbd5e1;">25% GNN <span style="font-size:10px; color:var(--text-muted); font-weight:400;">(Spatial Context)</span></span>
+          </div>
+          <span style="font-size:11px; color:var(--text-secondary); max-width:400px; text-align:right;">
+            Combines workload-derived risk with neighbor heat propagation to produce the final cooling decision.
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SPA VIEW 5: EVENTS LOG -->
+  <div id="view-events" class="spa-view-container" style="display:none;">
+    <div class="card-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+        <div>
+          <h2 style="font-size:18px; font-weight:700; color:var(--text-primary); margin:0;">Operational Events & Audit Timeline</h2>
+          <p style="font-size:12px; color:var(--text-muted); margin:2px 0 0 0;">Live system audit stream generated from simulation ticks</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-sm btn-outline active" id="btnEvtFilterAll" onclick="filterEvents('all')">All Events</button>
+          <button class="btn btn-sm btn-outline" id="btnEvtFilterWarn" onclick="filterEvents('warn')">Warnings</button>
+          <button class="btn btn-sm btn-outline" id="btnEvtFilterDanger" onclick="filterEvents('danger')">Critical</button>
+          <button class="btn btn-sm btn-outline" id="btnEvtFilterSuccess" onclick="filterEvents('success')">Cooling</button>
+        </div>
+      </div>
+
+      <div style="max-height:550px; overflow-y:auto; border:1px solid var(--border-light); border-radius:6px; background:var(--bg-surface);">
+        <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+          <thead style="position:sticky; top:0; background:var(--bg-subtle); border-bottom:1px solid var(--border-light); z-index:5;">
+            <tr style="color:var(--text-muted); font-size:11px;">
+              <th style="padding:10px 12px; width:110px;">TIMESTAMP</th>
+              <th style="padding:10px 12px; width:120px;">SEVERITY</th>
+              <th style="padding:10px 12px;">EVENT DESCRIPTION</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <!-- DATASETS & VALIDATION SPA VIEW (TAB 6) -->
@@ -1974,6 +2537,42 @@
 </main>
 
 <script>
+
+// ─── LIGHT / DARK THEME SYSTEM ───
+let currentTheme = localStorage.getItem('thervo_theme') || 'light';
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('thervo_theme', theme);
+
+  const iconEl = document.getElementById('themeToggleIcon');
+  const textEl = document.getElementById('themeToggleText');
+
+  if (theme === 'dark') {
+    if (iconEl) iconEl.textContent = '🌙';
+    if (textEl) textEl.textContent = 'Dark';
+  } else {
+    if (iconEl) iconEl.textContent = '☀️';
+    if (textEl) textEl.textContent = 'Light';
+  }
+
+  if (typeof initGNNCanvas === 'function') initGNNCanvas();
+  if (typeof drawHistoryChart === 'function') drawHistoryChart();
+  if (typeof drawAIThresholdCurve === 'function') drawAIThresholdCurve();
+}
+
+function toggleAppTheme() {
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  applyTheme(newTheme);
+  if (typeof addLog === 'function') {
+    addLog(`☀️/🌙 Switched app theme to ${newTheme.toUpperCase()} MODE`, 'info');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme(currentTheme);
+});
 
 // ─── THERVO VS TRADITIONAL COOLING TOGGLE STATE ───
 let thervoCoolingEnabled = true;
@@ -2410,50 +3009,114 @@ let filterCoolingVal = 'all';
 let sortFleetVal = 'risk-desc';
 
 // ─── ALIBABA PRODUCTION TRACE DATASET WORKLOAD ENGINE ───
-function generateSyntheticWorkload(rackIdx, epoch, baseLoad, noise) {
-  let traceCpu = 0.28, traceGpu = 0.32, traceMem = 0.35, traceDisk = 0.20, traceNet = 0.25;
+// ─── 11-STAGE STAGED TELEMETRY SCENARIO DEFINITION ───
+const SIM_STAGES = [
+  { id: 0, name: 'WARMUP', duration: 12, label: '1. WARMUP — System Baseline Init', cpu: 18, gpu: 15, mem: 24, disk: 12, net: 15 },
+  { id: 1, name: 'IDLE', duration: 12, label: '2. IDLE — Low Background Activity', cpu: 22, gpu: 18, mem: 28, disk: 15, net: 18 },
+  { id: 2, name: 'CPU STRESS', duration: 16, label: '3. CPU STRESS — High Compute Workload', cpu: 84, gpu: 24, mem: 36, disk: 20, net: 25 },
+  { id: 3, name: 'RECOVERY', duration: 12, label: '4. RECOVERY — Workload Decrease & Dissipation', cpu: 24, gpu: 18, mem: 28, disk: 15, net: 20 },
+  { id: 4, name: 'GPU LOAD', duration: 16, label: '5. GPU LOAD — Deep Learning Model Training', cpu: 36, gpu: 88, mem: 65, disk: 25, net: 32 },
+  { id: 5, name: 'IDLE', duration: 12, label: '6. IDLE — Thermal Normalization', cpu: 20, gpu: 18, mem: 25, disk: 15, net: 18 },
+  { id: 6, name: 'MEMORY LOAD', duration: 12, label: '7. MEMORY LOAD — In-Memory Database Caching', cpu: 32, gpu: 22, mem: 86, disk: 30, net: 26 },
+  { id: 7, name: 'DISK I/O LOAD', duration: 12, label: '8. DISK I/O LOAD — Heavy Storage Write Operations', cpu: 36, gpu: 18, mem: 42, disk: 85, net: 32 },
+  { id: 8, name: 'NETWORK LOAD', duration: 12, label: '9. NETWORK LOAD — Ingress/Egress Throughput', cpu: 30, gpu: 20, mem: 35, disk: 25, net: 88 },
+  { id: 9, name: 'MIXED LOAD', duration: 16, label: '10. MIXED LOAD — Multi-Resource Pipeline', cpu: 76, gpu: 80, mem: 74, disk: 62, net: 68 },
+  { id: 10, name: 'BURST / CHAOS', duration: 16, label: '11. BURST / CHAOS — Data Center Load Surge', cpu: 90, gpu: 86, mem: 82, disk: 72, net: 78 },
+];
 
-  // Drive telemetry from official Alibaba GPU Cluster Trace v2026 GitHub dataset
-  if (typeof ALIBABA_TRACE_DATA !== 'undefined' && ALIBABA_TRACE_DATA.time_steps && ALIBABA_TRACE_DATA.time_steps.length > 0) {
+const TOTAL_STAGE_TICKS = SIM_STAGES.reduce((sum, s) => sum + s.duration, 0);
+
+// ─── RACK ROLE DIFFERENTIATION (12 DISTINCT PROFILES) ───
+const RACK_ROLES = [
+  { role: 'Compute Gateway', cpu: 1.35, gpu: 0.40, mem: 0.90, disk: 0.60, net: 1.40 },
+  { role: 'Database Node', cpu: 1.10, gpu: 0.30, mem: 1.20, disk: 1.55, net: 0.80 },
+  { role: 'AI Training Node', cpu: 0.90, gpu: 1.55, mem: 1.30, disk: 0.50, net: 0.90 },
+  { role: 'HPC Supercluster', cpu: 0.80, gpu: 1.65, mem: 1.10, disk: 0.40, net: 0.75 },
+  { role: 'Web Microservices', cpu: 1.40, gpu: 0.30, mem: 1.00, disk: 0.50, net: 1.35 },
+  { role: 'Storage Array Node', cpu: 0.70, gpu: 0.20, mem: 0.80, disk: 1.60, net: 0.90 },
+  { role: 'Memory Cache Node', cpu: 0.80, gpu: 0.20, mem: 1.60, disk: 0.40, net: 0.80 },
+  { role: 'Cool Standby Node', cpu: 0.35, gpu: 0.20, mem: 0.45, disk: 0.30, net: 0.40 },
+  { role: 'Compute Specialist', cpu: 1.55, gpu: 0.50, mem: 0.90, disk: 0.50, net: 0.80 },
+  { role: 'LLM Inference Node', cpu: 0.80, gpu: 1.50, mem: 1.40, disk: 0.60, net: 1.00 },
+  { role: 'Analytics Engine', cpu: 1.20, gpu: 0.60, mem: 1.40, disk: 0.90, net: 0.70 },
+  { role: 'Storage Gateway', cpu: 0.90, gpu: 0.30, mem: 0.90, disk: 1.45, net: 1.30 },
+];
+
+function getStageForTick(t) {
+  let cycleTick = t % TOTAL_STAGE_TICKS;
+  let accumulated = 0;
+  for (const stage of SIM_STAGES) {
+    if (cycleTick < accumulated + stage.duration) {
+      return { stage, stageTick: cycleTick - accumulated };
+    }
+    accumulated += stage.duration;
+  }
+  return { stage: SIM_STAGES[0], stageTick: 0 };
+}
+
+function getDeterministicNoise(epoch, rackIdx, noiseScale) {
+  if (noiseScale <= 0) return 0;
+  const seed = (epoch * 37.1) + (rackIdx * 19.3);
+  const sinVal = Math.sin(seed) * 43758.5453;
+  const frac = sinVal - Math.floor(sinVal);
+  return (frac - 0.5) * noiseScale * 12.0;
+}
+
+// ─── STAGED WORKLOAD & TELEMETRY GENERATOR ───
+function generateSyntheticWorkload(rackIdx, epoch, baseLoad, noise) {
+  if (typeof ALIBABA_TRACE_DATA !== 'undefined' && ALIBABA_TRACE_DATA.time_steps && ALIBABA_TRACE_DATA.time_steps.length > 0 && typeof replayIsRunning !== 'undefined' && replayIsRunning) {
     const stepCount = ALIBABA_TRACE_DATA.time_steps.length;
     const currentStep = ALIBABA_TRACE_DATA.time_steps[epoch % stepCount];
     const sId = ALIBABA_SERVER_MAP[rackIdx];
     const sData = currentStep.servers.find(s => s.server_id === sId) || currentStep.servers[rackIdx % currentStep.servers.length];
 
     if (sData) {
-      traceCpu = sData.cpu_utilization;
-      traceGpu = sData.gpu_utilization;
-      traceMem = sData.memory_utilization;
-      traceDisk = (sData.gpu_memory_utilization || 0.4) * 0.75;
-      traceNet = Math.min(1.0, (sData.network_rx_mbps || 1000) / 3000);
-
-      if (racks[rackIdx]) {
-        racks[rackIdx].workload_type = sData.workload_type;
-        racks[rackIdx].gpu_type = sData.gpu_type;
-        racks[rackIdx].asw_id = sData.asw_id;
-      }
+      return {
+        cpu: Math.min(99, Math.max(10, sData.cpu_utilization * 100)),
+        gpu: Math.min(99, Math.max(5, sData.gpu_utilization * 100)),
+        memory: Math.min(99, Math.max(15, sData.memory_utilization * 100)),
+        diskIO: Math.min(99, Math.max(3, (sData.gpu_memory_utilization || 0.4) * 75)),
+        network: Math.min(99, Math.max(5, Math.min(1.0, (sData.network_rx_mbps || 1000) / 3000) * 100))
+      };
     }
   }
 
+  const { stage, stageTick } = getStageForTick(epoch);
+  const role = RACK_ROLES[rackIdx % RACK_ROLES.length];
   const loadScale = baseLoad / 0.35;
-  const rackBias = [1.25, 0.88, 1.12, 0.78, 1.35, 0.95, 0.82, 1.20, 0.72, 1.05, 0.80, 1.15][rackIdx] || 1.0;
-  const n = () => (Math.random() - 0.5) * noise * 2.0;
+  const noiseVal = getDeterministicNoise(epoch, rackIdx, noise);
 
-  let cpu = Math.min(99, Math.max(10, traceCpu * 100 * loadScale * rackBias + n() * 6));
-  let gpu = Math.min(99, Math.max(5, traceGpu * 100 * loadScale * rackBias + n() * 6));
-  let memory = Math.min(99, Math.max(18, traceMem * 100 * (0.85 + loadScale * 0.15) + n() * 4));
-  let diskIO = Math.min(99, Math.max(3, traceDisk * 100 * loadScale + n() * 5));
-  let network = Math.min(99, Math.max(5, traceNet * 100 * loadScale + n() * 6));
+  const phaseProgress = stageTick / stage.duration;
+  const ramp = Math.sin(phaseProgress * Math.PI);
+
+  let stageRackMultiplier = 1.0;
+  if (stage.name === 'CPU STRESS') {
+    stageRackMultiplier = [1.4, 1.2, 0.6, 0.5, 1.3, 0.5, 0.6, 0.3, 1.5, 0.6, 0.9, 0.7][rackIdx];
+  } else if (stage.name === 'GPU LOAD') {
+    stageRackMultiplier = [0.5, 0.4, 1.5, 1.6, 0.4, 0.4, 0.3, 0.2, 0.5, 1.5, 0.7, 0.4][rackIdx];
+  } else if (stage.name === 'MEMORY LOAD') {
+    stageRackMultiplier = [0.8, 1.2, 1.1, 0.9, 0.9, 0.7, 1.6, 0.3, 0.8, 1.3, 1.4, 0.8][rackIdx];
+  } else if (stage.name === 'DISK I/O LOAD') {
+    stageRackMultiplier = [0.6, 1.5, 0.5, 0.4, 0.5, 1.6, 0.4, 0.3, 0.5, 0.6, 0.9, 1.4][rackIdx];
+  } else if (stage.name === 'NETWORK LOAD') {
+    stageRackMultiplier = [1.5, 0.8, 0.9, 0.7, 1.4, 0.9, 0.8, 0.4, 0.8, 1.0, 0.7, 1.3][rackIdx];
+  }
+
+  let cpu = Math.min(99, Math.max(8, (stage.cpu * role.cpu * stageRackMultiplier * (0.85 + ramp * 0.3)) * loadScale + noiseVal));
+  let gpu = Math.min(99, Math.max(5, (stage.gpu * role.gpu * stageRackMultiplier * (0.85 + ramp * 0.3)) * loadScale + noiseVal));
+  let memory = Math.min(99, Math.max(15, (stage.mem * role.mem * stageRackMultiplier * (0.90 + ramp * 0.2)) * loadScale + noiseVal));
+  let diskIO = Math.min(99, Math.max(3, (stage.disk * role.disk * stageRackMultiplier * (0.85 + ramp * 0.3)) * loadScale + noiseVal));
+  let network = Math.min(99, Math.max(5, (stage.net * role.net * stageRackMultiplier * (0.85 + ramp * 0.3)) * loadScale + noiseVal));
 
   const activeRack = racks[rackIdx];
   if (activeRack && activeRack.spikeBonus > 0) {
     cpu = Math.min(99, cpu + activeRack.spikeBonus);
     gpu = Math.min(99, gpu + activeRack.spikeBonus * 0.9);
-    activeRack.spikeBonus *= 0.90;
+    activeRack.spikeBonus *= 0.88;
     if (activeRack.spikeBonus < 0.5) activeRack.spikeBonus = 0;
   }
 
-  return { cpu, gpu, memory, diskIO, network };
+  return { cpu, gpu, memory, diskIO, network, stageName: stage.name };
 }
 
 // ─── GNN MESSAGE PASSING ───
@@ -2465,21 +3128,21 @@ function computeGNNEmbeddings(rackFeatures) {
   for (let i = 0; i < NUM_RACKS; i++) {
     const self = rackFeatures[i];
     const selfCooling = racks[i] ? (racks[i].coolingActive || racks[i].overrideEnabled) : false;
-    const selfCoolFactor = selfCooling ? 0.45 : 1.0;
+    const selfCoolFactor = selfCooling ? 0.82 : 1.0;
 
     const neighbors = adjList[i].map(j => {
       const feat = rackFeatures[j];
       const jCooling = racks[j] ? (racks[j].coolingActive || racks[j].overrideEnabled) : false;
-      const jFactor = jCooling ? 0.45 : 1.0;
-      return { heat: (feat.cpu * 0.6 + feat.gpu * 0.4) * jFactor };
+      const jFactor = jCooling ? 0.82 : 1.0;
+      return { heat: (feat.cpu * 0.55 + feat.gpu * 0.45) * jFactor };
     });
 
     const neighborHeat = neighbors.length > 0
       ? neighbors.reduce((s, n) => s + n.heat, 0) / neighbors.length
       : 0;
 
-    const selfHeat = (self.cpu * 0.6 + self.gpu * 0.4) * selfCoolFactor;
-    const embedding = (selfHeat * 0.7 + neighborHeat * 0.3) / 100;
+    const selfHeat = (self.cpu * 0.55 + self.gpu * 0.45) * selfCoolFactor;
+    const embedding = (selfHeat * 0.70 + neighborHeat * 0.30) / 100;
 
     embeddings.push(parseFloat(embedding.toFixed(4)));
   }
@@ -2492,18 +3155,18 @@ const XGB_TREES = buildXGBModel();
 function buildXGBModel() {
   const trees = [];
   const treeTemplates = [
-    [0, 0.30, 0.02, 0.18],
-    [1, 0.28, 0.02, 0.16],
-    [5, 0.25, 0.02, 0.15],
-    [0, 0.45, 0.04, 0.28],
-    [1, 0.42, 0.03, 0.26],
-    [5, 0.38, 0.03, 0.22],
-    [0, 0.65, 0.05, 0.35],
-    [1, 0.62, 0.04, 0.32],
-    [5, 0.55, 0.04, 0.28],
-    [0, 0.80, 0.06, 0.42],
-    [1, 0.78, 0.06, 0.38],
-    [2, 0.50, 0.02, 0.14],
+    [0, 0.30, 0.02, 0.22],
+    [1, 0.28, 0.02, 0.20],
+    [5, 0.25, 0.02, 0.18],
+    [0, 0.45, 0.04, 0.32],
+    [1, 0.42, 0.03, 0.30],
+    [5, 0.38, 0.03, 0.25],
+    [0, 0.65, 0.05, 0.38],
+    [1, 0.62, 0.04, 0.35],
+    [2, 0.50, 0.03, 0.22],
+    [3, 0.45, 0.02, 0.20],
+    [4, 0.45, 0.02, 0.20],
+    [5, 0.55, 0.04, 0.32],
   ];
 
   for (let t = 0; t < 30; t++) {
@@ -2515,7 +3178,7 @@ function buildXGBModel() {
 }
 
 function xgbPredict(features) {
-  const LEARNING_RATE = 0.085;
+  const LEARNING_RATE = 0.10;
   let score = 0.10;
 
   for (const [fi, thresh, leftVal, rightVal] of XGB_TREES) {
@@ -2532,8 +3195,10 @@ function initRacks() {
     name: `RACK-${ZONES[i]}${Math.floor(i/4)+1}${i%4+1}`,
     zone: ZONES[i],
     cpu: 0, gpu: 0, memory: 0, diskIO: 0, network: 0,
+    displayCpu: 0, displayGpu: 0, displayMemory: 0, displayDiskIO: 0, displayNetwork: 0,
     gnnEmbed: 0,
     riskScore: 0,
+    displayRiskScore: 0,
     xgbPred: 0,
     coolingActive: false,
     coolingStrength: 0,
@@ -2544,7 +3209,6 @@ function initRacks() {
 
   riskHistory = racks.map(() => Array(40).fill(0));
 
-  // Compute dynamic initial baseline tick (distinct non-static values per rack)
   const baseLoad = 0.35;
   const noise = 0.08;
   const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, 0, baseLoad, noise));
@@ -2553,10 +3217,13 @@ function initRacks() {
     const f = rawFeatures[i];
     rack.cpu = f.cpu; rack.gpu = f.gpu; rack.memory = f.memory;
     rack.diskIO = f.diskIO; rack.network = f.network;
+    rack.displayCpu = f.cpu; rack.displayGpu = f.gpu; rack.displayMemory = f.memory;
+    rack.displayDiskIO = f.diskIO; rack.displayNetwork = f.network;
     rack.gnnEmbed = gnnEmbeds[i];
     const featVec = [f.cpu/100, f.gpu/100, f.memory/100, f.diskIO/100, f.network/100, gnnEmbeds[i]];
     rack.xgbPred = xgbPredict(featVec);
-    rack.riskScore = parseFloat((rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25).toFixed(4));
+    rack.riskScore = parseFloat((rack.xgbPred * 0.70 + rack.gnnEmbed * 0.30).toFixed(4));
+    rack.displayRiskScore = rack.riskScore;
     riskHistory[i] = Array(40).fill(rack.riskScore);
     rack.history = riskHistory[i];
   });
@@ -2575,9 +3242,10 @@ function simTick() {
   simTime++;
   totalPreds += NUM_RACKS;
 
-  const baseLoad = parseInt(document.getElementById('loadSlider').value) / 100;
-  const noise = parseInt(document.getElementById('noiseSlider').value) / 100;
+  const baseLoad = parseInt(document.getElementById('loadSlider')?.value || document.getElementById('loadSlider2')?.value || 35) / 100;
+  const noise = parseInt(document.getElementById('noiseSlider')?.value || document.getElementById('noiseSlider2')?.value || 12) / 100;
 
+  const { stage } = getStageForTick(epoch);
   const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, epoch, baseLoad, noise));
   const gnnEmbeds = computeGNNEmbeddings(rawFeatures);
 
@@ -2598,18 +3266,18 @@ function simTick() {
     const featVec = [f.cpu/100, f.gpu/100, f.memory/100, f.diskIO/100, f.network/100, gnnEmbeds[i]];
     rack.xgbPred = xgbPredict(featVec);
 
-    const rawCompositeRisk = rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25;
+    const rawCompositeRisk = rack.xgbPred * 0.70 + rack.gnnEmbed * 0.30;
 
-    // Hysteresis & Automatic Cooling Trigger (>= 0.58 to Activate, <= 0.45 to Release)
+    // Hysteresis & Automatic Cooling Trigger (>= 0.55 to Activate, <= 0.42 to Release)
     if (thervoCoolingEnabled) {
       if (!rack.coolingActive) {
-        if (rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) {
+        if (rawCompositeRisk >= 0.55 || rack.riskScore >= 0.55) {
           rack.coolingActive = true;
           newAlerts++;
           addLog(`⚠ AUTO COOLING DEPLOYED: ${rack.name} risk=${(rawCompositeRisk*100).toFixed(0)}%`, 'warn');
         }
       } else {
-        if (rack.riskScore <= 0.45 && rawCompositeRisk <= 0.45 && !rack.overrideEnabled) {
+        if (rack.riskScore <= 0.42 && rawCompositeRisk <= 0.42 && !rack.overrideEnabled) {
           rack.coolingActive = false;
           addLog(`✓ ${rack.name} thermal state normalized — cooling standby`, 'success');
         }
@@ -2627,9 +3295,10 @@ function simTick() {
       rack.coolingStrength = Math.max(0, rack.coolingStrength - 0.05);
     }
 
-    // Fast Risk Convergence (Lerp factor = 0.38 for fast cooling recovery)
-    const targetRisk = isCooled ? (rawCompositeRisk * 0.45) : rawCompositeRisk;
-    const lerpFactor = isCooled ? 0.38 : 0.20;
+    // Dynamic target risk scaling: active cooling provides realistic ~28% thermal risk reduction
+    const coolingFactor = isCooled ? 0.72 : 1.0;
+    const targetRisk = Math.min(1.0, Math.max(0.05, rawCompositeRisk * coolingFactor));
+    const lerpFactor = isCooled ? 0.28 : 0.20;
 
     if (rack.riskScore === 0) {
       rack.riskScore = parseFloat(targetRisk.toFixed(4));
@@ -2653,20 +3322,14 @@ function simTick() {
   const instantSaving = Math.max(0, (blanketBaseline - targetedCoolingLoad) * 100 * 0.4);
   energySavedTotal = parseFloat(Math.min(35, energySavedTotal * 0.90 + instantSaving * 0.10 + 0.08).toFixed(1));
 
-  // Update UI components
+  // Update UI components (Visual rendering is continuously driven by 60FPS startUIRenderLoop)
   updateMetrics(rawFeatures, hotZones, coolingOn);
-  renderFloorPlan();
-  updateRackCards();
-  updateHeatmap();
-  updateGNNGraph();
-  updateSelectedDetail();
-  updateModelStats();
   updateSimTime();
 
   const banner = document.getElementById('alertBanner');
   if (hotZones >= 3) {
     banner.classList.add('show');
-    if (newAlerts > 0) addLog(`🔴 CRITICAL: ${hotZones} hot zones exceeding threshold`, 'danger');
+    if (newAlerts > 0) addLog(`🔴 CRITICAL: ${hotZones} hot spots exceeding threshold`, 'danger');
   } else {
     banner.classList.remove('show');
   }
@@ -2693,7 +3356,7 @@ function toggleCoolingModal() {
 }
 
 function updateMetrics(features, hotZones, coolingOn) {
-  const avgRisk = (racks.reduce((s, r) => s + r.riskScore, 0) / NUM_RACKS * 100).toFixed(0);
+  const avgRisk = (racks.reduce((s, r) => s + (r.displayRiskScore !== undefined ? r.displayRiskScore : r.riskScore), 0) / NUM_RACKS * 100).toFixed(0);
   
   const avgRiskEl = document.getElementById('avgRiskVal');
   if (avgRiskEl) avgRiskEl.textContent = avgRisk + '%';
@@ -2744,10 +3407,54 @@ function updateSimTime() {
 }
 
 function getRiskEnterpriseClass(risk) {
-  if (risk < 0.35) return { label: 'LOW', badgeClass: 'risk-low', bg: '#f0fdf4', border: '#bbf7d0', color: '#166534' };
-  if (risk < 0.55) return { label: 'MED', badgeClass: 'risk-med', bg: '#fffbeb', border: '#fde68a', color: '#92400e' };
-  if (risk < 0.75) return { label: 'HIGH', badgeClass: 'risk-high', bg: '#fff7ed', border: '#fed7aa', color: '#9a3412' };
-  return { label: 'CRIT', badgeClass: 'risk-crit', bg: '#fef2f2', border: '#fca5a5', color: '#991b1b' };
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+
+  if (risk < 0.35) {
+    return {
+      label: 'LOW',
+      badgeClass: 'risk-low',
+      bg: isDark ? '#0B3A2D' : '#f0fdf4',
+      border: isDark ? '#0F8F68' : '#bbf7d0',
+      color: isDark ? '#D1FAE5' : '#166534',
+      valColor: isDark ? '#86EFAC' : '#166534',
+      badgeBg: isDark ? '#082D24' : '#dcfce7',
+      badgeText: isDark ? '#4ADE80' : '#15803d'
+    };
+  }
+  if (risk < 0.55) {
+    return {
+      label: 'MED',
+      badgeClass: 'risk-med',
+      bg: isDark ? '#3A2508' : '#fffbeb',
+      border: isDark ? '#D97706' : '#fde68a',
+      color: isDark ? '#FEF3C7' : '#92400e',
+      valColor: isDark ? '#FBBF24' : '#92400e',
+      badgeBg: isDark ? '#4A2F08' : '#fef3c7',
+      badgeText: isDark ? '#FBBF24' : '#b45309'
+    };
+  }
+  if (risk < 0.75) {
+    return {
+      label: 'HIGH',
+      badgeClass: 'risk-high',
+      bg: isDark ? '#3B1708' : '#fff7ed',
+      border: isDark ? '#EA580C' : '#fed7aa',
+      color: isDark ? '#FFEDD5' : '#9a3412',
+      valColor: isDark ? '#FB923C' : '#9a3412',
+      badgeBg: isDark ? '#4A1D0A' : '#ffedd5',
+      badgeText: isDark ? '#FB923C' : '#c2410c'
+    };
+  }
+  return {
+    label: 'CRIT',
+    badgeClass: 'risk-crit',
+    bg: isDark ? '#3A0D12' : '#fef2f2',
+    border: isDark ? '#DC2626' : '#fca5a5',
+    color: isDark ? '#FEE2E2' : '#991b1b',
+    valColor: isDark ? '#F87171' : '#991b1b',
+    badgeBg: isDark ? '#4A1017' : '#fee2e2',
+    badgeText: isDark ? '#F87171' : '#b91c1c'
+  };
 }
 
 // ─── RENDER FLOOR PLAN ───
@@ -2758,22 +3465,28 @@ function renderFloorPlan() {
   if (!rowA || !rowB || !rowC) return;
 
   rowA.innerHTML = ''; rowB.innerHTML = ''; rowC.innerHTML = '';
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
 
   racks.forEach((rack, i) => {
     const unit = document.createElement('div');
-    const ec = getRiskEnterpriseClass(rack.riskScore);
+    const displayRisk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
+    const ec = getRiskEnterpriseClass(displayRisk);
+    const isSel = (i === selectedRack);
     
-    unit.className = `floor-rack-unit ${i === selectedRack ? 'selected' : ''}`;
+    unit.className = `floor-rack-unit ${isSel ? 'selected' : ''}`;
     unit.style.background = ec.bg;
-    unit.style.borderColor = ec.border;
+    unit.style.borderColor = isSel ? '#3B82F6' : ec.border;
+    if (isSel) {
+      unit.style.boxShadow = isDark ? '0 0 12px rgba(59, 130, 246, 0.5), 0 0 0 2px #3B82F6' : '0 0 0 2px var(--brand-primary)';
+    }
 
     unit.innerHTML = `
       <div class="fru-header">
-        <span class="fru-id">${rack.name.replace('RACK-', '')}</span>
-        <span class="fru-badge ${ec.badgeClass}">${ec.label}</span>
+        <span class="fru-id" style="color:${ec.color}; font-weight:700;">${rack.name.replace('RACK-', '')}</span>
+        <span class="fru-badge ${ec.badgeClass}" style="background:${ec.badgeBg}; color:${ec.badgeText}; border-color:${ec.border};">${ec.label}</span>
       </div>
-      <div class="fru-risk-val">${(rack.riskScore * 100).toFixed(0)}%</div>
-      ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="fru-cooling">❄ COOLING ACTIVE</span>' : ''}
+      <div class="fru-risk-val" style="color:${ec.valColor}; font-weight:700;">${(displayRisk * 100).toFixed(0)}%</div>
+      ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="fru-cooling" style="color:#60A5FA;">❄ COOLING ACTIVE</span>' : ''}
     `;
 
     unit.addEventListener('click', () => selectRack(i));
@@ -2807,10 +3520,11 @@ function getFilteredSortedRacks() {
 
   if (filterRiskVal !== 'all') {
     list = list.filter(r => {
-      if (filterRiskVal === 'low') return r.riskScore < 0.35;
-      if (filterRiskVal === 'med') return r.riskScore >= 0.35 && r.riskScore < 0.55;
-      if (filterRiskVal === 'high') return r.riskScore >= 0.55 && r.riskScore < 0.75;
-      if (filterRiskVal === 'crit') return r.riskScore >= 0.75;
+      const displayRisk = r.displayRiskScore !== undefined ? r.displayRiskScore : r.riskScore;
+      if (filterRiskVal === 'low') return displayRisk < 0.35;
+      if (filterRiskVal === 'med') return displayRisk >= 0.35 && displayRisk < 0.55;
+      if (filterRiskVal === 'high') return displayRisk >= 0.55 && displayRisk < 0.75;
+      if (filterRiskVal === 'crit') return displayRisk >= 0.75;
       return true;
     });
   }
@@ -2823,8 +3537,10 @@ function getFilteredSortedRacks() {
   }
 
   list.sort((a, b) => {
-    if (sortFleetVal === 'risk-desc') return b.riskScore - a.riskScore;
-    if (sortFleetVal === 'risk-asc') return a.riskScore - b.riskScore;
+    const aRisk = a.displayRiskScore !== undefined ? a.displayRiskScore : a.riskScore;
+    const bRisk = b.displayRiskScore !== undefined ? b.displayRiskScore : b.riskScore;
+    if (sortFleetVal === 'risk-desc') return bRisk - aRisk;
+    if (sortFleetVal === 'risk-asc') return aRisk - bRisk;
     if (sortFleetVal === 'cpu-desc') return b.cpu - a.cpu;
     if (sortFleetVal === 'gpu-desc') return b.gpu - a.gpu;
     if (sortFleetVal === 'id') return a.id - b.id;
@@ -2843,18 +3559,28 @@ function updateFleetDisplay() {
   if (!grid) return;
   grid.innerHTML = '';
 
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
   const displayList = getFilteredSortedRacks();
 
   displayList.forEach(rack => {
     const i = rack.id;
-    const ec = getRiskEnterpriseClass(rack.riskScore);
+    const displayRisk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
+    const displayCpu = rack.displayCpu !== undefined ? rack.displayCpu : rack.cpu;
+    const displayGpu = rack.displayGpu !== undefined ? rack.displayGpu : rack.gpu;
+    const ec = getRiskEnterpriseClass(displayRisk);
+    const isSel = (i === selectedRack);
     const card = document.createElement('div');
-    card.className = `rack-card ${i === selectedRack ? 'selected' : ''}`;
+    card.className = `rack-card ${isSel ? 'selected' : ''}`;
     card.id = `rack-card-${i}`;
+    card.style.background = ec.bg;
+    card.style.borderColor = isSel ? '#3B82F6' : ec.border;
+    if (isSel) {
+      card.style.boxShadow = isDark ? '0 0 12px rgba(59, 130, 246, 0.5), 0 0 0 2px #3B82F6' : '0 0 0 2px var(--brand-primary)';
+    }
 
     const tooltipText = `Rack ${rack.name} (Zone ${rack.zone})\n` +
-      `Risk: ${(rack.riskScore * 100).toFixed(0)}% (${ec.label})\n` +
-      `CPU: ${rack.cpu.toFixed(0)}% | GPU: ${rack.gpu.toFixed(0)}%\n` +
+      `Risk: ${(displayRisk * 100).toFixed(0)}% (${ec.label})\n` +
+      `CPU: ${displayCpu.toFixed(0)}% | GPU: ${displayGpu.toFixed(0)}%\n` +
       `MEM: ${rack.memory.toFixed(0)}% | DISK: ${rack.diskIO.toFixed(0)}% | NET: ${rack.network.toFixed(0)}%\n` +
       `XGB: ${(rack.xgbPred * 100).toFixed(0)}% | GNN: ${rack.gnnEmbed.toFixed(3)}\n` +
       `Cooling: ${(rack.coolingActive || rack.overrideEnabled) ? 'ACTIVE' : 'IDLE'}`;
@@ -2864,12 +3590,12 @@ function updateFleetDisplay() {
     card.innerHTML = `
       <div class="rack-card-compact">
         <div class="rc-left">
-          <div class="rack-id" style="font-weight:700;">${rack.name}</div>
-          <div class="rack-zone" style="font-size:11px;color:var(--text-subtle);">Zone ${rack.zone}</div>
+          <div class="rack-id" style="font-weight:700; color:${ec.color};">${rack.name}</div>
+          <div class="rack-zone" style="font-size:11px; color:${isDark ? '#AAB8CC' : 'var(--text-subtle)'};">Zone ${rack.zone}</div>
         </div>
-        <div class="rc-right">
-          ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="cooling-dot-badge" title="Cooling Active">❄</span>' : ''}
-          <div class="rack-risk-badge ${ec.badgeClass}">${(rack.riskScore * 100).toFixed(0)}%</div>
+        <div class="rc-right" style="display:flex; align-items:center; gap:6px;">
+          ${(rack.coolingActive || rack.overrideEnabled) ? '<span class="cooling-dot-badge" style="color:#60A5FA;" title="Cooling Active">❄</span>' : ''}
+          <div class="rack-risk-badge ${ec.badgeClass}" style="background:${ec.badgeBg}; color:${ec.badgeText}; border:1px solid ${ec.border}; font-weight:700; padding:2px 8px; border-radius:12px; font-size:11px;">${(displayRisk * 100).toFixed(0)}%</div>
         </div>
       </div>
     `;
@@ -2891,7 +3617,8 @@ function renderHeatmap() {
 
   racks.forEach((rack, i) => {
     const cell = document.createElement('div');
-    const ec = getRiskEnterpriseClass(rack.riskScore);
+    const displayRisk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
+    const ec = getRiskEnterpriseClass(displayRisk);
 
     cell.className = 'hm-cell';
     cell.id = `hm-${i}`;
@@ -2900,7 +3627,7 @@ function renderHeatmap() {
     cell.style.borderColor = ec.border;
     cell.style.color = ec.color;
 
-    cell.innerHTML = `<div>${ZONES[i]}${i%4+1}</div><div style="font-size:8px;opacity:0.8">${(rack.riskScore*100).toFixed(0)}%</div>`;
+    cell.innerHTML = `<div>${ZONES[i]}${i%4+1}</div><div style="font-size:8px;opacity:0.8">${(displayRisk*100).toFixed(0)}%</div>`;
     cell.addEventListener('click', () => selectRack(i));
     grid.appendChild(cell);
   });
@@ -2910,11 +3637,12 @@ function updateHeatmap() {
   racks.forEach((rack, i) => {
     const cell = document.getElementById(`hm-${i}`);
     if (cell) {
-      const ec = getRiskEnterpriseClass(rack.riskScore);
+      const displayRisk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
+      const ec = getRiskEnterpriseClass(displayRisk);
       cell.style.background = ec.bg;
       cell.style.borderColor = ec.border;
       cell.style.color = ec.color;
-      cell.innerHTML = `<div>${ZONES[i]}${i%4+1}</div><div style="font-size:8px;opacity:0.8">${(rack.riskScore*100).toFixed(0)}%</div>`;
+      cell.innerHTML = `<div>${ZONES[i]}${i%4+1}</div><div style="font-size:8px;opacity:0.8">${(displayRisk*100).toFixed(0)}%</div>`;
     }
   });
 }
@@ -2945,10 +3673,11 @@ function drawGNNGraph() {
   ctx.clearRect(0, 0, W, H);
 
   // Background Grid
-  ctx.fillStyle = '#ffffff';
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+  ctx.fillStyle = isDark ? '#0D1626' : '#ffffff';
   ctx.fillRect(0, 0, W, H);
 
-  ctx.strokeStyle = '#f1f5f9';
+  ctx.strokeStyle = isDark ? '#1F2E45' : '#f1f5f9';
   ctx.lineWidth = 1;
   for (let x = 0; x < W; x += 40) {
     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
@@ -2971,7 +3700,9 @@ function drawGNNGraph() {
   GNN_EDGES.forEach(([a, b]) => {
     if (!gnnNodePositions[a] || !gnnNodePositions[b]) return;
     const pa = gnnNodePositions[a], pb = gnnNodePositions[b];
-    const riskAvg = ((racks[a]?.riskScore || 0) + (racks[b]?.riskScore || 0)) / 2;
+    const riskA = racks[a]?.displayRiskScore !== undefined ? racks[a].displayRiskScore : (racks[a]?.riskScore || 0);
+    const riskB = racks[b]?.displayRiskScore !== undefined ? racks[b].displayRiskScore : (racks[b]?.riskScore || 0);
+    const riskAvg = (riskA + riskB) / 2;
 
     ctx.lineWidth = 1.5;
     if (riskAvg > 0.55) ctx.strokeStyle = '#ea580c';
@@ -2998,7 +3729,7 @@ function drawGNNGraph() {
   gnnNodePositions.forEach((pos, i) => {
     if (!racks[i]) return;
     const rack = racks[i];
-    const risk = rack.riskScore;
+    const risk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
     const isSelected = i === selectedRack;
     const isCooling = rack.coolingActive || rack.overrideEnabled;
     const ec = getRiskEnterpriseClass(risk);
@@ -3054,7 +3785,14 @@ function updateSelectedDetail() {
   const rack = racks[selectedRack];
   if (!rack) return;
 
-  const ec = getRiskEnterpriseClass(rack.riskScore);
+  const displayRisk = rack.displayRiskScore !== undefined ? rack.displayRiskScore : rack.riskScore;
+  const displayCpu = rack.displayCpu !== undefined ? rack.displayCpu : rack.cpu;
+  const displayGpu = rack.displayGpu !== undefined ? rack.displayGpu : rack.gpu;
+  const displayMem = rack.displayMemory !== undefined ? rack.displayMemory : rack.memory;
+  const displayDisk = rack.displayDiskIO !== undefined ? rack.displayDiskIO : rack.diskIO;
+  const displayNet = rack.displayNetwork !== undefined ? rack.displayNetwork : rack.network;
+
+  const ec = getRiskEnterpriseClass(displayRisk);
 
   document.getElementById('detailTitle').textContent = rack.name;
   document.getElementById('detailSub').textContent = `Zone ${rack.zone} · GNN Node ${selectedRack} · ${rack.coolingActive || rack.overrideEnabled ? '❄ COOLING ACTIVE' : 'Cooling Standby'}`;
@@ -3062,15 +3800,15 @@ function updateSelectedDetail() {
   const badge = document.getElementById('detailRiskBadge');
   if (badge) {
     badge.className = `rack-risk-badge ${ec.badgeClass}`;
-    badge.textContent = `${ec.label} ${(rack.riskScore * 100).toFixed(0)}%`;
+    badge.textContent = `${ec.label} ${(displayRisk * 100).toFixed(0)}%`;
   }
 
-  document.getElementById('d-cpu').textContent = rack.cpu.toFixed(1) + '%';
-  document.getElementById('d-gpu').textContent = rack.gpu.toFixed(1) + '%';
-  document.getElementById('d-mem').textContent = rack.memory.toFixed(1) + '%';
-  document.getElementById('d-disk').textContent = rack.diskIO.toFixed(1) + '%';
-  document.getElementById('d-net').textContent = rack.network.toFixed(1) + '%';
-  document.getElementById('d-risk').textContent = (rack.riskScore * 100).toFixed(1) + '%';
+  document.getElementById('d-cpu').textContent = displayCpu.toFixed(1) + '%';
+  document.getElementById('d-gpu').textContent = displayGpu.toFixed(1) + '%';
+  document.getElementById('d-mem').textContent = displayMem.toFixed(1) + '%';
+  document.getElementById('d-disk').textContent = displayDisk.toFixed(1) + '%';
+  document.getElementById('d-net').textContent = displayNet.toFixed(1) + '%';
+  document.getElementById('d-risk').textContent = (displayRisk * 100).toFixed(1) + '%';
   document.getElementById('d-xgb').textContent = (rack.xgbPred * 100).toFixed(1) + '%';
   document.getElementById('d-gnn').textContent = rack.gnnEmbed.toFixed(4);
 
@@ -3081,8 +3819,8 @@ function updateSelectedDetail() {
   const recNeighbor = document.getElementById('recNeighbor');
 
   const history = riskHistory[selectedRack] || [];
-  const prevRisk = history.length > 5 ? history[history.length - 6] : rack.riskScore;
-  const isRising = rack.riskScore >= prevRisk;
+  const prevRisk = history.length > 5 ? history[history.length - 6] : displayRisk;
+  const isRising = displayRisk >= prevRisk;
 
   recTrend.textContent = isRising ? '↑ Increasing' : '↓ Decreasing';
   recTrend.style.color = isRising ? 'var(--risk-high)' : 'var(--risk-low)';
@@ -3090,25 +3828,26 @@ function updateSelectedDetail() {
   const neighborInfluenceVal = (rack.gnnEmbed * 12).toFixed(0);
   recNeighbor.textContent = `+${neighborInfluenceVal}%`;
 
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
   if (rack.coolingActive || rack.overrideEnabled) {
     recBadge.textContent = 'Maintain Cooling';
-    recBadge.style.color = '#0284c7';
-    recBadge.style.background = '#e0f2fe';
+    recBadge.style.color = isDark ? '#60A5FA' : '#0284c7';
+    recBadge.style.background = isDark ? '#16233A' : '#e0f2fe';
     recText.textContent = `Maintain active cooling on ${rack.name}. Predicted thermal risk is trending ${isRising ? 'upward' : 'downward'} and neighbor propagation influence is +${neighborInfluenceVal}%.`;
-  } else if (rack.riskScore > 0.58) {
+  } else if (displayRisk > 0.58) {
     recBadge.textContent = 'Proactive Cooling Active';
-    recBadge.style.color = 'var(--risk-high)';
-    recBadge.style.background = 'var(--risk-high-bg)';
+    recBadge.style.color = isDark ? '#FB923C' : 'var(--risk-high)';
+    recBadge.style.background = isDark ? '#3B1708' : 'var(--risk-high-bg)';
     recText.textContent = `${rack.name} has crossed the 58% automated cooling threshold. Rapid thermal intervention is engaged to prevent hotspot propagation.`;
-  } else if (rack.riskScore > 0.45) {
+  } else if (displayRisk > 0.45) {
     recBadge.textContent = 'Elevated Monitoring';
-    recBadge.style.color = 'var(--risk-med)';
-    recBadge.style.background = 'var(--risk-med-bg)';
+    recBadge.style.color = isDark ? '#FBBF24' : 'var(--risk-med)';
+    recBadge.style.background = isDark ? '#3A2508' : 'var(--risk-med-bg)';
     recText.textContent = `Proactive cooling monitoring for ${rack.name}. Workload intensity is elevating thermal risk.`;
   } else {
     recBadge.textContent = 'Normal Operation';
-    recBadge.style.color = 'var(--risk-low)';
-    recBadge.style.background = 'var(--risk-low-bg)';
+    recBadge.style.color = isDark ? '#4ADE80' : 'var(--risk-low)';
+    recBadge.style.background = isDark ? '#0B3A2D' : 'var(--risk-low-bg)';
     recText.textContent = `Thermal parameters are nominal. No active intervention required for ${rack.name}.`;
   }
 
@@ -3141,9 +3880,10 @@ function drawHistoryChart() {
   }
 
   // Gridlines
-  ctx.strokeStyle = '#f1f5f9';
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+  ctx.strokeStyle = isDark ? '#1F2E45' : '#f1f5f9';
   ctx.lineWidth = 1;
-  ctx.fillStyle = '#94a3b8';
+  ctx.fillStyle = isDark ? '#AAB8CC' : '#94a3b8';
   ctx.font = '500 9px "JetBrains Mono", monospace';
   for (let y = 0; y <= 4; y++) {
     const yp = H - 20 - (y / 4) * (H - 30);
@@ -3244,57 +3984,85 @@ function updateFeatureImportance(features) {
 }
 
 // ─── EVENT AUDIT LOG ───
+let logHistory = [];
+
 function addLog(msg, type = '') {
-  const log = document.getElementById('logArea');
-  if (!log) return;
-  const entry = document.createElement('div');
-  entry.className = `log-entry ${type}`;
   const ts = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'});
-  entry.textContent = `[${ts}] ${msg}`;
-  log.appendChild(entry);
-  if (log.children.length > 60) log.removeChild(log.firstChild);
-  log.scrollTop = log.scrollHeight;
+  const item = { id: Date.now() + Math.random(), ts, msg, type, epoch };
+  logHistory.unshift(item);
+  if (logHistory.length > 200) logHistory.pop();
+
+  const log = document.getElementById('logArea');
+  if (log) {
+    const entry = document.createElement('div');
+    entry.className = `log-entry ${type}`;
+    entry.textContent = `[${ts}] ${msg}`;
+    log.appendChild(entry);
+    if (log.children.length > 60) log.removeChild(log.firstChild);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  const activeLink = document.querySelector('.app-nav .nav-link.active');
+  const activeTab = activeLink ? (activeLink.getAttribute('data-tab') || activeLink.getAttribute('href')?.replace('#', '')) : 'overview';
+  if (activeTab === 'events') {
+    updateEventsView();
+  }
 }
 
 // ─── CONTROLS EVENT LISTENERS ───
-document.getElementById('speedSlider')?.addEventListener('input', function() {
-  document.getElementById('speedVal').textContent = this.value + 'x';
+function syncSliders(sliderId1, sliderId2, labelId1, labelId2, suffix, onChange) {
+  const s1 = document.getElementById(sliderId1);
+  const s2 = document.getElementById(sliderId2);
+  const l1 = document.getElementById(labelId1);
+  const l2 = document.getElementById(labelId2);
+
+  function handler(val) {
+    if (s1) s1.value = val;
+    if (s2) s2.value = val;
+    if (l1) l1.textContent = val + suffix;
+    if (l2) l2.textContent = val + suffix;
+    if (onChange) onChange(parseInt(val));
+  }
+
+  s1?.addEventListener('input', function() { handler(this.value); });
+  s2?.addEventListener('input', function() { handler(this.value); });
+}
+
+syncSliders('speedSlider', 'speedSlider2', 'speedVal', 'speedVal2', 'x', (val) => {
   if (simRunning) {
     clearInterval(simInterval);
-    simInterval = setInterval(simTick, 1000 / parseInt(this.value));
+    simInterval = setInterval(simTick, 1000 / val);
   }
 });
 
-document.getElementById('loadSlider')?.addEventListener('input', function() {
-  document.getElementById('loadVal').textContent = this.value + '%';
-});
+syncSliders('loadSlider', 'loadSlider2', 'loadVal', 'loadVal2', '%');
+syncSliders('noiseSlider', 'noiseSlider2', 'noiseVal', 'noiseVal2', '%');
 
-document.getElementById('noiseSlider')?.addEventListener('input', function() {
-  document.getElementById('noiseVal').textContent = this.value + '%';
-});
-
-document.getElementById('btnRun')?.addEventListener('click', () => {
+function handleRunSim() {
   if (simRunning) return;
   simRunning = true;
-  const speed = parseInt(document.getElementById('speedSlider').value);
+  const speed = parseInt(document.getElementById('speedSlider')?.value || 1);
   simInterval = setInterval(simTick, 1000 / speed);
-  document.getElementById('statusText').textContent = 'SYSTEM OPERATIONAL';
+  const statusText = document.getElementById('statusText');
+  if (statusText) statusText.textContent = 'Live';
   addLog('▶ Simulation started — Live GNN + XGBoost predictive pipeline active', 'info');
-});
+}
 
-document.getElementById('btnStop')?.addEventListener('click', () => {
+function handleStopSim() {
   simRunning = false;
   clearInterval(simInterval);
-  document.getElementById('statusText').textContent = 'SIMULATION PAUSED';
+  const statusText = document.getElementById('statusText');
+  if (statusText) statusText.textContent = 'Paused';
   addLog('■ Simulation paused', 'warn');
-});
+}
 
-document.getElementById('btnInjectSpike')?.addEventListener('click', () => {
-  const target = Math.floor(Math.random() * NUM_RACKS);
+function handleInjectSpike() {
+  const target = (selectedRack >= 0 && selectedRack < NUM_RACKS) ? selectedRack : Math.floor(Math.random() * NUM_RACKS);
   const rack = racks[target];
-  rack.spikeBonus = 55;
-  rack.cpu = Math.min(99, rack.cpu + 45);
-  rack.gpu = Math.min(99, rack.gpu + 40);
+  if (!rack) return;
+  rack.spikeBonus = 65;
+  rack.cpu = 99;
+  rack.gpu = 99;
 
   // Compute live pipeline for spiked rack
   const rawFeatures = racks.map((r, i) => ({ cpu: r.cpu, gpu: r.gpu, memory: r.memory, diskIO: r.diskIO, network: r.network }));
@@ -3302,24 +4070,18 @@ document.getElementById('btnInjectSpike')?.addEventListener('click', () => {
   rack.gnnEmbed = gnnEmbeds[target];
   const featVec = [rack.cpu/100, rack.gpu/100, rack.memory/100, rack.diskIO/100, rack.network/100, rack.gnnEmbed];
   rack.xgbPred = xgbPredict(featVec);
-  const uncooledRisk = rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25;
+  const uncooledRisk = Math.min(0.99, rack.xgbPred * 0.70 + rack.gnnEmbed * 0.30);
   rack.riskScore = parseFloat(uncooledRisk.toFixed(4));
 
-  if (uncooledRisk >= 0.72 && thervoCoolingEnabled) {
+  if (uncooledRisk >= 0.55 && thervoCoolingEnabled) {
     rack.coolingActive = true;
   }
 
   selectRack(target);
   addLog(`⚡ THERMAL SPIKE INJECTED into ${rack.name} → Risk jumped to ${(rack.riskScore*100).toFixed(0)}%`, 'danger');
-  renderFloorPlan();
-  updateRackCards();
-  updateHeatmap();
-  updateGNNGraph();
-  updateSelectedDetail();
-  updateModelStats();
-});
+}
 
-document.getElementById('btnCoolAll')?.addEventListener('click', () => {
+function handleCoolAll() {
   let count = 0;
   racks.forEach(rack => {
     if (rack.riskScore > 0.55) {
@@ -3328,30 +4090,42 @@ document.getElementById('btnCoolAll')?.addEventListener('click', () => {
     }
   });
   addLog(`❄ Targeted cooling deployed to ${count} high-risk racks`, 'success');
-  renderFloorPlan();
-  updateRackCards();
-  updateHeatmap();
-  updateModelStats();
-});
+}
+
+document.getElementById('btnRun')?.addEventListener('click', handleRunSim);
+document.getElementById('btnRun2')?.addEventListener('click', handleRunSim);
+
+document.getElementById('btnStop')?.addEventListener('click', handleStopSim);
+document.getElementById('btnStop2')?.addEventListener('click', handleStopSim);
+
+document.getElementById('btnInjectSpike')?.addEventListener('click', handleInjectSpike);
+document.getElementById('btnInjectSpike2')?.addEventListener('click', handleInjectSpike);
+
+document.getElementById('btnCoolAll')?.addEventListener('click', handleCoolAll);
+document.getElementById('btnCoolAll2')?.addEventListener('click', handleCoolAll);
 
 document.getElementById('btnDeployCool')?.addEventListener('click', () => {
   const rack = racks[selectedRack];
+  if (!rack) return;
   rack.overrideEnabled = true;
   addLog(`❄ MANUAL COOLING DEPLOYED → ${rack.name}`, 'success');
   renderFloorPlan();
   updateRackCards();
   updateSelectedDetail();
   updateHeatmap();
+  renderActiveTab();
 });
 
 document.getElementById('btnRemoveCool')?.addEventListener('click', () => {
   const rack = racks[selectedRack];
+  if (!rack) return;
   rack.overrideEnabled = false;
   addLog(`✕ Cooling intervention disengaged from ${rack.name}`, 'warn');
   renderFloorPlan();
   updateRackCards();
   updateSelectedDetail();
   updateHeatmap();
+  renderActiveTab();
 });
 
 // ─── RESIZE HANDLER ───
@@ -3360,63 +4134,102 @@ window.addEventListener('resize', () => {
   drawHistoryChart();
 });
 
-// ─── AUTONOMOUS LIVE DRIFT ───
-function autonomousDrift() {
-  if (!simRunning) {
-    const baseLoad = parseInt(document.getElementById('loadSlider').value) / 100;
-    const noise = parseInt(document.getElementById('noiseSlider').value) / 100;
-    const rawFeatures = racks.map((_, i) => generateSyntheticWorkload(i, epoch, baseLoad, noise));
-    const gnnEmbeds = computeGNNEmbeddings(rawFeatures);
-    racks.forEach((rack, i) => {
-      const f = rawFeatures[i];
-      rack.cpu    = rack.cpu    * 0.85 + f.cpu    * 0.15;
-      rack.gpu    = rack.gpu    * 0.85 + f.gpu    * 0.15;
-      rack.memory = rack.memory * 0.85 + f.memory * 0.15;
-      rack.diskIO = rack.diskIO * 0.85 + f.diskIO * 0.15;
-      rack.network= rack.network* 0.85 + f.network* 0.15;
-      rack.gnnEmbed = gnnEmbeds[i];
-      const featVec = [rack.cpu/100, rack.gpu/100, rack.memory/100, rack.diskIO/100, rack.network/100, rack.gnnEmbed];
-      rack.xgbPred  = xgbPredict(featVec);
-      const rawCompositeRisk = rack.xgbPred * 0.75 + rack.gnnEmbed * 0.25;
+// ─── SMOOTH 60 FPS UI RENDER LOOP (Decoupled from 1 Hz Simulation Time) ───
+let animFrameId = null;
 
-      if (thervoCoolingEnabled) {
-        if (!rack.coolingActive) {
-          if (rawCompositeRisk >= 0.58 || rack.riskScore >= 0.58) {
-            rack.coolingActive = true;
-          }
-        } else {
-          if (rack.riskScore <= 0.45 && rawCompositeRisk <= 0.45 && !rack.overrideEnabled) {
-            rack.coolingActive = false;
-          }
-        }
-      } else {
-        rack.coolingActive = true;
-      }
+function startUIRenderLoop() {
+  function renderFrame() {
+    const lerpRate = 0.14;
 
-      const isCooled = rack.coolingActive || rack.overrideEnabled;
-      const targetRisk = isCooled ? (rawCompositeRisk * 0.45) : rawCompositeRisk;
-      const lerpFactor = isCooled ? 0.38 : 0.20;
+    racks.forEach(rack => {
+      if (rack.displayCpu === undefined) rack.displayCpu = rack.cpu;
+      if (rack.displayGpu === undefined) rack.displayGpu = rack.gpu;
+      if (rack.displayMemory === undefined) rack.displayMemory = rack.memory;
+      if (rack.displayDiskIO === undefined) rack.displayDiskIO = rack.diskIO;
+      if (rack.displayNetwork === undefined) rack.displayNetwork = rack.network;
+      if (rack.displayRiskScore === undefined) rack.displayRiskScore = rack.riskScore;
 
-      if (rack.riskScore === 0) {
-        rack.riskScore = parseFloat(targetRisk.toFixed(4));
-      } else {
-        rack.riskScore = parseFloat((rack.riskScore * (1 - lerpFactor) + targetRisk * lerpFactor).toFixed(4));
-      }
-
-      riskHistory[i].push(rack.riskScore);
-      if (riskHistory[i].length > 40) riskHistory[i].shift();
+      rack.displayCpu += (rack.cpu - rack.displayCpu) * lerpRate;
+      rack.displayGpu += (rack.gpu - rack.displayGpu) * lerpRate;
+      rack.displayMemory += (rack.memory - rack.displayMemory) * lerpRate;
+      rack.displayDiskIO += (rack.diskIO - rack.displayDiskIO) * lerpRate;
+      rack.displayNetwork += (rack.network - rack.displayNetwork) * lerpRate;
+      rack.displayRiskScore += (rack.riskScore - rack.displayRiskScore) * lerpRate;
     });
+
     renderFloorPlan();
     updateRackCards();
     updateHeatmap();
     updateGNNGraph();
     updateSelectedDetail();
-    updateFeatureImportance(rawFeatures);
-    epoch++;
+    updateModelStats();
+    renderActiveTab();
+
+    const phaseEl = document.getElementById('currentPhaseVal');
+    if (phaseEl) {
+      const { stage } = getStageForTick(epoch);
+      phaseEl.textContent = stage.label;
+    }
+
+    animFrameId = requestAnimationFrame(renderFrame);
   }
 
-  updateModelStats();
-  if (selectedRack >= 0) drawHistoryChart();
+  if (!animFrameId) {
+    animFrameId = requestAnimationFrame(renderFrame);
+  }
+}
+
+function autonomousDrift() {
+  // Retained for API compatibility; UI rendering continuously driven by startUIRenderLoop
+}
+
+function triggerThermalSituation(type) {
+  if (type === 'llm-surge') {
+    const targetIdxs = [2, 4, 5, 9]; // RACK-A13, RACK-B21, RACK-B22, RACK-B24
+    targetIdxs.forEach(idx => {
+      if (racks[idx]) {
+        racks[idx].spikeBonus = 75;
+        racks[idx].cpu = 95;
+        racks[idx].gpu = 99;
+        racks[idx].memory = 90;
+      }
+    });
+    addLog('🔥 SITUATION ACTIVATED: LLM Supercluster Surge → Risk crossing 72% Threshold', 'danger');
+  } else if (type === 'gnn-spillover') {
+    [0, 1].forEach(idx => { // RACK-A11, RACK-A12
+      if (racks[idx]) {
+        racks[idx].spikeBonus = 88;
+        racks[idx].gpu = 99;
+        racks[idx].cpu = 95;
+      }
+    });
+    addLog('⚡ SITUATION ACTIVATED: GNN Neighbor Spillover → Message passing pushing adjacent nodes > 72%', 'warn');
+  } else if (type === 'cluster-burst') {
+    racks.forEach((r, i) => {
+      if (i % 2 === 0) {
+        r.spikeBonus = 70;
+        r.gpu = 94;
+        r.cpu = 92;
+      }
+    });
+    addLog('🌊 SITUATION ACTIVATED: Multi-Rack Cluster Burst → 6 Racks crossing critical threshold', 'danger');
+  } else if (type === 'normalize') {
+    racks.forEach(r => {
+      r.spikeBonus = 0;
+      r.cpu = 18;
+      r.gpu = 15;
+      r.memory = 22;
+      r.overrideEnabled = false;
+      r.coolingActive = false;
+    });
+    addLog('❄ SITUATION ACTIVATED: Workload Normalized → Telemetry falling below 60% Release Threshold', 'success');
+  }
+
+  simTick();
+  renderFloorPlan();
+  updateRackCards();
+  updateHeatmap();
+  if (typeof updateAIModelView === 'function') updateAIModelView();
 }
 
 // ─── INITIALIZATION ───
@@ -3431,16 +4244,403 @@ addLog('Prediction Engine: GNN message passing + 30 XGBoost decision trees', 'in
   simRunning = true;
   const speed = parseInt(document.getElementById('speedSlider').value);
   simInterval = setInterval(simTick, 1000 / speed);
-  document.getElementById('statusText').textContent = 'SYSTEM OPERATIONAL';
+  const statusText = document.getElementById('statusText');
+  if (statusText) statusText.textContent = 'Live';
+  startUIRenderLoop();
 })();
 
-setInterval(autonomousDrift, 250);
-setInterval(updateModelStats, 100);
 
+// ─── AI MODEL VIEW INTERACTIVE CONTROLS ───
+let currentPipeStage = 2; // Default XGBoost
+
+function toggleTechDetails() {
+  const drawer = document.getElementById('techDetailsDrawer');
+  const btn = document.getElementById('btnToggleTechDetails');
+  if (drawer) {
+    const isHidden = drawer.style.display === 'none';
+    drawer.style.display = isHidden ? 'block' : 'none';
+    if (btn) btn.textContent = isHidden ? '← Hide details' : 'Technical details →';
+  }
+}
+
+function selectPipeStage(idx) {
+  currentPipeStage = idx;
+  for (let i = 0; i <= 5; i++) {
+    const node = document.getElementById(`pipeNode${i}`);
+    if (node) {
+      if (i === idx) {
+        node.style.border = '2px solid var(--brand-primary)';
+        node.style.boxShadow = '0 2px 8px rgba(30,64,175,0.15)';
+      } else {
+        node.style.border = '1px solid var(--border-light)';
+        node.style.boxShadow = 'none';
+      }
+    }
+  }
+  updatePipeStageDetail();
+}
+
+function updatePipeStageDetail() {
+  const box = document.getElementById('pipeStageDetailBox');
+  if (!box) return;
+
+  const selRack = racks[selectedRack >= 0 ? selectedRack : 0] || racks[0];
+  if (!selRack) return;
+
+  let html = '';
+  if (currentPipeStage === 0) {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:var(--brand-primary);">STAGE 1: LIVE SOFTWARE TELEMETRY INGESTION</span>
+        <span class="mono" style="font-size:11px; color:var(--text-muted);">Sampling Cadence: 1 Hz</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        Collects 100% software-observable workload metrics directly from OS kernel / cluster scheduler without physical hardware temperature sensors.
+      </p>
+      <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; font-size:11px; text-align:center;">
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">CPU Util: <strong>${selRack.cpu.toFixed(1)}%</strong></div>
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">GPU Util: <strong>${selRack.gpu.toFixed(1)}%</strong></div>
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">Sys Memory: <strong>${selRack.memory.toFixed(1)}%</strong></div>
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">Disk I/O: <strong>${selRack.diskIO.toFixed(1)}%</strong></div>
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">Network: <strong>${selRack.network.toFixed(1)}%</strong></div>
+      </div>
+    `;
+  } else if (currentPipeStage === 1) {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:var(--brand-primary);">STAGE 2: 15 PRODUCTION FEATURE CATEGORIES</span>
+        <span class="mono" style="font-size:11px; color:var(--text-muted);">Feature Engine</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        Transforms raw telemetry into normalized feature vectors including rolling workload derivatives, thermal load proxies, and resource ratios.
+      </p>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
+        <span style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:600;">CPU Utilization</span>
+        <span style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:600;">GPU Utilization</span>
+        <span style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:600;">Memory Allocation</span>
+        <span style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:600;">Disk I/O Rate</span>
+        <span style="background:var(--brand-light); color:var(--brand-primary); padding:3px 8px; border-radius:4px; font-weight:600;">Network Throughput</span>
+        <span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:4px; font-weight:600;">Rolling Workload Behaviour</span>
+        <span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:4px; font-weight:600;">Workload Rate of Change</span>
+        <span style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-weight:600;">Thermal Load Proxy</span>
+      </div>
+    `;
+  } else if (currentPipeStage === 2) {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:var(--brand-primary);">STAGE 3: XGBOOST THERMAL RISK PREDICTOR</span>
+        <span class="mono" style="font-size:11px; color:var(--brand-primary); font-weight:700;">Prediction: ${(selRack.xgbPred*100).toFixed(1)}%</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        Predicts thermal risk from workload-derived features using gradient boosted decision trees calibrated against physical IPMI ground-truth.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:11px;">
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">
+          <strong>Workload Feature Categories:</strong> CPU, GPU, Memory, Disk I/O, Network I/O, Rolling workload behaviour, Workload changes
+        </div>
+        <div style="background:var(--bg-subtle); padding:8px; border-radius:4px;">
+          <strong>XGBoost Model Specs:</strong> 30 Estimators · Learning rate: 0.10 · Max depth: 4
+        </div>
+      </div>
+    `;
+  } else if (currentPipeStage === 3) {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:#0284c7;">STAGE 4: TOPOLOGY-AWARE GNN MESSAGE PASSING</span>
+        <span class="mono" style="font-size:11px; color:#0284c7; font-weight:700;">GNN Embed: ${selRack.gnnEmbed.toFixed(3)}</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        TOPOLOGY-AWARE RISK — Computes spatial heat influence across 12 data center racks connected by 18 adjacency edges across 3 zones.
+      </p>
+      <div style="background:var(--bg-subtle); padding:8px; border-radius:4px; font-size:11px; font-family:var(--font-mono);">
+        gnn_embedding = 0.7 × self_heat + 0.3 × mean(neighbor_heat)
+      </div>
+    `;
+  } else if (currentPipeStage === 4) {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:var(--risk-med);">STAGE 5: COMPOSITE RISK ENSEMBLE</span>
+        <span class="mono" style="font-size:11px; color:var(--risk-med); font-weight:700;">Composite Risk: ${(selRack.riskScore*100).toFixed(1)}%</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        XGBoost captures workload-derived risk. GNN adds spatial/topological context. The combination produces the final risk score used by THERVO's cooling decision.
+      </p>
+      <div style="background:#fffbeb; border:1px solid #fef3c7; color:#92400e; padding:8px; border-radius:4px; font-size:11px; font-weight:600; text-align:center;">
+        75% XGBoost [${(selRack.xgbPred*100).toFixed(0)}%] + 25% GNN [${(selRack.gnnEmbed*100).toFixed(0)}%] = ${(selRack.riskScore*100).toFixed(0)}% COMPOSITE RISK
+      </div>
+    `;
+  } else {
+    html = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-weight:700; font-size:13px; color:var(--risk-low);">STAGE 6: AUTOMATED CONTROL RESPONSE & HYSTERESIS</span>
+        <span class="mono" style="font-size:11px; color:var(--risk-low); font-weight:700;">Trigger: ≥ 72%</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin-bottom:10px;">
+        Automatically triggers targeted rack cooling when composite risk reaches 72%, and releases cooling when risk drops to 60%.
+      </p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:11px; text-align:center;">
+        <div style="background:#fee2e2; color:#991b1b; padding:8px; border-radius:4px; font-weight:700;">≥ 72% Risk → AUTO COOLING TRIGGERED</div>
+        <div style="background:#dcfce7; color:#166534; padding:8px; border-radius:4px; font-weight:700;">≤ 60% Risk → COOLING RELEASED (STANDBY)</div>
+      </div>
+    `;
+  }
+
+  box.innerHTML = html;
+}
+
+function updateAIModelView() {
+  updatePipeStageDetail();
+  renderAITopology();
+  drawAIThresholdCurve();
+}
+
+function renderAITopology() {
+  const nodesGrid = document.getElementById('aiGnnNodesGrid');
+  if (!nodesGrid) return;
+
+  const selId = selectedRack >= 0 ? selectedRack : 0;
+  const selRack = racks[selId] || racks[0];
+
+  // Inspector updates
+  const inspName = document.getElementById('aiInspRackName');
+  const inspBadge = document.getElementById('aiInspRiskBadge');
+  const inspSub = document.getElementById('aiInspSubText');
+  const inspXgb = document.getElementById('aiInspXgbVal');
+  const inspGnn = document.getElementById('aiInspGnnVal');
+  const inspHeat = document.getElementById('aiInspHeatVal');
+  const inspComp = document.getElementById('aiInspCompVal');
+  const inspCooling = document.getElementById('aiInspCoolingStatus');
+
+  if (selRack) {
+    const ec = getRiskEnterpriseClass(selRack.riskScore);
+    const heatProxy = (selRack.cpu * 0.55 + selRack.gpu * 0.45).toFixed(0);
+    const isCooled = selRack.coolingActive || selRack.overrideEnabled;
+
+    if (inspName) inspName.textContent = selRack.name;
+    if (inspBadge) {
+      inspBadge.textContent = `${ec.label} ${(selRack.riskScore * 100).toFixed(0)}%`;
+      inspBadge.className = `rack-risk-badge ${ec.badgeClass}`;
+    }
+    if (inspSub) inspSub.textContent = `Zone ${selRack.zone} · Node ${selRack.id} · ${isCooled ? 'Cooling Active' : 'Standby'}`;
+    if (inspXgb) inspXgb.textContent = `${(selRack.xgbPred * 100).toFixed(0)}%`;
+    if (inspGnn) inspGnn.textContent = `${(selRack.gnnEmbed * 100).toFixed(0)}%`;
+    if (inspHeat) inspHeat.textContent = `${heatProxy}%`;
+    if (inspComp) inspComp.textContent = `${(selRack.riskScore * 100).toFixed(0)}%`;
+
+    if (inspCooling) {
+      if (isCooled) {
+        inspCooling.textContent = '❄ TARGETED COOLING ACTIVE';
+        inspCooling.style.background = '#e0f2fe';
+        inspCooling.style.color = '#0369a1';
+        inspCooling.style.borderColor = '#7dd3fc';
+      } else {
+        inspCooling.textContent = 'COOLING STANDBY (NO ACTION NEEDED)';
+        inspCooling.style.background = '#eff6ff';
+        inspCooling.style.color = '#0284c7';
+        inspCooling.style.borderColor = '#bfdbfe';
+      }
+    }
+  }
+
+  // Render 12 Node Cards in Topology Grid
+  let gridHtml = '';
+  racks.forEach(r => {
+    const ec = getRiskEnterpriseClass(r.riskScore);
+    const isSel = (r.id === selId);
+    const isCooled = (r.coolingActive || r.overrideEnabled);
+
+    gridHtml += `
+      <div onclick="selectRack(${r.id})" style="background:${ec.bg}; border:1px solid ${ec.border}; border-radius:6px; padding:6px; cursor:pointer; text-align:center; transition:all 0.15s; ${isSel ? 'box-shadow:0 0 0 2.5px var(--brand-primary); z-index:5;' : ''} ${isCooled ? 'border-color:#0284c7;' : ''}">
+        <div style="font-weight:700; font-size:10px; color:${ec.color};">${r.name}</div>
+        <div style="font-size:12px; font-weight:700; color:var(--text-primary); margin:2px 0;">${(r.riskScore*100).toFixed(0)}%</div>
+        <div style="font-size:9px; color:var(--text-muted);">${isCooled ? '❄ ACTIVE' : 'Standby'}</div>
+      </div>
+    `;
+  });
+  nodesGrid.innerHTML = gridHtml;
+}
+
+function drawAIThresholdCurve() {
+  const canvas = document.getElementById('aiThresholdCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const rect = canvas.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) return;
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  const padL = 40, padR = 20, padT = 30, padB = 35;
+  const plotW = w - padL - padR;
+  const plotH = h - padT - padB;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Background Risk Regions
+  const rLow = plotW * 0.35;
+  const rMed = plotW * 0.55;
+  const rHigh = plotW * 0.75;
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+
+  if (isDark) {
+    ctx.fillStyle = 'rgba(11, 58, 45, 0.45)';
+    ctx.fillRect(padL, padT, rLow, plotH);
+    ctx.fillStyle = 'rgba(58, 37, 8, 0.45)';
+    ctx.fillRect(padL + rLow, padT, rMed - rLow, plotH);
+    ctx.fillStyle = 'rgba(59, 23, 8, 0.45)';
+    ctx.fillRect(padL + rMed, padT, rHigh - rMed, plotH);
+    ctx.fillStyle = 'rgba(58, 13, 18, 0.45)';
+    ctx.fillRect(padL + rHigh, padT, plotW - rHigh, plotH);
+  } else {
+    ctx.fillStyle = 'rgba(220, 252, 231, 0.35)';
+    ctx.fillRect(padL, padT, rLow, plotH);
+    ctx.fillStyle = 'rgba(254, 243, 199, 0.35)';
+    ctx.fillRect(padL + rLow, padT, rMed - rLow, plotH);
+    ctx.fillStyle = 'rgba(255, 237, 213, 0.35)';
+    ctx.fillRect(padL + rMed, padT, rHigh - rMed, plotH);
+    ctx.fillStyle = 'rgba(254, 226, 226, 0.35)';
+    ctx.fillRect(padL + rHigh, padT, plotW - rHigh, plotH);
+  }
+
+  // Region Labels
+  ctx.font = '9px Inter, sans-serif';
+  ctx.fillStyle = isDark ? '#AAB8CC' : '#64748b';
+  ctx.fillText('LOW', padL + 10, padT + 14);
+  ctx.fillText('MEDIUM', padL + rLow + 10, padT + 14);
+  ctx.fillText('HIGH', padL + rMed + 10, padT + 14);
+  ctx.fillText('CRITICAL', padL + rHigh + 10, padT + 14);
+
+  // Axis Lines
+  ctx.strokeStyle = isDark ? '#30435F' : '#cbd5e1';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT + plotH); ctx.lineTo(padL + plotW, padT + plotH);
+  ctx.stroke();
+
+  // Threshold Line 72%
+  const x72 = padL + plotW * 0.72;
+  ctx.strokeStyle = '#dc2626';
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(x72, padT); ctx.lineTo(x72, padT + plotH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#dc2626';
+  ctx.font = 'bold 9px Inter, sans-serif';
+  ctx.fillText('72% AUTO COOLING', x72 - 45, padT - 6);
+
+  // Threshold Line 60% Release
+  const x60 = padL + plotW * 0.60;
+  ctx.strokeStyle = '#16a34a';
+  ctx.setLineDash([3, 3]);
+  ctx.beginPath();
+  ctx.moveTo(x60, padT); ctx.lineTo(x60, padT + plotH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = '#16a34a';
+  ctx.font = 'bold 9px Inter, sans-serif';
+  ctx.fillText('60% RELEASE', x60 - 30, padT - 6);
+
+  // S-Curve Response Line
+  ctx.strokeStyle = '#1e40af';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let px = 0; px <= plotW; px += 2) {
+    const riskVal = px / plotW;
+    const resp = 1 / (1 + Math.exp(-12 * (riskVal - 0.62)));
+    const py = padT + plotH - (resp * plotH);
+    if (px === 0) ctx.moveTo(padL + px, py);
+    else ctx.lineTo(padL + px, py);
+  }
+  ctx.stroke();
+
+  // Trace Rack Selection or System Risk
+  const traceSel = document.getElementById('aiRackTraceSelect')?.value || 'system';
+  let targetRisk = 0.21;
+  let targetHistory = [];
+
+  if (traceSel === 'system') {
+    targetRisk = racks.reduce((s, r) => s + r.riskScore, 0) / NUM_RACKS;
+  } else {
+    const rIdx = parseInt(traceSel);
+    if (racks[rIdx]) {
+      targetRisk = racks[rIdx].riskScore;
+      targetHistory = riskHistory[rIdx] || [];
+    }
+  }
+
+  // Draw 40-epoch risk history trace line if available
+  if (targetHistory.length > 1) {
+    ctx.strokeStyle = 'rgba(2, 132, 199, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < targetHistory.length; i++) {
+      const hVal = targetHistory[i];
+      const hx = padL + plotW * Math.min(1, Math.max(0, hVal));
+      const hy = padT + plotH - ((i / (targetHistory.length - 1)) * plotH);
+      if (i === 0) ctx.moveTo(hx, hy);
+      else ctx.lineTo(hx, hy);
+    }
+    ctx.stroke();
+  }
+
+  // Live Marker Position
+  const liveX = padL + plotW * Math.min(1, Math.max(0, targetRisk));
+  const liveResp = 1 / (1 + Math.exp(-12 * (targetRisk - 0.62)));
+  const liveY = padT + plotH - (liveResp * plotH);
+
+  ctx.fillStyle = targetRisk >= 0.72 ? '#dc2626' : (targetRisk >= 0.55 ? '#ea580c' : '#1e40af');
+  ctx.beginPath();
+  ctx.arc(liveX, liveY, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Label Marker
+  ctx.fillStyle = '#0f172a';
+  ctx.font = 'bold 10px Inter, sans-serif';
+  ctx.fillText(`${(targetRisk * 100).toFixed(0)}%`, liveX + 8, liveY + 3);
+
+  // Update Live Marker Text Badges
+  const markerEl = document.getElementById('aiLiveRiskMarker');
+  const actionBadgeEl = document.getElementById('aiThresholdActionBadge');
+  
+  const riskPct = (targetRisk * 100).toFixed(0);
+  if (markerEl) {
+    let cat = 'LOW';
+    if (targetRisk >= 0.75) cat = 'CRITICAL';
+    else if (targetRisk >= 0.55) cat = 'HIGH';
+    else if (targetRisk >= 0.35) cat = 'MEDIUM';
+    markerEl.textContent = `● ${riskPct}% (${cat})`;
+  }
+
+  if (actionBadgeEl) {
+    if (targetRisk >= 0.72) {
+      actionBadgeEl.textContent = 'COOLING TRIGGERED ❄';
+      actionBadgeEl.style.background = '#fee2e2';
+      actionBadgeEl.style.color = '#dc2626';
+      actionBadgeEl.style.borderColor = '#fca5a5';
+    } else if (targetRisk <= 0.60) {
+      actionBadgeEl.textContent = 'COOLING RELEASED ✓';
+      actionBadgeEl.style.background = '#dcfce7';
+      actionBadgeEl.style.color = '#166534';
+      actionBadgeEl.style.borderColor = '#bbf7d0';
+    } else {
+      actionBadgeEl.textContent = 'ELEVATED — MONITORING';
+      actionBadgeEl.style.background = '#fef3c7';
+      actionBadgeEl.style.color = '#92400e';
+      actionBadgeEl.style.borderColor = '#fde68a';
+    }
+  }
+}
 
 // ─── SINGLE PAGE APPLICATION (SPA) TAB NAVIGATION ───
+let activeEvtFilter = 'all';
+
 function switchTab(tabId, updateHash = true) {
-  const validTabs = ['overview', 'thermal-map', 'racks', 'predictions', 'events', 'datasets'];
+  const validTabs = ['overview', 'thermal-map', 'racks', 'predictions', 'ai-model', 'events', 'datasets'];
   if (!validTabs.includes(tabId)) tabId = 'overview';
 
   // Update nav link active state
@@ -3450,24 +4650,246 @@ function switchTab(tabId, updateHash = true) {
     else link.classList.remove('active');
   });
 
-  // Update view visibility
-  const datasetsView = document.getElementById('view-datasets');
-  const mainGrid = document.querySelector('.dashboard-grid');
-  const kpiGrid = document.querySelector('.kpi-grid');
-  const statusStrip = document.querySelector('.status-strip');
-  const alertBanner = document.getElementById('alertBanner');
-
-  if (tabId === 'datasets') {
-    if (datasetsView) datasetsView.style.display = 'flex';
-    if (mainGrid) mainGrid.style.display = 'none';
-  } else {
-    if (datasetsView) datasetsView.style.display = 'none';
-    if (mainGrid) mainGrid.style.display = 'grid';
-  }
+  // Toggle view visibility
+  validTabs.forEach(id => {
+    const viewEl = document.getElementById(`view-${id}`);
+    if (viewEl) {
+      if (id === tabId) {
+        viewEl.style.display = (id === 'datasets') ? 'flex' : 'block';
+      } else {
+        viewEl.style.display = 'none';
+      }
+    }
+  });
 
   if (updateHash) {
     window.location.hash = tabId;
   }
+
+  renderActiveTab();
+}
+
+function renderActiveTab() {
+  const activeLink = document.querySelector('.app-nav .nav-link.active');
+  const activeTab = activeLink ? (activeLink.getAttribute('data-tab') || activeLink.getAttribute('href')?.replace('#', '')) : 'overview';
+
+  if (activeTab === 'thermal-map') updateThermalMapView();
+  else if (activeTab === 'racks') updateRacksView();
+  else if (activeTab === 'predictions') updatePredictionsView();
+  else if (activeTab === 'ai-model') updateAIModelView();
+  else if (activeTab === 'events') updateEventsView();
+}
+
+function updateThermalMapView() {
+  const container = document.getElementById('thermalMapZonesGrid');
+  if (!container) return;
+  
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+  const zones = ['A', 'B', 'C'];
+  const zoneNames = { 'A': 'Row A (Cold Aisle 1)', 'B': 'Row B (Hot Aisle)', 'C': 'Row C (Cold Aisle 2)' };
+  
+  let html = '';
+  zones.forEach(z => {
+    const zoneRacks = racks.filter(r => r.zone === z);
+    html += `
+      <div style="background:var(--bg-subtle); border:1px solid var(--border-light); border-radius:8px; padding:14px;">
+        <div style="font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:12px; border-bottom:1px solid var(--border-light); padding-bottom:6px;">
+          ZONE ${z} · ${zoneNames[z]}
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+    `;
+    
+    zoneRacks.forEach(r => {
+      const ec = getRiskEnterpriseClass(r.riskScore);
+      const isSel = (r.id === selectedRack);
+      html += `
+        <div onclick="selectRack(${r.id})" style="background:${ec.bg}; border:1px solid ${isSel ? '#3B82F6' : ec.border}; border-radius:6px; padding:10px; cursor:pointer; transition:all 0.15s; ${isSel ? (isDark ? 'box-shadow:0 0 12px rgba(59, 130, 246, 0.5), 0 0 0 2px #3B82F6;' : 'box-shadow:0 0 0 2px var(--brand-primary);') : ''}">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <div>
+              <span style="font-weight:700; font-size:13px; color:${ec.color};">${r.name}</span>
+              <span style="font-size:11px; color:${isDark ? '#AAB8CC' : 'var(--text-subtle)'}; margin-left:6px;">Node ${r.id}</span>
+            </div>
+            <div class="rack-risk-badge ${ec.badgeClass}" style="background:${ec.badgeBg}; color:${ec.badgeText}; border:1px solid ${ec.border}; font-weight:700;">${ec.label} ${(r.riskScore*100).toFixed(0)}%</div>
+          </div>
+          <div style="display:flex; gap:12px; font-size:11px; color:${isDark ? '#AAB8CC' : 'var(--text-secondary)'}; margin-bottom:4px;">
+            <span>CPU: <strong>${r.cpu.toFixed(0)}%</strong></span>
+            <span>GPU: <strong>${r.gpu.toFixed(0)}%</strong></span>
+            <span>MEM: <strong>${r.memory.toFixed(0)}%</strong></span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:11px;">
+            <span style="font-size:10px; color:${isDark ? '#71819A' : 'var(--text-subtle)'};">GNN Embed: ${r.gnnEmbed.toFixed(3)}</span>
+            ${(r.coolingActive || r.overrideEnabled) ? '<span style="color:#60A5FA; font-weight:700; font-size:10px;">❄ COOLING ACTIVE</span>' : `<span style="color:${isDark ? '#71819A' : 'var(--text-subtle)'}; font-size:10px;">Standby</span>`}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+  });
+  container.innerHTML = html;
+}
+
+function updateRacksView() {
+  const grid = document.getElementById('vRacksFleetGrid');
+  if (!grid) return;
+
+  const isDark = (typeof currentTheme !== 'undefined' && currentTheme === 'dark');
+  const filterRisk = document.getElementById('vRacksFilterRisk')?.value || 'all';
+  const filterCooling = document.getElementById('vRacksFilterCooling')?.value || 'all';
+
+  let list = racks.filter(r => {
+    if (filterRisk === 'low' && r.riskScore >= 0.35) return false;
+    if (filterRisk === 'med' && (r.riskScore < 0.35 || r.riskScore >= 0.55)) return false;
+    if (filterRisk === 'high' && (r.riskScore < 0.55 || r.riskScore >= 0.75)) return false;
+    if (filterRisk === 'crit' && r.riskScore < 0.75) return false;
+
+    if (filterCooling === 'active' && !r.coolingActive && !r.overrideEnabled) return false;
+    if (filterCooling === 'idle' && (r.coolingActive || r.overrideEnabled)) return false;
+
+    return true;
+  });
+
+  let html = '';
+  list.forEach(r => {
+    const ec = getRiskEnterpriseClass(r.riskScore);
+    const role = RACK_ROLES[r.id % RACK_ROLES.length];
+    const isSel = (r.id === selectedRack);
+    const tooltip = `Rack ${r.name} (${role.role})\nRisk: ${(r.riskScore*100).toFixed(0)}%\nCPU: ${r.cpu.toFixed(0)}% | GPU: ${r.gpu.toFixed(0)}%\nMEM: ${r.memory.toFixed(0)}% | DISK: ${r.diskIO.toFixed(0)}% | NET: ${r.network.toFixed(0)}%\nCooling: ${(r.coolingActive || r.overrideEnabled) ? 'ACTIVE' : 'IDLE'}`;
+
+    html += `
+      <div onclick="selectRack(${r.id})" title="${tooltip}" style="background:${ec.bg}; border:1px solid ${isSel ? '#3B82F6' : ec.border}; border-radius:6px; padding:12px; cursor:pointer; transition:all 0.15s; ${isSel ? (isDark ? 'box-shadow:0 0 12px rgba(59, 130, 246, 0.5), 0 0 0 2px #3B82F6;' : 'box-shadow:0 0 0 2px var(--brand-primary);') : ''}">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <div style="font-weight:700; font-size:14px; color:${ec.color};">${r.name}</div>
+            <div style="font-size:11px; color:${isDark ? '#AAB8CC' : 'var(--text-subtle)'};">Zone ${r.zone} · ${role.role}</div>
+          </div>
+          <div class="rack-risk-badge ${ec.badgeClass}" style="background:${ec.badgeBg}; color:${ec.badgeText}; border:1px solid ${ec.border}; font-weight:700;">${ec.label} ${(r.riskScore*100).toFixed(0)}%</div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; padding-top:6px; border-top:1px solid ${isDark ? '#24344D' : 'var(--border-light)'}; font-size:11px;">
+          <span style="color:${isDark ? '#AAB8CC' : 'var(--text-secondary)'};">CPU ${r.cpu.toFixed(0)}% · GPU ${r.gpu.toFixed(0)}%</span>
+          ${(r.coolingActive || r.overrideEnabled) ? '<span style="color:#60A5FA; font-weight:700; font-size:11px;">❄ COOLING</span>' : `<span style="color:${isDark ? '#71819A' : 'var(--text-subtle)'}; font-size:11px;">Standby</span>`}
+        </div>
+      </div>
+    `;
+  });
+
+  grid.innerHTML = html || `<div style="grid-column:1/-1; padding:20px; text-align:center; color:${isDark ? '#71819A' : 'var(--text-subtle)'};">No racks match filter criteria</div>`;
+}
+
+function updatePredictionsView() {
+  const tbody = document.getElementById('predictionsTableBody');
+  const stageEl = document.getElementById('predCurrentStage');
+  const featEl = document.getElementById('predFeatureImportance');
+  if (!tbody) return;
+
+  const { stage } = getStageForTick(epoch);
+  if (stageEl) stageEl.textContent = stage.label;
+
+  let html = '';
+  racks.forEach(r => {
+    const role = RACK_ROLES[r.id % RACK_ROLES.length];
+    const currRisk = r.riskScore;
+    const predRisk = r.xgbPred * 0.70 + r.gnnEmbed * 0.30;
+    const diff = predRisk - currRisk;
+
+    let trend = '→ Stable';
+    let trendColor = 'var(--text-secondary)';
+    if (diff > 0.03) { trend = '↑ Rising'; trendColor = 'var(--risk-high)'; }
+    else if (diff < -0.03) { trend = '↓ Falling'; trendColor = 'var(--risk-low)'; }
+
+    let forecast = 'Normal Operations';
+    let forecastBadge = 'background:#f1f5f9; color:#475569;';
+    if (r.coolingActive || r.overrideEnabled) {
+      forecast = '❄ Cooling Deployed';
+      forecastBadge = 'background:#e0f2fe; color:#0369a1;';
+    } else if (predRisk >= 0.55 || currRisk >= 0.52) {
+      forecast = '⚠ Cooling Imminent (< 2 ticks)';
+      forecastBadge = 'background:#fef3c7; color:#92400e;';
+    }
+
+    const ecCurr = getRiskEnterpriseClass(currRisk);
+    const ecPred = getRiskEnterpriseClass(predRisk);
+
+    html += `
+      <tr style="border-bottom:1px solid var(--border-light); cursor:pointer;" onclick="selectRack(${r.id})">
+        <td style="padding:10px 12px; font-weight:700; color:var(--text-primary);">${r.name}</td>
+        <td style="padding:10px 12px; color:var(--text-secondary);">${role.role}</td>
+        <td style="padding:10px 12px;"><span class="rack-risk-badge ${ecCurr.badgeClass}">${(currRisk*100).toFixed(0)}%</span></td>
+        <td style="padding:10px 12px;"><span class="rack-risk-badge ${ecPred.badgeClass}">${(predRisk*100).toFixed(0)}%</span></td>
+        <td style="padding:10px 12px; font-weight:700; color:${trendColor};">${trend}</td>
+        <td style="padding:10px 12px;"><span style="font-size:11px; font-weight:700; padding:3px 8px; border-radius:4px; ${forecastBadge}">${forecast}</span></td>
+      </tr>
+    `;
+  });
+  tbody.innerHTML = html;
+
+  if (featEl) {
+    const rawFeatures = racks.map(r => ({ cpu: r.cpu, gpu: r.gpu, memory: r.memory, diskIO: r.diskIO, network: r.network }));
+    const avgCpu = rawFeatures.reduce((s, f) => s + f.cpu, 0) / NUM_RACKS;
+    const avgGpu = rawFeatures.reduce((s, f) => s + f.gpu, 0) / NUM_RACKS;
+    const avgMem = rawFeatures.reduce((s, f) => s + f.memory, 0) / NUM_RACKS;
+    const avgDisk = rawFeatures.reduce((s, f) => s + f.diskIO, 0) / NUM_RACKS;
+    const avgNet = rawFeatures.reduce((s, f) => s + f.network, 0) / NUM_RACKS;
+
+    const total = avgCpu + avgGpu + avgMem + avgDisk + avgNet || 1;
+    const features = [
+      { name: 'GPU Workload', pct: (avgGpu / total * 100).toFixed(0), color: 'var(--risk-high)' },
+      { name: 'CPU Utilization', pct: (avgCpu / total * 100).toFixed(0), color: 'var(--brand-primary)' },
+      { name: 'System Memory', pct: (avgMem / total * 100).toFixed(0), color: 'var(--risk-med)' },
+      { name: 'Disk I/O Rate', pct: (avgDisk / total * 100).toFixed(0), color: '#64748b' },
+      { name: 'Network Throughput', pct: (avgNet / total * 100).toFixed(0), color: '#0284c7' }
+    ];
+
+    featEl.innerHTML = features.map(f => `
+      <div style="font-size:11px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+          <span>${f.name}</span>
+          <span class="mono">${f.pct}%</span>
+        </div>
+        <div style="height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden;">
+          <div style="width:${f.pct}%; height:100%; background:${f.color};"></div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function filterEvents(type) {
+  activeEvtFilter = type;
+  document.querySelectorAll('#view-events .btn').forEach(b => b.classList.remove('active'));
+  if (type === 'all') document.getElementById('btnEvtFilterAll')?.classList.add('active');
+  if (type === 'warn') document.getElementById('btnEvtFilterWarn')?.classList.add('active');
+  if (type === 'danger') document.getElementById('btnEvtFilterDanger')?.classList.add('active');
+  if (type === 'success') document.getElementById('btnEvtFilterSuccess')?.classList.add('active');
+  updateEventsView();
+}
+
+function updateEventsView() {
+  const tbody = document.getElementById('eventsTableBody');
+  if (!tbody) return;
+
+  let filtered = logHistory.filter(item => {
+    if (activeEvtFilter === 'all') return true;
+    return item.type === activeEvtFilter;
+  });
+
+  let html = '';
+  filtered.forEach(item => {
+    let sevBadge = '<span style="background:#f1f5f9; color:#475569; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">INFO</span>';
+    if (item.type === 'warn') sevBadge = '<span style="background:#fef3c7; color:#92400e; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">WARNING</span>';
+    if (item.type === 'danger') sevBadge = '<span style="background:#fee2e2; color:#991b1b; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">CRITICAL</span>';
+    if (item.type === 'success') sevBadge = '<span style="background:#dcfce7; color:#166534; padding:2px 6px; border-radius:4px; font-weight:700; font-size:10px;">COOLING</span>';
+
+    html += `
+      <tr style="border-bottom:1px solid var(--border-light);">
+        <td style="padding:8px 12px; font-family:var(--font-mono); color:var(--text-muted);">${item.ts}</td>
+        <td style="padding:8px 12px;">${sevBadge}</td>
+        <td style="padding:8px 12px; color:var(--text-primary); font-weight:500;">${item.msg}</td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html || '<tr><td colspan="3" style="padding:20px; text-align:center; color:var(--text-subtle);">No events matching filter criteria</td></tr>';
 }
 
 // Bind click events on all nav links
@@ -3483,6 +4905,12 @@ document.querySelectorAll('.app-nav .nav-link').forEach(link => {
 window.addEventListener('hashchange', () => {
   const hash = window.location.hash.replace('#', '');
   if (hash) switchTab(hash, false);
+});
+
+// Check initial hash on load
+document.addEventListener('DOMContentLoaded', () => {
+  const initialHash = window.location.hash.replace('#', '');
+  if (initialHash) switchTab(initialHash, false);
 });
 
 </script>

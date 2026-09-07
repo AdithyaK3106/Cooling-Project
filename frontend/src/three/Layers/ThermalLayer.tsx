@@ -64,7 +64,7 @@ export function ThermalLayer({ scene }: { scene: THREE.Object3D }) {
     
     // Direct iteration over the cached map (O(N) where N=25 racks) instead of full scene traversal
     rackMap.forEach((meshes, rackId) => {
-      const rackData = telemetry.racks?.find((r) => r.id === rackId);
+      const rackData = telemetry.racks?.find((r: any) => r.id === rackId);
       
       let targetColor = COLORS.optimal;
       if (rackData) {

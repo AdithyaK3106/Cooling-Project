@@ -100,21 +100,17 @@ class InferenceEngine:
 
     def _start_wmi_cpu_thread(self):
         def _wmi_loop():
+            try:
+                psutil.cpu_percent(interval=None)
+            except Exception:
+                pass
             while True:
                 try:
-                    res = subprocess.run(
-                        ["wmic", "cpu", "get", "loadpercentage"],
-                        capture_output=True, text=True, timeout=3
-                    )
-                    if res.returncode == 0:
-                        lines = [L for L in res.stdout.split("\n") if L.strip()]
-                        if len(lines) >= 2:
-                            val = lines[1].strip()
-                            if val.isdigit():
-                                self._wmi_cpu_val = float(val)
+                    val = psutil.cpu_percent(interval=0.5)
+                    self._wmi_cpu_val = float(val)
                 except Exception:
                     pass
-                time.sleep(1.0)
+                time.sleep(0.5)
                 
         t = threading.Thread(target=_wmi_loop, daemon=True)
         t.start()
