@@ -296,25 +296,77 @@ export function getSimulatedTelemetry(): any {
     },
     events: eventsList,
     topology,
-    racks: racks.map(r => ({
-      id: r.id,
-      telemetry: {
-        cpu_util: parseFloat(r.cpu.toFixed(1)),
-        gpu_util: parseFloat(r.gpu.toFixed(1)),
-        mem_util: parseFloat(r.memory.toFixed(1)),
-        disk_io: parseFloat(r.diskIO.toFixed(1)),
-        network_io: parseFloat(r.network.toFixed(1)),
-        cpu_temp: parseFloat((35 + r.riskScore * 50).toFixed(1)),
-        gpu_temp: parseFloat((38 + r.riskScore * 48).toFixed(1)),
-        power_draw: parseFloat((100 + r.cpu * 3 + r.gpu * 4).toFixed(1))
-      },
-      risk_score: r.riskScore,
-      cooling: {
-        status: (r.coolingActive || r.overrideEnabled) ? 'predictive intervention' : 'normal',
-        override: r.overrideEnabled,
-        actual_rpm: Math.round(1000 + r.riskScore * 3500)
-      },
-      ai_insights: { gnn_embed: r.gnnEmbed, xgb_pred: r.xgbPred, zone: r.zone }
-    }))
+    racks: racks.map(r => {
+      const isCooled = r.coolingActive || r.overrideEnabled;
+      const totalHeat = r.cpu * 0.38 + r.gpu * 0.48 + (r.gnnEmbed * 100) * 0.22 + 0.01;
+      const gpuContrib = Math.min(85, Math.max(10, Math.round((r.gpu * 0.48 / totalHeat) * 100)));
+      const cpuContrib = Math.min(85, Math.max(10, Math.round((r.cpu * 0.38 / totalHeat) * 100)));
+      const gnnContrib = Math.max(5, 100 - gpuContrib - cpuContrib - 8);
+      const memContrib = 5;
+      const ioContrib = 3;
+
+      let primaryDriver = 'GPU Compute Intensity';
+      if (gnnContrib > gpuContrib && gnnContrib > cpuContrib) {
+        primaryDriver = 'Adjacent Rack GNN Spatial Heat Spillover';
+      } else if (cpuContrib > gpuContrib) {
+        primaryDriver = 'Host CPU Multi-Thread Workload';
+      }
+
+      let explanation = '';
+      if (isCooled) {
+        if (primaryDriver.includes('GNN')) {
+          explanation = `Predictive cooling engaged (${Math.round(1000 + r.riskScore * 3500)} RPM): GNN spatial graph propagation detected thermal spillover from adjacent racks pushing total risk to ${Math.round(r.riskScore * 100)}%.`;
+        } else if (primaryDriver.includes('GPU')) {
+          explanation = `Predictive cooling engaged (${Math.round(1000 + r.riskScore * 3500)} RPM): GPU utilization (${r.gpu.toFixed(0)}%) generating rapid thermal flux. Proactive fan speed boosted before physical temperature threshold break.`;
+        } else {
+          explanation = `Predictive cooling engaged (${Math.round(1000 + r.riskScore * 3500)} RPM): Multi-threaded host CPU load (${r.cpu.toFixed(0)}%) and memory bus activity triggered thermal safety intervention.`;
+        }
+      } else {
+        explanation = `Passive thermal equilibrium: Current workload (CPU ${r.cpu.toFixed(0)}%, GPU ${r.gpu.toFixed(0)}%) generates manageable heat within passive chassis airflow bounds (${Math.round(r.riskScore * 100)}% risk).`;
+      }
+
+      const shapValues = [
+        { feature: 'GPU Utilization', impact: parseFloat((r.gpu * 0.48 / 100).toFixed(3)), unit: '%' },
+        { feature: 'CPU Utilization', impact: parseFloat((r.cpu * 0.38 / 100).toFixed(3)), unit: '%' },
+        { feature: 'GNN Spatial Diffusion', impact: parseFloat((r.gnnEmbed * 0.25).toFixed(3)), unit: 'embed' },
+        { feature: 'Memory Bus Intensity', impact: parseFloat((r.memory * 0.15 / 100).toFixed(3)), unit: '%' },
+        { feature: 'Disk & Network I/O', impact: parseFloat(((r.diskIO + r.network) * 0.05 / 100).toFixed(3)), unit: 'I/O' }
+      ];
+
+      return {
+        id: r.id,
+        telemetry: {
+          cpu_util: parseFloat(r.cpu.toFixed(1)),
+          gpu_util: parseFloat(r.gpu.toFixed(1)),
+          mem_util: parseFloat(r.memory.toFixed(1)),
+          disk_io: parseFloat(r.diskIO.toFixed(1)),
+          network_io: parseFloat(r.network.toFixed(1)),
+          cpu_temp: parseFloat((35 + r.riskScore * 50).toFixed(1)),
+          gpu_temp: parseFloat((38 + r.riskScore * 48).toFixed(1)),
+          power_draw: parseFloat((100 + r.cpu * 3 + r.gpu * 4).toFixed(1))
+        },
+        risk_score: r.riskScore,
+        cooling: {
+          status: isCooled ? 'predictive intervention' : 'normal',
+          override: r.overrideEnabled,
+          actual_rpm: Math.round(1000 + r.riskScore * 3500)
+        },
+        ai_insights: {
+          gnn_embed: r.gnnEmbed,
+          xgb_pred: r.xgbPred,
+          zone: r.zone,
+          primary_driver: primaryDriver,
+          explanation: explanation,
+          xai_attribution: {
+            gpu: gpuContrib,
+            cpu: cpuContrib,
+            gnn: gnnContrib,
+            memory: memContrib,
+            io: ioContrib
+          },
+          shap_values: shapValues
+        }
+      };
+    })
   };
 }

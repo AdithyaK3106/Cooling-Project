@@ -5,13 +5,15 @@ import { useTelemetry } from '../services/telemetryApi';
 import { useUiStore } from '../stores/uiStore';
 import { useInjectSpike, useToggleRackOverride, useResetSimulation } from '../services/controlApi';
 import { SimulationControlBar } from '../components/simulation/SimulationControlBar';
-import { Flame, RefreshCw, Snowflake, Cpu, Activity, HardDrive, Wifi } from 'lucide-react';
+import { XaiExplainerModal } from '../components/xai/XaiExplainerModal';
+import { Flame, RefreshCw, Snowflake, Cpu, Activity, HardDrive, Wifi, Sparkles } from 'lucide-react';
 
 export function OverviewTab() {
   const { data: telemetry } = useTelemetry();
   const racks = telemetry?.racks || [];
   const { selectedRackId, setSelectedRackId } = useUiStore();
   const [zoneFilter, setZoneFilter] = useState<string>('ALL');
+  const [xaiModalRack, setXaiModalRack] = useState<any>(null);
 
   const spikeMutation = useInjectSpike();
   const overrideMutation = useToggleRackOverride();
@@ -170,9 +172,18 @@ export function OverviewTab() {
                       </div>
                     </div>
 
-                    {/* Bottom Dynamic Risk Score Number (Changes with tick updates!) */}
-                    <div className="flex justify-between items-end border-t border-white/10 pt-1.5 mt-1.5">
-                      <span className="text-[9px] font-mono text-gray-400">RISK</span>
+                    {/* Bottom Dynamic Risk Score Number & XAI Inspector Button */}
+                    <div className="flex justify-between items-center border-t border-white/10 pt-1.5 mt-1.5">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setXaiModalRack(rack);
+                        }}
+                        className="text-[9px] font-mono text-cyan-300 hover:text-cyan-100 bg-cyan-500/20 hover:bg-cyan-500/30 px-1.5 py-0.5 rounded border border-cyan-500/30 transition-colors flex items-center gap-1"
+                        title="Explain why the AI is cooling this rack"
+                      >
+                        <Sparkles size={10} /> XAI
+                      </button>
                       <div className={`font-mono text-base font-bold ${riskBadgeColor} transition-all duration-300`}>
                         {riskPct}%
                       </div>
@@ -313,6 +324,13 @@ export function OverviewTab() {
         </div>
 
       </div>
+
+      {/* XAI Explainer Inspector Modal */}
+      <XaiExplainerModal
+        rack={xaiModalRack}
+        isOpen={!!xaiModalRack}
+        onClose={() => setXaiModalRack(null)}
+      />
     </div>
   );
 }
