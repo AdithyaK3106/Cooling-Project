@@ -44,8 +44,6 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
 
   // 2. Build edges matching exact existing graph topology and paths
   const edges = useMemo(() => {
-    if (!telemetry || !telemetry.topology) return [];
-
     return (telemetry.topology as TopologyEdge[])
       .filter((edge: TopologyEdge) => positions.has(edge.source) && positions.has(edge.target))
       .map((edge: TopologyEdge, idx: number) => {
@@ -367,7 +365,6 @@ export function GNNLayer({ scene }: { scene: THREE.Object3D }) {
   });
 
   return (
-    <>
       {/* 1. Base Subtle Guide Arch (Clean Wireframe Baseline) */}
       {edges.map((edge) => (
         <Line

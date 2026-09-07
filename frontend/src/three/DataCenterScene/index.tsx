@@ -8,6 +8,7 @@ import { useUiStore } from '../../stores/uiStore';
 import { ThermalLayer } from '../Layers/ThermalLayer';
 import { GNNLayer } from '../Layers/GNNLayer';
 import { AirflowLayer } from '../Layers/AirflowLayer';
+import { StatsLayer } from '../Layers/StatsLayer';
 import { Html } from '@react-three/drei';
 import { useQueryClient } from '@tanstack/react-query';
 import { useTelemetry, TELEMETRY_QUERY_KEY } from '../../services/telemetryApi';
@@ -467,6 +468,7 @@ function Model() {
 
       {isReady && (
         <>
+          <StatsLayer scene={scene} />
           {activeLayer === 'THERMAL' && <ThermalLayer scene={scene} />}
           {activeLayer === 'RISK' && <GNNLayer scene={scene} />}
           {activeLayer === 'AIRFLOW' && <AirflowLayer />}

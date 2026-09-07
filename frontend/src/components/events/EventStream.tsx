@@ -12,7 +12,7 @@ export function EventStream() {
         <Terminal size={14} /> SYSTEM EVENTS
       </div>
       <div className="flex h-32 flex-col gap-1 overflow-y-auto font-mono text-xs">
-        {telemetry.events.map((event, i) => (
+        {telemetry.events.map((event: any, i: number) => (
           <div key={i} className="flex gap-2">
             <span className="text-thervo-amber">[{event.time}]</span>
             <span className="text-gray-300">{event.message}</span>

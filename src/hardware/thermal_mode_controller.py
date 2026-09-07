@@ -13,8 +13,19 @@ class ThermalModeController:
     """
     def __init__(self, cli_path=None):
         if cli_path is None:
-            local_app_data = os.environ.get("LOCALAPPDATA", r"C:\Users\urbra\AppData\Local")
-            self.cli_path = os.path.join(local_app_data, "Programs", "LenovoLegionToolkit", "llt.exe")
+            program_files_path = r"C:\Program Files\LenovoLegionToolkit\llt.exe"
+            program_files_x86_path = r"C:\Program Files (x86)\LenovoLegionToolkit\llt.exe"
+            local_app_data = os.environ.get("LOCALAPPDATA", r"C:\Users\Tanish\AppData\Local")
+            app_data_path = os.path.join(local_app_data, "Programs", "LenovoLegionToolkit", "llt.exe")
+            
+            if os.path.exists(program_files_path):
+                self.cli_path = program_files_path
+            elif os.path.exists(app_data_path):
+                self.cli_path = app_data_path
+            elif os.path.exists(program_files_x86_path):
+                self.cli_path = program_files_x86_path
+            else:
+                self.cli_path = program_files_path
         else:
             self.cli_path = cli_path
             

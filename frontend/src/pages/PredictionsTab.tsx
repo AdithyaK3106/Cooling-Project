@@ -1,5 +1,5 @@
 import { useTelemetry } from '../services/telemetryApi';
-import { BrainCircuit } from 'lucide-react';
+import { BrainCircuit, Sparkles } from 'lucide-react';
 
 export function PredictionsTab() {
   const { data: telemetry } = useTelemetry();
@@ -93,6 +93,63 @@ export function PredictionsTab() {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* XAI Model Explainer Panel */}
+        <div className="rounded-xl border border-cyan-500/30 bg-[#0B0E14]/90 p-6 backdrop-blur shadow-2xl">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-bold text-white tracking-wide flex items-center gap-2">
+                <Sparkles className="text-cyan-400" size={18} /> Explainable AI (XAI) Feature Attribution & Rationale
+              </h2>
+              <p className="text-xs text-gray-400">Global SHAP feature importance breakdown across all 25 datacenter racks.</p>
+            </div>
+            <span className="bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold px-2.5 py-1 rounded border border-cyan-500/30">
+              SHAP / GNN Graph Explainer
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
+            <div className="bg-white/5 p-4 rounded-lg border border-white/5 flex flex-col gap-2">
+              <span className="text-amber-400 font-bold">1. GPU Compute Intensity (45% Weight)</span>
+              <p className="text-gray-300 font-sans text-xs">
+                Matrix multiplication and CUDA kernel executions generate localized high-density thermal flux on GPU dies.
+              </p>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-amber-500 w-[45%]" />
+              </div>
+            </div>
+
+            <div className="bg-white/5 p-4 rounded-lg border border-white/5 flex flex-col gap-2">
+              <span className="text-blue-400 font-bold">2. CPU Multi-Thread Utilization (30% Weight)</span>
+              <p className="text-gray-300 font-sans text-xs">
+                Multi-threaded host worker processes increase motherboard VRM power draw and baseline ambient chassis heat.
+              </p>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-blue-500 w-[30%]" />
+              </div>
+            </div>
+
+            <div className="bg-white/5 p-4 rounded-lg border border-white/5 flex flex-col gap-2">
+              <span className="text-purple-400 font-bold">3. GNN Spatial Heat Diffusion (18% Weight)</span>
+              <p className="text-gray-300 font-sans text-xs">
+                Graph Neural Network edge weights capture thermal spillover and convective heat dissipation from adjacent racks.
+              </p>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-purple-500 w-[18%]" />
+              </div>
+            </div>
+
+            <div className="bg-white/5 p-4 rounded-lg border border-white/5 flex flex-col gap-2">
+              <span className="text-emerald-400 font-bold">4. Memory & I/O Bus Activity (7% Weight)</span>
+              <p className="text-gray-300 font-sans text-xs">
+                High memory bus bandwidth and disk/network I/O transfer rates contribute to chassis ambient dissipation.
+              </p>
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-emerald-500 w-[7%]" />
+              </div>
+            </div>
           </div>
         </div>
 
