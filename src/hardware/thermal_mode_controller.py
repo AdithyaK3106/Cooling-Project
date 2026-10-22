@@ -50,8 +50,6 @@ class ThermalModeController:
         """Queries actual hardware state from Lenovo Legion Toolkit."""
         if not os.path.exists(self.cli_path):
             return self.desired_mode
-        if self.llt_unresponsive and (time.time() - self.last_llt_failure_time) < self.llt_backoff_sec:
-            return self.actual_hardware_mode
 
         try:
             result = subprocess.run(
@@ -106,38 +104,33 @@ class ThermalModeController:
             self.sync_status = "SYNCED"
             return True
             
-        if (now - self.last_attempt_time) < self.mode_transition_cooldown:
-            return False
-            
-        self.last_attempt_time = now
-        self.sync_status = "PENDING"
-        
-        logger.info(f"Reconciling hardware mode to {self.desired_mode}")
-
-        llt_in_backoff = self.llt_unresponsive and (now - self.last_llt_failure_time) < self.llt_backoff_sec
-
-        if os.path.exists(self.cli_path) and not llt_in_backoff:
+        # Force run every single time for debugging
+        if True:
             try:
                 cli_val = "balance" if self.desired_mode == "BALANCED" else self.desired_mode.lower()
+                
+                print(f"[HW_DEBUG] Executing LLT Command: {self.cli_path} feature set power-mode {cli_val}")
+                
                 result = subprocess.run(
                     [self.cli_path, "feature", "set", "power-mode", cli_val],
                     capture_output=True,
                     text=True,
                     timeout=3.0
                 )
+                
+                print(f"[HW_DEBUG] LLT Return Code: {result.returncode}")
+                if result.stdout: print(f"[HW_DEBUG] LLT STDOUT: {result.stdout.strip()}")
+                if result.stderr: print(f"[HW_DEBUG] LLT STDERR: {result.stderr.strip()}")
+                
                 if result.returncode == 0:
                     self.llt_response_status = "OK"
                     self.llt_unresponsive = False
                 else:
                     self.llt_response_status = f"ERROR: {result.stderr.strip()}"
-                    logger.warning(f"LLT set failed: {self.llt_response_status}")
-                    self.llt_unresponsive = True
-                    self.last_llt_failure_time = now
+                    logger.error(f"LLT set failed: {self.llt_response_status}")
             except Exception as e:
                 self.llt_response_status = f"EXCEPTION: {e}"
                 logger.error(self.llt_response_status)
-                self.llt_unresponsive = True
-                self.last_llt_failure_time = now
 
         # Verify immediately
         actual = self.get_current_mode_from_hardware()

@@ -5,7 +5,10 @@ export function EventsTab() {
   const { data: telemetry } = useTelemetry();
 
   return (
-    <div className="flex h-full w-full flex-col p-6 overflow-hidden">
+    <div 
+      style={{ zoom: 1.5 }}
+      className="flex h-full w-full flex-col p-6 overflow-hidden"
+    >
       <div className="flex-1 rounded-xl border border-white/10 bg-[#0B0E14]/80 backdrop-blur shadow-2xl flex flex-col overflow-hidden">
         
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
@@ -28,15 +31,16 @@ export function EventsTab() {
         <div className="flex-1 overflow-y-auto p-6 font-mono text-sm bg-black/40">
           {telemetry?.events?.length ? (
             <div className="flex flex-col gap-3">
-              {telemetry.events.map((evt, i) => {
-                const isWarning = evt.message.includes('⚠') || evt.message.includes('SPIKE');
-                const isSuccess = evt.message.includes('✓');
+              {telemetry.events.map((evt: any, i: number) => {
+                const isWarning = evt.message.includes('⚠') || evt.message.includes('SPIKE') || evt.category === 'WARN';
+                const isSuccess = evt.message.includes('✓') || evt.category === 'HEALTHY';
                 
                 const textColor = isWarning ? 'text-yellow-400' : isSuccess ? 'text-green-400' : 'text-gray-300';
                 
                 return (
                   <div key={i} className="flex gap-4 border-b border-white/5 pb-3">
                     <span className="text-cyan-500 opacity-70 w-24 shrink-0">{evt.time}</span>
+                    <span className="text-gray-500 w-20 shrink-0">[{evt.source || 'SYS'}]</span>
                     <span className={textColor}>{evt.message}</span>
                   </div>
                 );

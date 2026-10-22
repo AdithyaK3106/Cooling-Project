@@ -4,8 +4,8 @@ export function StatusStrip() {
   const { data: telemetry } = useTelemetry();
   const racks = telemetry?.racks || [];
   
-  const hotZones = racks.filter((r) => r.risk_score > 0.55).length;
-  const coolingActiveCount = racks.filter((r) => r.cooling?.status === 'predictive intervention').length;
+  const hotZones = racks.filter((r: any) => r.risk_score > 0.55).length;
+  const coolingActiveCount = racks.filter((r: any) => r.cooling?.status === 'predictive intervention' || r.cooling?.override).length;
 
   return (
     <div className="flex h-10 shrink-0 items-center gap-6 overflow-x-auto border-b border-white/5 bg-[#0B0E14]/80 px-6 backdrop-blur">

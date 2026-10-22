@@ -1,30 +1,50 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchApi } from './apiClient';
-import type { ThervoTelemetry } from '../types/telemetry';
-import { tickSimulation, getSimulatedTelemetry } from './simulation';
+import { tickSimulation, getSimulatedTelemetry, getSimulationConfig, subscribeSimulationConfig } from './simulation';
 
 export const TELEMETRY_QUERY_KEY = ['telemetry'];
 
-// Start the simulation loop
-setInterval(() => {
-  if (localStorage.getItem('thervo_mode') === 'SIMULATED') {
-    tickSimulation();
-  }
-}, 250);
+let simulationTimer: any = null;
+
+function syncSimulationTimer() {
+  if (simulationTimer) clearInterval(simulationTimer);
+  const config = getSimulationConfig();
+  simulationTimer = setInterval(() => {
+    if (localStorage.getItem('thervo_mode') === 'SIMULATED') {
+      tickSimulation();
+    }
+  }, config.simSpeedMs);
+}
+
+syncSimulationTimer();
+subscribeSimulationConfig(syncSimulationTimer);
 
 export async function getTelemetry(): Promise<any> {
-  const mode = localStorage.getItem('thervo_mode') || 'LOCAL';
+  const defaultMode = typeof window !== 'undefined' && window.location.pathname === '/dual-node' ? 'LOCAL' : 'SIMULATED';
+  const mode = localStorage.getItem('thervo_mode') || defaultMode;
   if (mode === 'SIMULATED') {
     return getSimulatedTelemetry();
   }
-  return fetchApi<any>('/telemetry');
+  try {
+    return await fetchApi<any>('/telemetry');
+  } catch {
+    return getSimulatedTelemetry();
+  }
 }
 
-export function useTelemetry(pollingIntervalMs = 100) {
+export function useTelemetry(overrideInterval?: number) {
+  const mode = localStorage.getItem('thervo_mode') || 'SIMULATED';
+  const config = getSimulationConfig();
+  
+  let refetchInterval: number | false = overrideInterval ?? 200;
+  if (mode === 'SIMULATED') {
+    refetchInterval = config.isPaused ? false : config.simSpeedMs;
+  }
+
   return useQuery({
     queryKey: TELEMETRY_QUERY_KEY,
     queryFn: getTelemetry,
-    refetchInterval: pollingIntervalMs, // 10Hz telemetry ticks
+    refetchInterval,
     retry: 3,
   });
 }

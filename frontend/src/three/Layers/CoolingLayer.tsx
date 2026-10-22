@@ -11,7 +11,7 @@ export function CoolingLayer({ scene }: { scene: THREE.Object3D }) {
     const positions: THREE.Vector3[] = [];
     scene.traverse((child) => {
       if (child.userData && child.userData.rackId) {
-        const rackData = telemetry.racks?.find((r) => r.id === child.userData.rackId);
+        const rackData = telemetry.racks?.find((r: any) => r.id === child.userData.rackId);
         // "predictive intervention" active
         if (rackData && rackData.cooling.status === 'predictive intervention') {
           const pos = new THREE.Vector3();

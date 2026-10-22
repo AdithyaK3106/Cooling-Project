@@ -10,10 +10,23 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from runtime.live_runtime_manager import LiveRuntimeManager
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+
 class DashboardHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=frontend_dist, **kwargs)
+        
+    def guess_type(self, path):
+        if path.endswith('.js'): return 'application/javascript'
+        if path.endswith('.css'): return 'text/css'
+        if path.endswith('.html'): return 'text/html'
+        if path.endswith('.svg'): return 'image/svg+xml'
+        return super().guess_type(path)
+
     def do_GET(self):
-        if self.path == '/':
-            self.path = '/Index.html'
+        path = self.translate_path(self.path)
+        if not os.path.exists(path):
+            self.path = '/index.html'
         return super().do_GET()
         
     def log_message(self, format, *args):

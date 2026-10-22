@@ -99,24 +99,17 @@ class InferenceEngine:
         self._start_wmi_cpu_thread()
 
     def _start_wmi_cpu_thread(self):
-        def _wmi_loop():
+        def _cpu_loop():
+            # Initial burn-in reading
+            psutil.cpu_percent(interval=None)
             while True:
                 try:
-                    res = subprocess.run(
-                        ["wmic", "cpu", "get", "loadpercentage"],
-                        capture_output=True, text=True, timeout=3
-                    )
-                    if res.returncode == 0:
-                        lines = [L for L in res.stdout.split("\n") if L.strip()]
-                        if len(lines) >= 2:
-                            val = lines[1].strip()
-                            if val.isdigit():
-                                self._wmi_cpu_val = float(val)
+                    # Blocks for 1 second in this daemon thread, very lightweight
+                    self._wmi_cpu_val = psutil.cpu_percent(interval=1.0)
                 except Exception:
-                    pass
-                time.sleep(1.0)
+                    time.sleep(1.0)
                 
-        t = threading.Thread(target=_wmi_loop, daemon=True)
+        t = threading.Thread(target=_cpu_loop, daemon=True)
         t.start()
 
     def _startup_parity_check(self) -> None:
@@ -200,9 +193,9 @@ class InferenceEngine:
         filtered_cpu = max(0.0, sys_cpu)
 
         # 4. CPU Package Power Query / Estimation
-        cpu_power = 0.0
+        cpu_power = getattr(self, '_cached_cpu_power', 0.0)
         # Try to query CPU Package Power from OpenHardwareMonitor WMI
-        if sys.platform == "win32":
+        if sys.platform == "win32" and (now_mono - getattr(self, '_last_cpu_query', 0.0)) >= 1.0:
             try:
                 res = subprocess.run(
                     [
@@ -222,6 +215,8 @@ class InferenceEngine:
                     cpu_power = float(res.stdout.strip())
             except Exception:
                 pass
+            self._cached_cpu_power = cpu_power
+            self._last_cpu_query = time.monotonic()
                 
         if cpu_power <= 0.0:
             # Fallback estimation for Intel i7-14700HX (Base TDP 55W)

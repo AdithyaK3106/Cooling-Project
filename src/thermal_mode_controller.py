@@ -39,7 +39,7 @@ class ThermalModeController:
     MIN_MODE_HOLD_SECONDS = 15.0
     PERFORMANCE_ENTER_THRESHOLD = 0.45
     PERFORMANCE_EXIT_THRESHOLD = 0.35
-    FAILSAFE_THRESHOLD = 0.70
+    FAILSAFE_THRESHOLD = 0.90
     
     COOLDOWN_MAX_SWITCHES = 5
     COOLDOWN_WINDOW_SECONDS = 120.0
@@ -161,14 +161,15 @@ class ThermalModeController:
         while self.switch_history and (current_time - self.switch_history[0]) > self.COOLDOWN_WINDOW_SECONDS:
             self.switch_history.popleft()
             
-        if len(self.switch_history) >= self.COOLDOWN_MAX_SWITCHES:
-            if not self.cooldown_locked:
-                self.cooldown_locked = True
-                self._log("COOLDOWN_LOCK", "Too many mode transitions. Locking state for stability.")
-        else:
-            if self.cooldown_locked and len(self.switch_history) < 2:
-                self.cooldown_locked = False
-                self._log("COOLDOWN_UNLOCK", "State transition lock released.")
+        # DEMO OVERRIDE: Disable cooldown locks completely for instant visual feedback
+        # if len(self.switch_history) >= self.COOLDOWN_MAX_SWITCHES:
+        #     if not self.cooldown_locked:
+        #         self.cooldown_locked = True
+        #         self._log("COOLDOWN_LOCK", "Too many mode transitions. Locking state for stability.")
+        # else:
+        #     if self.cooldown_locked and len(self.switch_history) < 2:
+        #         self.cooldown_locked = False
+        #         self._log("COOLDOWN_UNLOCK", "State transition lock released.")
 
     def switch_mode(self, target_mode: ThermalMode, reason: str = ""):
         current_time = time.time()
@@ -358,16 +359,10 @@ class ThermalModeController:
         # Robust True Idle Detection (Low Package Power + Low dGPU power/util + Stable Thermals)
         is_safe_idle = (cpu < 25 and gpu < 10 and cpu_p < 20.0 and gpu_p < 15.0 and max(cpu_t, gpu_t) < 62.0)
 
-        # Demo override: If risk is high, don't clamp it down! Let the demo work!
-        if future_risk > 0.4:
+        # Demo override: If risk is high, let the demo work!
+        if future_risk > 0.65:
             wp_phase = WorkloadPhase.SUSTAINED_LOAD
             fingerprint = "THERVO_PROPAGATION"
-        elif gpu > 35 or gpu_p > 25.0:
-            wp_phase = WorkloadPhase.SUSTAINED_LOAD
-            fingerprint = "GAMING_GPU_LOAD" if gpu > 45 else "SUSTAINED_GPU_RENDER"
-        elif cpu > 40:
-            wp_phase = WorkloadPhase.SUSTAINED_LOAD
-            fingerprint = "CPU_COMPILE"
         elif is_safe_idle:
             wp_phase = WorkloadPhase.IDLE
             fingerprint = "IDLE_BROWSER"

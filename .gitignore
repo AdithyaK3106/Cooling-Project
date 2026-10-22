@@ -167,3 +167,12 @@ runtime/orchestration_logs.csv
 runtime/fan_target.json
 runtime/bench_target.json
 preprocessor_state_xgb_smoke.pkl
+
+# Chronos bi-temporal AST runtime cache & governance logs
+.chronos/*.wal
+.chronos/*.shm
+.chronos/*.kz*
+cooling_governed_workflow_evidence.json
+cooling_governed_workflow_report.md
+*.db-shm
+*.db-wal

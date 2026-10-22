@@ -28,8 +28,9 @@ def gpu_burner():
             t1 = time.time()
             
             compute_time = t1 - t0
-            # To get 50% utilization, we sleep for the exact same duration as the compute took
-            time.sleep(compute_time)
+            # To get ~80% utilization, we sleep for a quarter of the compute time
+            # (Compute = 80%, Sleep = 20%. 20 is 1/4th of 80)
+            time.sleep(compute_time * 0.25)
             
     except ImportError:
         print("\n[!] PyTorch not installed. Skipping GPU stress test.")
@@ -41,7 +42,8 @@ def run_stress_test(duration=60):
     print(" THERVO - NODE 1 STRESS TEST (CPU + GPU)")
     print("======================================================")
     
-    num_cores = 15
+    # Use almost all CPU cores to hit ~80-90% system-wide utilization
+    num_cores = max(4, multiprocessing.cpu_count() - 2)
     print(f"[*] Starting {num_cores} CPU Burner processes...")
     
     processes = []
@@ -53,7 +55,7 @@ def run_stress_test(duration=60):
         processes.append(p)
         
     # Start GPU process
-    print("[*] Starting GPU Burner process (~50% utilization)...")
+    print("[*] Starting GPU Burner process (~80% utilization)...")
     gpu_p = multiprocessing.Process(target=gpu_burner)
     gpu_p.start()
     processes.append(gpu_p)
