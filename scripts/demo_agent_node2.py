@@ -4,7 +4,7 @@ import time
 import requests
 import psutil
 import subprocess
-import json
+import argparse
 from datetime import datetime
 
 # Setup path
@@ -12,12 +12,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.fan_controller import HardwareFanController
 from src.hardware.thermal_mode_controller import ThermalModeController
-
-# Configure Node 1 IP here (will be the Personal Hotspot IP, usually 192.168.137.1)
-NODE1_IP = "192.168.137.1"
-NODE1_PORT = 8080
-API_URL = f"http://{NODE1_IP}:{NODE1_PORT}/neighbor/sync"
-FALLBACK_TIMEOUT = 5.0 # Seconds
 
 def collect_basic_telemetry():
     """Lightweight telemetry collection for Node 2."""
@@ -39,7 +33,7 @@ def collect_basic_telemetry():
     except Exception:
         pass
 
-    # Approximate CPU temp (since WMI is slow, we use a simple synthetic correlation or you can add OHM reading)
+    # Approximate CPU temp (since WMI is slow, use simple synthetic correlation or sensors)
     cpu_temp = 40.0 + 0.4 * sys_cpu
 
     return {
@@ -60,14 +54,27 @@ def collect_basic_telemetry():
     }
 
 def main():
+    parser = argparse.ArgumentParser(description="THERVO - Node 2 Agent (Neighbor Device)")
+    parser.add_argument("--host", default=os.environ.get("THERVO_MAIN_IP", "192.168.137.1"), help="Node 1 Brain IP address (default: 192.168.137.1)")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("THERVO_MAIN_PORT", 8080)), help="Node 1 Brain API port (default: 8080)")
+    parser.add_argument("--timeout", type=float, default=5.0, help="Safe-command fallback timeout in seconds (default: 5.0)")
+    args = parser.parse_args()
+
+    api_url = f"http://{args.host}:{args.port}/neighbor/sync"
+
     print("======================================================")
-    print(" THERVO - NODE 2 AGENT (DUMB TERMINAL)")
+    print(" THERVO - NODE 2 AGENT (NEIGHBOR / SECONDARY NODE)")
     print("======================================================")
-    print(f"[*] Targeting Node 1 (Brain) at: {API_URL}")
-    print(f"[*] Safe-Command Fallback Timeout: {FALLBACK_TIMEOUT}s")
+    print(f"[*] Targeting Node 1 (Brain) at: {api_url}")
+    print(f"[*] Safe-Command Fallback Timeout: {args.timeout}s")
     
     fan_controller = HardwareFanController()
-    thermal_controller = ThermalModeController()
+    try:
+        thermal_controller = ThermalModeController()
+    except Exception as e:
+        thermal_controller = None
+        print(f"[*] Note: Hardware thermal mode controller unavailable ({e}); running fan emulation mode.")
+
     last_valid_command_time = time.monotonic()
     is_fallback = False
     
@@ -76,11 +83,12 @@ def main():
         
         try:
             # Sync with Node 1: Send telemetry, get command
-            response = requests.post(API_URL, json=telemetry, timeout=2.0)
+            response = requests.post(api_url, json=telemetry, timeout=2.0)
             if response.status_code == 200:
                 data = response.json()
                 fan_target = data.get("fan_percent")
                 mode = data.get("mode", "BASELINE")
+                risk_score = data.get("risk_score", 0.5)
                 
                 last_valid_command_time = time.monotonic()
                 if is_fallback:
@@ -91,19 +99,27 @@ def main():
                 
                 # Apply cooling command
                 if fan_target is not None:
-                    # In real life this calls Toolkit. Here we use our HardwareFanController
-                    fan_controller.write_target(risk_score=data.get("risk_score", 0.5), target_percent=fan_target, policy_state=mode, is_stabilizing=False)
+                    fan_controller.write_target(
+                        future_risk=risk_score,
+                        target_fan_percent=fan_target,
+                        policy_state=mode,
+                        stabilization_active=False
+                    )
                     
-                    # Also actually apply the Lenovo toolkit mode!
-                    toolkit_mode = "BALANCED"
-                    if fan_target > 70:
-                        toolkit_mode = "PERFORMANCE"
-                    elif fan_target < 30:
-                        toolkit_mode = "QUIET"
+                    # Also actually apply the Lenovo toolkit mode if available
+                    if thermal_controller is not None:
+                        toolkit_mode = "BALANCED"
+                        if fan_target > 70:
+                            toolkit_mode = "PERFORMANCE"
+                        elif fan_target < 30:
+                            toolkit_mode = "QUIET"
+                            
+                        try:
+                            thermal_controller.set_mode(toolkit_mode, reason="THERVO_SYNC", severity="HIGH" if toolkit_mode == "PERFORMANCE" else "LOW")
+                            thermal_controller.reconcile()
+                        except Exception:
+                            pass
                         
-                    thermal_controller.set_mode(toolkit_mode, reason="THERVO_SYNC", severity="HIGH" if toolkit_mode == "PERFORMANCE" else "LOW")
-                    thermal_controller.reconcile()
-                    
             else:
                 raise Exception(f"HTTP {response.status_code}")
                 
@@ -112,14 +128,22 @@ def main():
             elapsed_since_valid = time.monotonic() - last_valid_command_time
             print(f"[{telemetry['timestamp']}] Sync Failed ({e}). Time since last valid: {elapsed_since_valid:.1f}s")
             
-            if elapsed_since_valid > FALLBACK_TIMEOUT and not is_fallback:
+            if elapsed_since_valid > args.timeout and not is_fallback:
                 print(f"!!! SAFE-COMMAND FALLBACK TRIGGERED !!!")
-                print(f"Lost connection to Node 1 for >{FALLBACK_TIMEOUT}s. Relinquishing fan control to BIOS.")
+                print(f"Lost connection to Node 1 for >{args.timeout}s. Relinquishing fan control to BIOS.")
                 is_fallback = True
-                # Call fan_controller with a safe state
-                fan_controller.write_target(risk_score=1.0, target_percent=100.0, policy_state="FALLBACK", is_stabilizing=False)
-                thermal_controller.set_mode("FAILSAFE", reason="DISCONNECT_TIMEOUT", severity="CRITICAL")
-                thermal_controller.reconcile()
+                fan_controller.write_target(
+                    future_risk=1.0,
+                    target_fan_percent=100.0,
+                    policy_state="FALLBACK",
+                    stabilization_active=False
+                )
+                if thermal_controller is not None:
+                    try:
+                        thermal_controller.set_mode("FAILSAFE", reason="DISCONNECT_TIMEOUT", severity="CRITICAL")
+                        thermal_controller.reconcile()
+                    except Exception:
+                        pass
                 
         time.sleep(1.0)
 
